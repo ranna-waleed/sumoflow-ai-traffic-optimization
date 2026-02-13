@@ -1,0 +1,32 @@
+<additional>
+    <taz id="taz_north_in">
+        <tazSource id="29181613#0" weight="1.0"/>
+    </taz>
+
+    <taz id="taz_south_in">
+        <tazSource id="690516091#0" weight="1.0"/>
+    </taz>
+
+    <taz id="taz_west_in">
+        <tazSource id="50211834#0" weight="1.0"/>
+    </taz>
+
+    <taz id="taz_east_in">
+        <tazSource id="28718647#0" weight="1.0"/>
+    </taz>
+
+
+    <taz id="taz_west_out">
+        <tazSink id="192591565#2" weight="1.0"/>
+        <tazSink id="305873958#4" weight="1.0"/>
+    </taz>
+
+    <taz id="taz_north_out">
+        <tazSink id="10873191#5" weight="1.0"/>
+    </taz>
+
+    <taz id="taz_east_out">
+        <tazSink id="10873193#3" weight="1.0"/>
+    </taz>
+
+</additional>
