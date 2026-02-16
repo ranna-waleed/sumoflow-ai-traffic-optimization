@@ -1,7 +1,8 @@
 <configuration>
     <input>
-        <net-file value="tahrir.net.xml"/>
+        <net-file value="tahrirupdated.net.xml"/>
         <route-files value="tahrir.rou.xml"/>
+        <additional-files value="tahrir.add.xml"/>
     </input>
 
     <time>

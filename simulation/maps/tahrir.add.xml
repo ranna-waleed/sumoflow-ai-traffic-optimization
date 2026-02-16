@@ -1,0 +1,34 @@
+<additional>
+    <!-- Bus Stop 1 (lane length: 9.74m) -->
+    <busStop id="bs_1" lane="50211834#1_0" startPos="1" endPos="8"/>
+    
+    <!-- Bus Stop 2 (lane length: 13.34m) -->
+    <busStop id="bs_2" lane="192591565#1_0" startPos="1" endPos="10"/>
+    
+    <!-- Bus Stop 3 (lane length: 13.40m) -->
+    <busStop id="bs_3" lane="28718647#3_0" startPos="1" endPos="10"/>
+    
+    <!-- Bus Stop 4 (lane length: 2.47m - VERY SHORT!) -->
+    <busStop id="bs_4" lane="28718647#3_4" startPos="0.2" endPos="2.2"/>
+    
+    <!-- Bus Stop 5 (lane length: 2.75m - VERY SHORT!) -->
+    <busStop id="bs_5" lane="28718647#2_0" startPos="0.2" endPos="2.5"/>
+    
+    <!-- Bus Stop 6 (lane length: 2.34m - VERY SHORT!) -->
+    <busStop id="bs_6" lane="28718647#2_4" startPos="0.2" endPos="2.1"/>
+    
+    <!-- Bus Stop 7 (lane length: 452.74m) -->
+    <busStop id="bs_7" lane="28718647#1_0" startPos="5" endPos="20"/>
+    
+    <!-- Bus Stop 8 (lane length: 448.98m) -->
+    <busStop id="bs_8" lane="28718647#1_4" startPos="5" endPos="20"/>
+    
+    <!-- Bus Stop 9 (need to check lane length) -->
+    <busStop id="bs_9" lane="28718874#1_0" startPos="1" endPos="8"/>
+    
+    <!-- Bus Stop 10 (need to check lane length) -->
+    <busStop id="bs_10" lane="28718874#1_4" startPos="1" endPos="8"/>
+    
+    <!-- Bus Stop 11 (lane length: 10.73m) -->
+    <busStop id="bs_11" lane="10873193#1_0" startPos="1" endPos="8"/>
+</additional>
