@@ -1,0 +1,15 @@
+$O;D2
+* From-Time To-Time
+0.00 3600.00
+* Factor
+1.00
+*
+taz_north_in taz_west_out 350
+taz_north_in taz_east_out 200
+taz_north_in taz_east_out 40
+taz_south_in taz_north_out 300
+taz_south_in taz_west_out 180
+taz_east_in taz_west_out 280
+taz_east_in taz_north_out 60
+taz_west_in taz_east_out 320
+taz_west_in taz_north_out 150
