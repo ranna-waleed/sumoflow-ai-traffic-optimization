@@ -7,6 +7,29 @@
 
     <time>
         <begin value="0"/>
-        <end value="2000"/>
+        <end value="3600"/>
     </time>
+
+    <devices>
+        <device.ssm.probability value="1.0"/>
+        <device.ssm.measures value="TTC DRAC PET"/>
+        <device.ssm.thresholds value="3.0 3.0 2.0"/>
+        <device.ssm.trajectories value="true"/>
+        <device.ssm.range value="50.0"/>
+        <device.ssm.extratime value="5.0"/>
+        <device.ssm.file value="outputs/ssm.xml"/>
+    </devices>
+
+    <output>
+        <emission-output value="outputs/emission.xml"/>
+        <fcd-output value="outputs/fcd.xml"/>
+        <summary-output value="outputs/summary.xml"/>
+        <tripinfo-output value="outputs/tripinfo.xml"/>
+    </output>
+
+    <report>
+        <verbose value="true"/>
+        <no-step-log value="false"/>
+    </report>
+
 </configuration>
