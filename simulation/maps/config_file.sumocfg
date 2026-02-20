@@ -25,6 +25,9 @@
         <fcd-output value="outputs/fcd.xml"/>
         <summary-output value="outputs/summary.xml"/>
         <tripinfo-output value="outputs/tripinfo.xml"/>
+        <full-output value="outputs/full.xml"/>
+        <netstate-dump value="outputs/netstate.xml"/>
+        <lanechange-output value="outputs/lanechange.xml"/>
     </output>
 
     <report>
