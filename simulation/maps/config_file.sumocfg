@@ -1,11 +1,12 @@
 <configuration>
-<input>
-<net-file value="tahrirupdated.net.xml"/>
-<route-files value="od_route_tahrir.odtrips.rou.xml"/>
-</input>
-<time>
-<begin value="0"/>
-<end value="2000"/>
-</time>
-</configuration>
+    <input>
+        <net-file value="tahrirupdated.net.xml"/>
+        <route-files value="od_route_tahrir.odtrips.rou.xml"/>
+        <additional-files value="tahrir.add.xml"/>
+    </input>
 
+    <time>
+        <begin value="0"/>
+        <end value="2000"/>
+    </time>
+</configuration>
