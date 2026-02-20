@@ -1,14 +1,13 @@
 <configuration>
-<!-- The duarouter configuration file takes as input your **network** and the **OD Trips File** and outputs the route file -->
-<input>
-<net-file value="tahrirupdated.net.xml"/> <!-- Your SUMO Network File -->
-<route-files value="od_file.odtrips.xml"/> <!-- Your SUMO OD Trips File -->
-</input>
-<output>
-<output-file value="od_route_tahrir.odtrips.rou.xml"/>
-</output>
-<report>
-<xml-validation value="never"/>
-<no-step-log value="true"/>
-</report>
+    <input>
+        <net-file value="tahrirupdated.net.xml"/>
+        <route-files value="od_tahrir.odtrips.xml"/>
+    </input>
+    <output>
+        <output-file value="od_route_tahrir.odtrips.rou.xml"/>
+    </output>
+    <report>
+        <xml-validation value="never"/>
+        <no-step-log value="true"/>
+    </report>
 </configuration>
