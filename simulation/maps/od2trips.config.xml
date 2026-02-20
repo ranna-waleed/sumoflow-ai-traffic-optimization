@@ -1,11 +1,15 @@
 <configuration>
-<input>
-<taz-files value="tahrir.taz.xml"/>
-<od-matrix-files value="OD_file.od"/>
-</input>
-<!--
-<output>
-<output-file value="od_tahrir.odtrips.xml"/>
-</output>
--->
+    <input>
+        <taz-files value="tahrir.taz.xml"/>
+        <od-matrix-files value="OD_file.od"/>
+    </input>
+
+    <output>
+        <output-file value="od_tahrir.odtrips.xml"/>
+    </output>
+
+    <time>
+        <begin value="0"/>
+        <end value="3600"/>
+    </time>
 </configuration>
