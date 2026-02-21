@@ -21,10 +21,13 @@
     </devices>
 
     <output>
-        <emission-output value="outputs/emission.xml"/>
         <fcd-output value="outputs/fcd.xml"/>
         <summary-output value="outputs/summary.xml"/>
         <tripinfo-output value="outputs/tripinfo.xml"/>
+        <full-output value="outputs/full.xml.gz"/>
+        <netstate-dump value="outputs/netstate.xml.gz"/>
+        <lanechange-output value="outputs/lanechange.xml.gz"/>
+        <emission-output value="outputs/emission.xml.gz"/>
     </output>
 
     <report>
