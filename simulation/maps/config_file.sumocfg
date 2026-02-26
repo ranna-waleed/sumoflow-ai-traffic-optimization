@@ -3,6 +3,7 @@
         <net-file value="tahrirupdated.net.xml"/>
         <route-files value="od_route_tahrir.odtrips.rou.xml"/>
         <additional-files value="tahrir.add.xml"/>
+        <gui-settings-file value="gui_settings.xml"/>
     </input>
 
     <time>
@@ -21,13 +22,14 @@
     </devices>
 
     <output>
-        <emission-output value="outputs/emission.xml"/>
         <fcd-output value="outputs/fcd.xml"/>
         <summary-output value="outputs/summary.xml"/>
         <tripinfo-output value="outputs/tripinfo.xml"/>
-        <full-output value="outputs/full.xml"/>
-        <netstate-dump value="outputs/netstate.xml"/>
-        <lanechange-output value="outputs/lanechange.xml"/>
+        <full-output value="outputs/full.xml.gz"/>
+        <netstate-dump value="outputs/netstate.xml.gz"/>
+        <lanechange-output value="outputs/lanechange.xml.gz"/>
+        <emission-output value="outputs/emission.xml.gz"/>
+        
     </output>
 
     <report>
