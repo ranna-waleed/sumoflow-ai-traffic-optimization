@@ -1,7 +1,8 @@
 <configuration>
     <input>
         <net-file value="tahrirupdated.net.xml"/>
-        <route-files value="od_tahrir.odtrips.xml"/>
+        <route-files value="od_tahrir_typed.odtrips.xml"/>
+        <additional-files value="vtypes.xml"/>
     </input>
     <output>
         <output-file value="od_route_tahrir.odtrips.rou.xml"/>
