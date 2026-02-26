@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2026-02-26 15:59:15 by Eclipse SUMO netedit Version 1.24.0
+<!-- generated on 2026-02-26 21:00:35 by Eclipse SUMO netedit Version 1.24.0
 <neteditConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/neteditConfiguration.xsd">
 
     <input>
-        <sumo-net-file value="tahrirupdated.net.xml"/>
+        <sumo-net-file value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\tahrirupdated.net.xml"/>
     </input>
 
     <output>
-        <output-file value="tahrirupdated.net.xml"/>
+        <output-file value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\tahrirupdated.net.xml"/>
     </output>
 
     <processing>
@@ -788,11 +788,6 @@
         <phase duration="5"  state="yyy"/>
         <phase duration="5"  state="rrr"/>
     </tlLogic>
-    <tlLogic id="3105658889" type="static" programID="0" offset="0">
-        <phase duration="79" state="GGGGG"/>
-        <phase duration="6"  state="yyyyy"/>
-        <phase duration="5"  state="rrrrr"/>
-    </tlLogic>
     <tlLogic id="315743335" type="static" programID="0" offset="0">
         <phase duration="80" state="GGG"/>
         <phase duration="5"  state="yyy"/>
@@ -816,10 +811,9 @@
         <phase duration="90" state="GGGG"/>
     </tlLogic>
     <tlLogic id="96621100" type="static" programID="0" offset="0">
-        <phase duration="51" state="GGGGGGGGGG"/>
+        <phase duration="51" state="rrrrrrrrrr"/>
         <phase duration="3"  state="yyyyyyyyyy"/>
-        <phase duration="75" state="rrrrrrrrrr"/>
-        <phase duration="3"  state="rrrrryyyyy"/>
+        <phase duration="75" state="GGGGGGGGGG"/>
     </tlLogic>
 
     <junction id="1125317403" type="dead_end" x="3615.91" y="1456.83" incLanes="97144241#1_0" intLanes="" shape="3615.69,1458.50 3617.44,1457.54 3617.05,1455.58 3615.71,1456.14 3615.37,1456.58 3615.26,1457.12 3615.36,1457.76"/>
@@ -884,7 +878,7 @@
     </junction>
     <junction id="271066081" type="dead_end" x="3608.76" y="1037.18" incLanes="" intLanes="" shape="3601.02,1039.22 3616.50,1035.14"/>
     <junction id="305873958#3-AddedOnRampNode" type="dead_end" x="3478.16" y="1339.98" incLanes="305873958#3-AddedOnRampEdge_0 305873958#3-AddedOnRampEdge_1 305873958#3-AddedOnRampEdge_2 305873958#3-AddedOnRampEdge_3" intLanes="" shape="3473.30,1346.35 3481.06,1336.17"/>
-    <junction id="3105658889" type="traffic_light" x="3692.26" y="1486.85" incLanes="10873186#7_0 10873186#7_1 10873186#7_2 10873186#7_3 10873186#7_4 10873186#7_5 10873186#7_6 10873186#7_7" intLanes=":3105658889_0_0 :3105658889_0_1 :3105658889_0_2 :3105658889_0_3 :3105658889_0_4" shape="3699.19,1508.51 3711.74,1498.59 3707.82,1481.97 3693.40,1503.12">
+    <junction id="3105658889" type="priority" x="3692.26" y="1486.85" incLanes="10873186#7_0 10873186#7_1 10873186#7_2 10873186#7_3 10873186#7_4 10873186#7_5 10873186#7_6 10873186#7_7" intLanes=":3105658889_0_0 :3105658889_0_1 :3105658889_0_2 :3105658889_0_3 :3105658889_0_4" shape="3699.19,1508.51 3711.74,1498.59 3707.82,1481.97 3693.40,1503.12">
         <request index="0" response="00000" foes="00000" cont="0"/>
         <request index="1" response="00000" foes="00000" cont="0"/>
         <request index="2" response="00000" foes="00000" cont="0"/>
@@ -1201,11 +1195,11 @@
     <connection from="10873186#6" to="10873186#7" fromLane="1" toLane="5" via=":6288850219_4_5" dir="s" state="M"/>
     <connection from="10873186#6" to="10873186#7" fromLane="1" toLane="6" via=":6288850219_4_6" dir="s" state="M"/>
     <connection from="10873186#6" to="10873186#7" fromLane="1" toLane="7" via=":6288850219_4_7" dir="s" state="M"/>
-    <connection from="10873186#7" to="10873186#8" fromLane="3" toLane="0" via=":3105658889_0_0" tl="3105658889" linkIndex="0" dir="s" state="O"/>
-    <connection from="10873186#7" to="10873186#8" fromLane="4" toLane="1" via=":3105658889_0_1" tl="3105658889" linkIndex="1" dir="s" state="O"/>
-    <connection from="10873186#7" to="10873186#8" fromLane="5" toLane="2" via=":3105658889_0_2" tl="3105658889" linkIndex="2" dir="s" state="O"/>
-    <connection from="10873186#7" to="10873186#8" fromLane="6" toLane="3" via=":3105658889_0_3" tl="3105658889" linkIndex="3" dir="s" state="O"/>
-    <connection from="10873186#7" to="10873186#8" fromLane="7" toLane="4" via=":3105658889_0_4" tl="3105658889" linkIndex="4" dir="s" state="O"/>
+    <connection from="10873186#7" to="10873186#8" fromLane="3" toLane="0" via=":3105658889_0_0" dir="s" state="M"/>
+    <connection from="10873186#7" to="10873186#8" fromLane="4" toLane="1" via=":3105658889_0_1" dir="s" state="M"/>
+    <connection from="10873186#7" to="10873186#8" fromLane="5" toLane="2" via=":3105658889_0_2" dir="s" state="M"/>
+    <connection from="10873186#7" to="10873186#8" fromLane="6" toLane="3" via=":3105658889_0_3" dir="s" state="M"/>
+    <connection from="10873186#7" to="10873186#8" fromLane="7" toLane="4" via=":3105658889_0_4" dir="s" state="M"/>
     <connection from="10873186#8" to="10873186#9" fromLane="0" toLane="1" via=":96621100_5_0" tl="96621100" linkIndex="5" dir="s" state="O"/>
     <connection from="10873186#8" to="10873186#9" fromLane="1" toLane="2" via=":96621100_5_1" tl="96621100" linkIndex="6" dir="s" state="O"/>
     <connection from="10873186#8" to="10873186#9" fromLane="2" toLane="3" via=":96621100_5_2" tl="96621100" linkIndex="7" dir="s" state="O"/>
@@ -1341,10 +1335,10 @@
     <connection from="690516091#0" to="690516091#1" fromLane="4" toLane="4" via=":315744796_4_4" tl="315744796" linkIndex="8" dir="s" state="O"/>
     <connection from="690516091#0" to="138136500#0" fromLane="4" toLane="1" via=":315744796_9_0" tl="315744796" linkIndex="9" dir="l" state="O"/>
     <connection from="690516091#1" to="10873186#9" fromLane="0" toLane="0" via=":96621100_0_0" tl="96621100" linkIndex="0" dir="s" state="O"/>
-    <connection from="690516091#1" to="10873186#9" fromLane="1" toLane="1" via=":96621100_0_1" tl="96621100" linkIndex="1" dir="s" state="o"/>
-    <connection from="690516091#1" to="10873186#9" fromLane="2" toLane="2" via=":96621100_0_2" tl="96621100" linkIndex="2" dir="s" state="o"/>
-    <connection from="690516091#1" to="10873186#9" fromLane="3" toLane="3" via=":96621100_0_3" tl="96621100" linkIndex="3" dir="s" state="o"/>
-    <connection from="690516091#1" to="10873186#9" fromLane="4" toLane="4" via=":96621100_0_4" tl="96621100" linkIndex="4" dir="s" state="o"/>
+    <connection from="690516091#1" to="10873186#9" fromLane="1" toLane="1" via=":96621100_0_1" tl="96621100" linkIndex="1" dir="s" state="o" visibility="9.00"/>
+    <connection from="690516091#1" to="10873186#9" fromLane="2" toLane="2" via=":96621100_0_2" tl="96621100" linkIndex="2" dir="s" state="o" visibility="9.00"/>
+    <connection from="690516091#1" to="10873186#9" fromLane="3" toLane="3" via=":96621100_0_3" tl="96621100" linkIndex="3" dir="s" state="o" visibility="9.00"/>
+    <connection from="690516091#1" to="10873186#9" fromLane="4" toLane="4" via=":96621100_0_4" tl="96621100" linkIndex="4" dir="s" state="o" visibility="9.00"/>
     <connection from="902270937" to="-902270937" fromLane="0" toLane="0" via=":8380714890_0_0" dir="t" state="M"/>
     <connection from="961982432#0" to="961982432#1" fromLane="0" toLane="0" via=":8900171483_0_0" dir="s" state="M"/>
     <connection from="961982432#0" to="961982432#1" fromLane="1" toLane="1" via=":8900171483_0_1" dir="s" state="M"/>

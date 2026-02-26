@@ -1,0 +1,24 @@
+# SUMO & Simulation 
+traci
+sumolib
+
+# Computer Vision
+opencv-python
+Pillow
+
+# YOLO 
+ultralytics
+
+
+# Data & Analysis 
+numpy
+pandas
+matplotlib
+scikit-learn
+
+#Labeling Tool
+labelImg
+
+# Utilities 
+tqdm
+PyYAML
