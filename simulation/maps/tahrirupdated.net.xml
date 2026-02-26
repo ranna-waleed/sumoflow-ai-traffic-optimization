@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2026-02-16 21:20:34 by Eclipse SUMO netedit Version 1.24.0
+<!-- generated on 2026-02-26 15:59:15 by Eclipse SUMO netedit Version 1.24.0
 <neteditConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/neteditConfiguration.xsd">
 
     <input>
-        <sumo-net-file value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\tahrirupdated.net.xml"/>
+        <sumo-net-file value="tahrirupdated.net.xml"/>
     </input>
 
     <output>
-        <output-file value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\tahrirupdated.net.xml"/>
+        <output-file value="tahrirupdated.net.xml"/>
     </output>
 
     <processing>
@@ -816,9 +816,9 @@
         <phase duration="90" state="GGGG"/>
     </tlLogic>
     <tlLogic id="96621100" type="static" programID="0" offset="0">
-        <phase duration="46" state="GGGGGrrrrr"/>
-        <phase duration="3"  state="yyyyyrrrrr"/>
-        <phase duration="81" state="rrrrrGGGGG"/>
+        <phase duration="51" state="GGGGGGGGGG"/>
+        <phase duration="3"  state="yyyyyyyyyy"/>
+        <phase duration="75" state="rrrrrrrrrr"/>
         <phase duration="3"  state="rrrrryyyyy"/>
     </tlLogic>
 
