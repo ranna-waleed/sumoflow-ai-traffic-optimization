@@ -18,7 +18,7 @@
         <device.ssm.trajectories value="true"/>
         <device.ssm.range value="50.0"/>
         <device.ssm.extratime value="5.0"/>
-        <device.ssm.file value="outputs/ssm.xml"/>
+        <device.ssm.file value="outputs/ssm.xml.gz"/>
     </devices>
 
     <output>
@@ -26,8 +26,8 @@
         <summary-output value="outputs/summary.xml"/>
         <tripinfo-output value="outputs/tripinfo.xml"/>
         <full-output value="outputs/full.xml.gz"/>
-        <netstate-dump value="outputs/netstate.xml.gz"/>
-        <lanechange-output value="outputs/lanechange.xml.gz"/>
+        <netstate-dump value="outputs/netstate.xml"/>
+        <lanechange-output value="outputs/lanechange.xml"/>
         <emission-output value="outputs/emission.xml.gz"/>
         
     </output>
