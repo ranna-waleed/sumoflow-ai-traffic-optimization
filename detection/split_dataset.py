@@ -1,0 +1,56 @@
+import os
+import shutil
+import random
+
+# ─── Paths ───────────────────────────────────────────
+RAW_IMAGES = "detection/dataset/images/raw"
+RAW_LABELS = "detection/dataset/labels/raw"
+
+# ─── Create Split Folders ────────────────────────────
+for split in ["train", "val", "test"]:
+    os.makedirs(f"detection/dataset/images/{split}", exist_ok=True)
+    os.makedirs(f"detection/dataset/labels/{split}", exist_ok=True)
+
+# ─── Get Labeled Images Only ─────────────────────────
+all_images = [
+    f for f in os.listdir(RAW_IMAGES)
+    if f.endswith(".png") and
+    os.path.exists(f"{RAW_LABELS}/{f.replace('.png', '.txt')}")
+]
+
+print(f"Total labeled images found: {len(all_images)}")
+
+# ─── Shuffle & Split ─────────────────────────────────
+random.seed(42)
+random.shuffle(all_images)
+
+total     = len(all_images)
+train_end = int(total * 0.70)
+val_end   = int(total * 0.90)
+
+train = all_images[:train_end]
+val   = all_images[train_end:val_end]
+test  = all_images[val_end:]
+
+# ─── Copy Files ──────────────────────────────────────
+def copy_files(file_list, split):
+    for img in file_list:
+        label = img.replace(".png", ".txt")
+        shutil.copy(
+            f"{RAW_IMAGES}/{img}",
+            f"detection/dataset/images/{split}/{img}"
+        )
+        shutil.copy(
+            f"{RAW_LABELS}/{label}",
+            f"detection/dataset/labels/{split}/{label}"
+        )
+
+copy_files(train, "train")
+copy_files(val,   "val")
+copy_files(test,  "test")
+
+# ─── Summary ─────────────────────────────────────────
+print("\nDataset split complete!")
+print(f"   Train : {len(train)} images  (70%)")
+print(f"   Val   : {len(val)}   images  (20%)")
+print(f"   Test  : {len(test)}  images  (10%)")

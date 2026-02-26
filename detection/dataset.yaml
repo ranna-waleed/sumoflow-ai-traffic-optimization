@@ -1,0 +1,18 @@
+# El-Tahrir Square Cairo - Traffic Detection Dataset
+path: detection/dataset
+train: images/train
+val:   images/val
+test:  images/test
+
+# Number of classes
+nc: 7
+
+# Class names
+names:
+  0: car
+  1: bus
+  2: truck
+  3: motorcycle
+  4: taxi
+  5: microbus
+  6: bicycle
