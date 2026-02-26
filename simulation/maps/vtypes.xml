@@ -1,13 +1,36 @@
 <additional>
     <vType id="car" vClass="passenger" emissionClass="HBEFA3/PC_G_EU4" 
            accel="2.6" decel="4.5" sigma="0.5" length="4.5" minGap="2.5" 
-           maxSpeed="50" guiShape="passenger"/>
+           maxSpeed="50" guiShape="passenger/sedan"
+           color="255,255,255"/>
 
     <vType id="bus" vClass="bus" emissionClass="HBEFA3/Bus" 
            accel="1.2" decel="3.5" sigma="0.5" length="12.0" minGap="3.0" 
-           maxSpeed="30" guiShape="bus"/>
+           maxSpeed="30" guiShape="bus"
+           color="255,165,0"/>
 
     <vType id="taxi" vClass="taxi" emissionClass="HBEFA3/PC_G_EU4" 
            accel="2.6" decel="4.5" sigma="0.5" length="4.5" minGap="2.5" 
-           maxSpeed="55" guiShape="taxi" color="255,255,0"/>
+           maxSpeed="55" guiShape="passenger/sedan"
+           color="255,255,0"/>
+
+    <vType id="microbus" vClass="passenger" emissionClass="HBEFA3/PC_D_EU3"
+           accel="1.8" decel="3.8" sigma="0.5" length="7.0" minGap="2.5"
+           maxSpeed="40" guiShape="passenger/van"
+           color="100,180,255"/>
+
+    <vType id="bicycle" vClass="bicycle" emissionClass="zero"
+           accel="1.0" decel="3.0" sigma="0.8" length="1.8" minGap="1.0"
+           maxSpeed="15" guiShape="bicycle"
+           color="0,200,0"/>
+
+    <vType id="truck" vClass="truck" emissionClass="HBEFA3/HDV_D_EU0"
+           accel="1.0" decel="3.0" sigma="0.5" length="9.0" minGap="3.0"
+           maxSpeed="35" guiShape="truck"
+           color="180,100,50"/>
+
+    <vType id="motorcycle" vClass="motorcycle" emissionClass="HBEFA3/PC_G_EU4"
+           accel="3.5" decel="5.0" sigma="0.7" length="2.2" minGap="1.5"
+           maxSpeed="70" guiShape="motorcycle"
+           color="255,50,50"/>
 </additional>
