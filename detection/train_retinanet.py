@@ -8,7 +8,7 @@ import os
 NUM_CLASSES = 8 # 7 vehicles (car, bus, taxi, microbus, bicycle, truck, motorcycle) + 1 background
 BATCH_SIZE = 2
 NUM_EPOCHS = 10
-LEARNING_RATE = 0.005
+LEARNING_RATE = 0.001
 SAVE_PATH = "detection/retinanet_best.pth"
 
 # ─── 2. Model Initialization ───────────────────────────────────
@@ -73,6 +73,8 @@ def main():
             # Backpropagation
             optimizer.zero_grad()
             losses.backward()
+            #GRADIENT CLIPPING : This prevents the gradients from exploding into NaN
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)
             optimizer.step()
             
             epoch_loss += losses.item()
