@@ -39,10 +39,18 @@ class TahrirTrafficDataset(Dataset):
                     float(bndbox.find('xmin').text), float(bndbox.find('ymin').text),
                     float(bndbox.find('xmax').text), float(bndbox.find('ymax').text)
                 ])
+# --- NEW SAFE TENSOR LOGIC ---
+        # If the image has zero vehicles, force the tensor to be shape [0, 4]
+        if len(boxes) == 0:
+            boxes_tensor = torch.zeros((0, 4), dtype=torch.float32)
+            labels_tensor = torch.zeros((0,), dtype=torch.int64)
+        else:
+            boxes_tensor = torch.as_tensor(boxes, dtype=torch.float32)
+            labels_tensor = torch.as_tensor(labels, dtype=torch.int64)
 
         target = {
-            "boxes": torch.as_tensor(boxes, dtype=torch.float32),
-            "labels": torch.as_tensor(labels, dtype=torch.int64),
+            "boxes": boxes_tensor,
+            "labels": labels_tensor,
             "image_id": torch.tensor([idx])
         }
         return img_tensor, target
@@ -52,6 +60,22 @@ class TahrirTrafficDataset(Dataset):
 
 def collate_fn(batch):
     return tuple(zip(*batch))
+
+def get_train_loader(batch_size=2):
+    # Call the actual class you defined at the top, and give it the correct paths
+    dataset = TahrirTrafficDataset(
+        imgs_dir="detection/dataset/images/train", 
+        xml_dir="detection/dataset/annotations/train"
+    )
+    
+    # collate_fn is critical for PyTorch object detection to handle varying box counts per image
+    return torch.utils.data.DataLoader(
+        dataset, 
+        batch_size=batch_size, 
+        shuffle=True, 
+        collate_fn=collate_fn  # Using the collate_fn you defined right above this!
+    )
+
 
 if __name__ == "__main__":
     print("Testing PyTorch DataLoader...")
