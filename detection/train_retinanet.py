@@ -7,7 +7,7 @@ import os
 # ─── 1. Configuration ──────────────────────────────────────────
 NUM_CLASSES = 8 # 7 vehicles (car, bus, taxi, microbus, bicycle, truck, motorcycle) + 1 background
 BATCH_SIZE = 2
-NUM_EPOCHS = 10
+NUM_EPOCHS = 60
 LEARNING_RATE = 0.001
 SAVE_PATH = "detection/retinanet_best.pth"
 
@@ -50,6 +50,9 @@ def main():
     params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.SGD(params, lr=LEARNING_RATE, momentum=0.9, weight_decay=0.0005)
 
+    # --- NEW: ADD THE SCHEDULER ---
+    # Drops the learning rate by 90% every 15 epochs to help the model fine-tune
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
     print("Starting fine-tuning on El-Tahrir dataset...")
     
     # To track the best loss and save the best weights
@@ -73,8 +76,6 @@ def main():
             # Backpropagation
             optimizer.zero_grad()
             losses.backward()
-            #GRADIENT CLIPPING : This prevents the gradients from exploding into NaN
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)
             optimizer.step()
             
             epoch_loss += losses.item()
@@ -91,6 +92,9 @@ def main():
             best_loss = avg_epoch_loss
             torch.save(model.state_dict(), SAVE_PATH)
             print(f"New best model saved to {SAVE_PATH}!")
+            
+        # --- NEW: STEP THE SCHEDULER ---
+        scheduler.step()
 
     print("Training Complete. Best weights saved.")
 
