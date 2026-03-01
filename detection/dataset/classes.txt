@@ -1,7 +1,0 @@
-car
-bus
-truck
-motorcycle
-taxi
-microbus
-bicycle
