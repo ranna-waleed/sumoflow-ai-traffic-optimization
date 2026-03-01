@@ -3,14 +3,26 @@ import shutil
 import random
 
 # ─── Paths ───────────────────────────────────────────
-RAW_IMAGES = "detection/dataset/images/raw"
-RAW_LABELS = "detection/dataset/labels/raw"
+RAW_IMAGES = "detection/dataset_v2/images/raw"
+RAW_LABELS = "detection/dataset_v2/labels/raw"
 
-# ─── Create Split Folders ────────────────────────────
+
+# ─── Clean & Create Split Folders ────────────────────────
 for split in ["train", "val", "test"]:
-    os.makedirs(f"detection/dataset/images/{split}", exist_ok=True)
-    os.makedirs(f"detection/dataset/labels/{split}", exist_ok=True)
+    img_dir = f"detection/dataset_v2/images/{split}"
+    lbl_dir = f"detection/dataset_v2/labels/{split}"
+    
+    # If the folder exists from a previous run, delete it completely to prevent data leakage
+    if os.path.exists(img_dir):
+        shutil.rmtree(img_dir)
+    if os.path.exists(lbl_dir):
+        shutil.rmtree(lbl_dir)
+        
+    # Create fresh empty folders
+    os.makedirs(img_dir, exist_ok=True)
+    os.makedirs(lbl_dir, exist_ok=True)
 
+    
 # ─── Get Labeled Images Only ─────────────────────────
 all_images = [
     f for f in os.listdir(RAW_IMAGES)
@@ -38,11 +50,11 @@ def copy_files(file_list, split):
         label = img.replace(".png", ".txt")
         shutil.copy(
             f"{RAW_IMAGES}/{img}",
-            f"detection/dataset/images/{split}/{img}"
+            f"detection/dataset_v2/images/{split}/{img}"
         )
         shutil.copy(
             f"{RAW_LABELS}/{label}",
-            f"detection/dataset/labels/{split}/{label}"
+            f"detection/dataset_v2/labels/{split}/{label}"
         )
 
 copy_files(train, "train")

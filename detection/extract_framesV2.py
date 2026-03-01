@@ -4,7 +4,7 @@ import time
 
 # ─── Paths ───────────────────────────────────────────
 SUMO_CFG    = "simulation/maps/config_file.sumocfg"
-OUTPUT_DIR  = "detection/dataset/images/raw"
+OUTPUT_DIR  = "detection/dataset_v2/images/raw"
 TOTAL_STEPS = 3600
 CAPTURE_EVERY = 10
 
@@ -33,8 +33,18 @@ traci.start([
 ])
 
 step = 0
-frame_count = 0
+# --- SMART FRAME COUNTER ---
+# Check the output directory for existing frames so we don't overwrite them
+existing_frames = [f for f in os.listdir(OUTPUT_DIR) if f.startswith("frame_") and f.endswith(".png")]
 
+if existing_frames:
+    # Find the highest number in the existing files (e.g., from "frame_0359.png" -> 359)
+    highest_num = max([int(f.split('_')[1].split('.')[0]) for f in existing_frames])
+    frame_count = highest_num + 1
+    print(f"Found existing dataset! Resuming capture at frame_{frame_count:04d}.png")
+else:
+    frame_count = 0
+    print("No existing frames found. Starting at frame_0000.png")
 print("Ready! Adjust your zoom now, then click Play in SUMO.")
 
 while step < TOTAL_STEPS:
