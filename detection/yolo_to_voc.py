@@ -69,7 +69,7 @@ def create_voc_xml(image_path, yolo_txt_path, output_xml_path):
     tree.write(output_xml_path, encoding='utf-8', xml_declaration=True)
 
 def convert_all_splits():
-    base_dir = "detection/dataset"
+    base_dir = "detection/dataset_v2"
     splits = ["train", "val", "test"]
     
     for split in splits:
@@ -99,7 +99,7 @@ def convert_all_splits():
                 create_voc_xml(img_path, txt_path, xml_path)
 
     print("\nSuccess! All YOLO labels have been converted to Pascal VOC XML format.")
-    print("Check the new 'detection/dataset/annotations/' folder!")
+    print("Check the new 'detection/dataset_v2/annotations/' folder!")
 
 if __name__ == "__main__":
     convert_all_splits()

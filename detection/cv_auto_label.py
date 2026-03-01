@@ -2,8 +2,8 @@ import cv2
 import os
 import numpy as np
 
-IMG_DIR = "detection/dataset/images/raw"
-LBL_DIR = "detection/dataset/labels/raw"
+IMG_DIR = "detection/dataset_v2/images/raw"
+LBL_DIR = "detection/dataset_v2/labels/raw"
 os.makedirs(LBL_DIR, exist_ok=True)
 
 # Map our YOLO classes to the EXACT BGR colors from the Extractor
