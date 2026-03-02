@@ -64,8 +64,8 @@ def collate_fn(batch):
 def get_train_loader(batch_size=2):
     # Call the actual class you defined at the top, and give it the correct paths
     dataset = TahrirTrafficDataset(
-        imgs_dir="detection/dataset/images/train", 
-        xml_dir="detection/dataset/annotations/train"
+        imgs_dir="detection/dataset_v2/images/train", 
+        xml_dir="detection/dataset_v2/annotations/train"
     )
     
     # collate_fn is critical for PyTorch object detection to handle varying box counts per image
@@ -80,8 +80,8 @@ def get_train_loader(batch_size=2):
 if __name__ == "__main__":
     print("Testing PyTorch DataLoader...")
     dataset = TahrirTrafficDataset(
-        imgs_dir="detection/dataset/images/train", 
-        xml_dir="detection/dataset/annotations/train"
+        imgs_dir="detection/dataset_v2/images/train", 
+        xml_dir="detection/dataset_v2/annotations/train"
     )
     data_loader = DataLoader(dataset, batch_size=2, shuffle=True, collate_fn=collate_fn)
     
