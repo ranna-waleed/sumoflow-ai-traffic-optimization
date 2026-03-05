@@ -243,3 +243,45 @@ simulation/maps/outputs/*
 # MLOps Tracking (MLflow)
 mlruns/
 *.sqlite
+
+
+# ─── Python Virtual Environment ──────────────────────
+.venv/
+venv/
+env/
+
+# ─── Python Cache ─────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ─── YOLO Weights (too large for GitHub) ─────────────
+*.pt
+*.pth
+*.weights
+
+# ─── Dataset (too large for GitHub) ──────────────────
+*.cache
+
+
+# ─── Frontend Dependencies ────────────────────────────
+frontend/node_modules/
+
+# ─── Frontend Build ───────────────────────────────────
+frontend/build/
+frontend/dist/
+
+# ─── Environment Variables ────────────────────────────
+.env
+.env.local
+
+# ─── OS Files ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Misc ─────────────────────────────────────────────
+folder_structure.txt
+*.log
