@@ -244,5 +244,52 @@ simulation/maps/outputs/*
 mlruns/
 *.sqlite
 
+<<<<<<< Updated upstream
 # MLflow local databases
 *.db
+=======
+# ─── Python Virtual Environment ──────────────────────
+.venv/
+venv/
+env/
+
+# ─── Python Cache ─────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ─── YOLO Weights (too large for GitHub) ─────────────
+*.pt
+*.pth
+*.weights
+
+# ─── Dataset (too large for GitHub) ──────────────────
+detection/dataset/images/
+detection/dataset/labels/
+detection/dataset_v2/images/
+detection/dataset_v2/labels/
+*.cache
+
+
+# ─── Frontend Dependencies ────────────────────────────
+frontend/node_modules/
+
+# ─── Frontend Build ───────────────────────────────────
+frontend/build/
+frontend/dist/
+
+# ─── Environment Variables ────────────────────────────
+.env
+.env.local
+
+# ─── OS Files ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Misc ─────────────────────────────────────────────
+folder_structure.txt
+*.log
+>>>>>>> Stashed changes
