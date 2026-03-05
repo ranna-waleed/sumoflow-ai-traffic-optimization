@@ -10,7 +10,7 @@ import random
 NUM_CLASSES = 8
 CONFIDENCE_THRESHOLD = 0.50 # Only show boxes if the model is >50% sure
 WEIGHTS_PATH = "detection/retinanet_best.pth"
-TEST_DIR = "detection/dataset/images/test"
+TEST_DIR = "detection/dataset_v2/images/test"
 
 # Map PyTorch integers back to your string labels
 IDX_TO_CLASS = {

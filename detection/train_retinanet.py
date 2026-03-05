@@ -30,7 +30,7 @@ def get_retinanet_model(num_classes):
 
 # ─── 3. Training Loop ──────────────────────────────────────────
 def main():
-    # NEW: Setup MLflow Experiment
+    # Setup MLflow Experiment
     mlflow.set_experiment("SumoFlowAI-Traffic-Detection")
     
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -48,7 +48,7 @@ def main():
     
     best_loss = float('inf')
 
-    # NEW: Start MLflow Run
+    # Start MLflow Run
     with mlflow.start_run(run_name="retinanet_v2_1800_images"):
         # Log Hyperparameters
         mlflow.log_param("num_epochs", NUM_EPOCHS)
@@ -80,7 +80,7 @@ def main():
 
             avg_epoch_loss = epoch_loss / len(train_loader)
             
-            # NEW: Log Metric to MLflow
+            # Log Metric to MLflow
             mlflow.log_metric("avg_loss", avg_epoch_loss, step=epoch)
             mlflow.log_metric("lr", scheduler.get_last_lr()[0], step=epoch)
 
@@ -89,13 +89,24 @@ def main():
             if avg_epoch_loss < best_loss:
                 best_loss = avg_epoch_loss
                 torch.save(model.state_dict(), SAVE_PATH)
-                # NEW: Log model artifact to MLflow
+                # Log model artifact to MLflow
                 mlflow.log_artifact(SAVE_PATH)
                 print(f"New best model saved and logged to MLflow!")
                 
+                # --- AUTOMATED DVC CLOUD BACKUP ---
+                print("Saving checkpoint to Google Drive via DVC...")
+                try:
+                    # We track both the model weights AND the mlflow tracking folder
+                    os.system(f"dvc add {SAVE_PATH} mlruns/")
+                    os.system("dvc push")
+                    print("Checkpoint successfully secured in the cloud!")
+                except Exception as e:
+                    print(f"Warning: Failed to push checkpoint this epoch. Error: {e}")
+                # ----------------------------------
+                
             scheduler.step()
 
-    print("Training Complete. Best weights saved.")
+    print("Training Complete. Best weights secured in Google Drive.")
 
 if __name__ == "__main__":
     main()

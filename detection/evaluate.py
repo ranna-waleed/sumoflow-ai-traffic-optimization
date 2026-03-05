@@ -59,6 +59,7 @@ def main():
 
     # Initialize TorchMetrics mAP calculator
     metric = MeanAveragePrecision(box_format='xyxy', class_metrics=True)
+    
 
     total_inference_time = 0
     num_images = 0
