@@ -58,8 +58,7 @@ def main():
     val_loader = get_val_loader(BATCH_SIZE)
 
     # Initialize TorchMetrics mAP calculator
-    metric = MeanAveragePrecision(box_format='xyxy', class_metrics=True)
-    
+    metric = MeanAveragePrecision(box_format='xyxy', class_metrics=True, max_detection_thresholds=[1, 10, 100, 300])
 
     total_inference_time = 0
     num_images = 0
