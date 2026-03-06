@@ -1,0 +1,174 @@
+/* SUMOFLOW Design System - Clean Dark Dashboard */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-page: #0b1220; /* slightly lighter navy */
+  --bg-surface: #0f172a;
+  --bg-card: #111827;
+  --border-subtle: rgba(148, 163, 184, 0.25);
+  --border-strong: rgba(148, 163, 184, 0.45);
+  --accent: #3b82f6; /* blue */
+  --accent-soft: rgba(59, 130, 246, 0.15);
+  --accent-alt: #22c55e; /* green */
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  background-image: radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.12), transparent 55%);
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Cards */
+.card {
+  background-color: var(--bg-card);
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.55);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.8);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border-subtle);
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+}
+
+/* Mini traffic light */
+.traffic-light {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 4px 6px;
+  border-radius: 9999px;
+  background-color: #020617;
+  border: 1px solid var(--border-subtle);
+}
+
+.traffic-light-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  opacity: 0.4;
+}
+
+.traffic-light-dot.red {
+  background-color: #ef4444;
+}
+
+.traffic-light-dot.yellow {
+  background-color: #eab308;
+}
+
+.traffic-light-dot.green {
+  background-color: #22c55e;
+}
+
+.traffic-light-dot.active {
+  opacity: 1;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* Simulation viewport */
+.viewport-frame {
+  position: relative;
+  border-radius: 16px;
+  background: radial-gradient(circle at top, #1e293b, #020617);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+/* Optional light scanline, much softer */
+.scanline::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(15, 23, 42, 0),
+    rgba(15, 23, 42, 0) 2px,
+    rgba(15, 23, 42, 0.06) 4px,
+    rgba(15, 23, 42, 0.06) 6px
+  );
+  pointer-events: none;
+}
+
+/* mAP coloring helpers */
+.map-badge-good {
+  color: #22c55e;
+}
+.map-badge-mid {
+  color: #3b82f6;
+}
+.map-badge-bad {
+  color: #f97316;
+}
+
+/* Pulse for ONLINE dot */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  70% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+.badge-pulse {
+  position: relative;
+}
+
+.badge-pulse .badge-dot {
+  animation: pulse-ring 2s ease-out infinite;
+}

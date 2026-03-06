@@ -219,7 +219,21 @@ simulation/maps/outputs/netstate.xml
 simulation/maps/outputs/netstate.csv
 simulation/maps/outputs/full.xml.gz
 simulation/maps/outputs/emission.xml
-
+simulation/maps/outputs/emission_evening.xml
+simulation/maps/outputs/emission_midday.xml
+simulation/maps/outputs/emission_morning.xml
+simulation/maps/outputs/emission_night.xml
+simulation/maps/outputs/fcd_evening.xml
+simulation/maps/outputs/fcd_midday.xml
+simulation/maps/outputs/fcd_morning.xml
+simulation/maps/outputs/fcd_night.xml
+simulation/maps/outputs/summary_evening.xml
+simulation/maps/outputs/summary_midday.xml
+simulation/maps/outputs/summary_morning.xml
+simulation/maps/outputs/summary_night.xml
+simulation/maps/outputs/tripinfo_evening.xml
+simulation/maps/outputs/tripinfo_midday.xml
+simulation/maps/outputs/tripinfo_morning.xml
 sumoflow_env/
 
 # Ignore ALL generated synthetic datasets (V1 and V2)
@@ -237,12 +251,54 @@ detection/dataset_v2/
 *.pth
 *.pt
 
-# Ignore SUMO simulation output logs and plots
-simulation/maps/outputs/*
-
 # MLOps Tracking (MLflow)
 mlruns/
 *.sqlite
 
 # Ignore MLflow database
 mlflow.db
+=======
+# ─── Python Virtual Environment ──────────────────────
+.venv/
+venv/
+env/
+
+# ─── Python Cache ─────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ─── YOLO Weights (too large for GitHub) ─────────────
+*.pt
+*.pth
+*.weights
+
+# ─── Dataset (too large for GitHub) ──────────────────
+detection/dataset/images/
+detection/dataset/labels/
+detection/dataset_v2/images/
+detection/dataset_v2/labels/
+*.cache
+
+
+# ─── Frontend Dependencies ────────────────────────────
+frontend/node_modules/
+
+# ─── Frontend Build ───────────────────────────────────
+frontend/build/
+frontend/dist/
+
+# ─── Environment Variables ────────────────────────────
+.env
+.env.local
+
+# ─── OS Files ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Misc ─────────────────────────────────────────────
+folder_structure.txt
+*.log
