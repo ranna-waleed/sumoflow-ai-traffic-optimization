@@ -255,10 +255,6 @@ detection/dataset_v2/
 mlruns/
 *.sqlite
 
-<<<<<<< Updated upstream
-# MLflow local databases
-*.db
-=======
 # ─── Python Virtual Environment ──────────────────────
 .venv/
 venv/
@@ -303,4 +299,3 @@ desktop.ini
 # ─── Misc ─────────────────────────────────────────────
 folder_structure.txt
 *.log
->>>>>>> Stashed changes
