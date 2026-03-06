@@ -58,8 +58,8 @@ def main():
     val_loader = get_val_loader(BATCH_SIZE)
 
     # Initialize TorchMetrics mAP calculator
-    metric = MeanAveragePrecision(box_format='xyxy', class_metrics=True)
-
+# We keep exactly 3 values, but bump the highest one up to 300!
+    metric = MeanAveragePrecision(box_format='xyxy', class_metrics=True, max_detection_thresholds=[1, 10, 300])
     total_inference_time = 0
     num_images = 0
 
@@ -96,13 +96,13 @@ def main():
 
     map_50 = mAP_results['map_50'].item()
     precision = mAP_results['map'].item() # Strict mAP 0.5:0.95 often correlates to precision in this API
-    recall = mAP_results['mar_100'].item() # Maximum recall given 100 detections per image
-
+    recall = mAP_results['mar_300'].item() # Maximum recall given 300 detections per image
     print("\n--- Evaluation Results ---")
     print(f"FPS:             {fps:.2f}")
     print(f"Inference Time:  {avg_inference_time:.4f} sec/image")
     print(f"mAP@0.5:         {map_50:.4f}")
-    print(f"Recall (AR@100): {recall:.4f}")
+    print(f"Recall (AR@300): {recall:.4f}")
+    print(f"Precision (mAP@0.5:0.95): {precision:.4f}")
 
     # --- Log to MLflow ---
     mlflow.set_experiment("SumoFlowAI-Traffic-Detection")
