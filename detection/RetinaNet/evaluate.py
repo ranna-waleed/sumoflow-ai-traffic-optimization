@@ -11,7 +11,7 @@ import os
 # ─── 1. Configuration ──────────────────────────────────────────
 NUM_CLASSES = 8 
 BATCH_SIZE = 1 
-WEIGHTS_PATH = "detection/retinanet_best.pth"
+WEIGHTS_PATH = "detection/RetinaNet/retinanet_best.pth"
 
 # ─── 2. Model Initialization ───────────────────────────────────
 def get_retinanet_model(num_classes):
