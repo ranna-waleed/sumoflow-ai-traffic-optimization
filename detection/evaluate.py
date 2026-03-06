@@ -102,6 +102,7 @@ def main():
     print(f"Inference Time:  {avg_inference_time:.4f} sec/image")
     print(f"mAP@0.5:         {map_50:.4f}")
     print(f"Recall (AR@300): {recall:.4f}")
+    print(f"Precision (mAP@0.5:0.95): {precision:.4f}")
 
     # --- Log to MLflow ---
     mlflow.set_experiment("SumoFlowAI-Traffic-Detection")
