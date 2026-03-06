@@ -18,6 +18,19 @@ IDX_TO_CLASS = {
     5: 'taxi', 6: 'microbus', 7: 'bicycle'
 }
 
+# Map classes to distinct BGR colors for OpenCV
+CLASS_COLORS = {
+    'car': (255, 144, 30),      # Dodger Blue
+    'bus': (0, 215, 255),       # Gold
+    'truck': (0, 69, 255),      # Orange Red
+    'motorcycle': (204, 50, 153),# Dark Orchid
+    'taxi': (50, 205, 50),      # Lime Green
+    'microbus': (255, 255, 0),  # Cyan
+    'bicycle': (128, 0, 128),   # Purple
+    'Unknown': (128, 128, 128)  # Gray
+}
+
+
 # ─── 2. Model Initialization (Same as training) ────────────────
 def get_retinanet_model(num_classes):
     # Load the blank architecture (no pretrained weights this time, we use yours!)
@@ -76,22 +89,33 @@ def main():
     print(f"Found {len(boxes)} vehicles with >{int(CONFIDENCE_THRESHOLD*100)}% confidence.")
 
     # Draw the boxes!
+# Draw the boxes!
     img_draw = img_rgb.copy()
     for box, label, score in zip(boxes, labels, scores):
         x1, y1, x2, y2 = map(int, box.tolist())
         class_name = IDX_TO_CLASS.get(label.item(), 'Unknown')
         
-        # Draw a neon green rectangle
-        cv2.rectangle(img_draw, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        # Get the unique color for this specific vehicle type
+        color = CLASS_COLORS.get(class_name, (0, 255, 0))
         
-        # Add a nice background for the text
-        text = f"{class_name}: {score:.2f}"
-        (w, h), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-        cv2.rectangle(img_draw, (x1, y1 - 20), (x1 + w, y1), (0, 255, 0), -1)
+        # 1. Draw a slightly thinner bounding box
+        cv2.rectangle(img_draw, (x1, y1), (x2, y2), color, 1)
         
-        # Put the label text in black
-        cv2.putText(img_draw, text, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-
+        # 2. Format a smaller, cleaner label
+        text = f"{class_name} {score:.2f}"
+        font_scale = 0.4 # Smaller text
+        thickness = 1
+        (w, h), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, font_scale, thickness)
+        
+        # Ensure the label doesn't get cut off at the top of the image
+        text_y = max(y1, h + 5)
+        
+        # Draw a solid background rectangle for the text
+        cv2.rectangle(img_draw, (x1, text_y - h - 5), (x1 + w, text_y), color, -1)
+        
+        # Put the label text in black for high contrast
+        cv2.putText(img_draw, text, (x1, text_y - 3), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 0, 0), thickness)
+        
     # Save the output image (Requirements for Issue #24)
     save_file = f"detection/pred_{sample_img_name}"
     cv2.imwrite(save_file, cv2.cvtColor(img_draw, cv2.COLOR_RGB2BGR))
