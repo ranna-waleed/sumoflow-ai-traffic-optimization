@@ -76,6 +76,21 @@ def get_train_loader(batch_size=2):
         collate_fn=collate_fn  # Using the collate_fn you defined right above this!
     )
 
+def get_val_loader(batch_size=1):
+    # Pointing to the test directories to evaluate unseen data
+    dataset = TahrirTrafficDataset(
+        imgs_dir="detection/dataset_v2/images/test", 
+        xml_dir="detection/dataset_v2/annotations/test"
+    )
+    
+    # We use shuffle=False for validation/testing
+    return DataLoader(
+        dataset, 
+        batch_size=batch_size, 
+        shuffle=False, 
+        collate_fn=collate_fn 
+    )
+
 
 if __name__ == "__main__":
     print("Testing PyTorch DataLoader...")
