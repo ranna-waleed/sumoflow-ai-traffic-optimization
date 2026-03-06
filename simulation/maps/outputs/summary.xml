@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-03-06 01:58:00 by Eclipse SUMO GUI Version 1.24.0
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\tahrirupdated.net.xml"/>
+        <route-files value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\od_route_tahrir.odtrips.rou.xml"/>
+        <additional-files value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\tahrir.add.xml"/>
+    </input>
+
+    <output>
+        <netstate-dump value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\outputs/netstate.xml"/>
+        <emission-output value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\outputs/emission.xml.gz"/>
+        <fcd-output value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\outputs/fcd.xml"/>
+        <full-output value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\outputs/full.xml.gz"/>
+        <summary-output value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\outputs/summary.xml"/>
+        <tripinfo-output value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\outputs/tripinfo.xml"/>
+        <lanechange-output value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\outputs/lanechange.xml"/>
+    </output>
+
+    <time>
+        <begin value="0"/>
+        <end value="3600"/>
+    </time>
+
+    <report>
+        <verbose value="true"/>
+        <no-step-log value="false"/>
+    </report>
+
+    <ssm_device>
+        <device.ssm.probability value="1.0"/>
+        <device.ssm.measures value="TTC DRAC PET"/>
+        <device.ssm.thresholds value="3.0 3.0 2.0"/>
+        <device.ssm.trajectories value="true"/>
+        <device.ssm.range value="50.0"/>
+        <device.ssm.extratime value="5.0"/>
+        <device.ssm.file value="outputs/ssm.xml.gz"/>
+    </ssm_device>
+
+    <gui_only>
+        <gui-settings-file value="C:\Users\WIN\Documents\GitHub\sumoflow-ai-traffic-optimization\simulation\maps\gui_settings.xml"/>
+    </gui_only>
+
+</sumoConfiguration>
+-->
+
+<summary xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/summary_file.xsd">
+</summary>

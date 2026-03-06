@@ -219,7 +219,21 @@ simulation/maps/outputs/netstate.xml
 simulation/maps/outputs/netstate.csv
 simulation/maps/outputs/full.xml.gz
 simulation/maps/outputs/emission.xml
-
+simulation/maps/outputs/emission_evening.xml
+simulation/maps/outputs/emission_midday.xml
+simulation/maps/outputs/emission_morning.xml
+simulation/maps/outputs/emission_night.xml
+simulation/maps/outputs/fcd_evening.xml
+simulation/maps/outputs/fcd_midday.xml
+simulation/maps/outputs/fcd_morning.xml
+simulation/maps/outputs/fcd_night.xml
+simulation/maps/outputs/summary_evening.xml
+simulation/maps/outputs/summary_midday.xml
+simulation/maps/outputs/summary_morning.xml
+simulation/maps/outputs/summary_night.xml
+simulation/maps/outputs/tripinfo_evening.xml
+simulation/maps/outputs/tripinfo_midday.xml
+simulation/maps/outputs/tripinfo_morning.xml
 sumoflow_env/
 
 # Ignore ALL generated synthetic datasets (V1 and V2)
@@ -236,9 +250,6 @@ detection/dataset_v2/
 # Ignore Trained Model Weights
 *.pth
 *.pt
-
-# Ignore SUMO simulation output logs and plots
-simulation/maps/outputs/*
 
 # MLOps Tracking (MLflow)
 mlruns/
