@@ -1,0 +1,90 @@
+# Faster R-CNN — Tahrir Traffic Detection
+
+## Folder Structure
+
+```
+FastRCNN/
+├── dataloader.py          ← your existing dataloader
+├── setup_verify.py        ← Part 1: install check + 5-sample test
+├── train.py               ← Part 2: training (60 epochs, MLflow)
+├── evaluate.py            ← Part 3: metrics, detection images, MLflow
+├── requirements.txt
+└── outputs/
+    ├── best_faster_rcnn.pth
+    ├── last_faster_rcnn.pth
+    ├── eval_results.json
+    └── detection_images/
+```
+
+---
+
+## Step-by-Step: GPU Setup & Running
+
+### 1. Check your CUDA version
+```bash
+nvidia-smi
+```
+Note the CUDA version shown (e.g. 12.1, 11.8).
+
+### 2. Install PyTorch with CUDA support
+
+**For CUDA 12.1:**
+```bash
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+```
+**For CUDA 11.8:**
+```bash
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+```
+
+### 3. Install remaining dependencies
+```bash
+cd FastRCNN
+pip install -r requirements.txt
+```
+
+### 4. Part 1 — Verify setup
+```bash
+python setup_verify.py
+```
+You should see:
+- All libraries listed with versions  
+- 'CUDA available: True` and your GPU name  
+- 5 sample images loaded with box counts
+
+### 5. Part 2 — Train (60 epochs)
+```bash
+python train.py
+```
+- Automatically uses GPU if available  
+- Saves `outputs/best_faster_rcnn.pth` whenever val loss improves  
+- Open MLflow UI in another terminal to watch live:
+```bash
+mlflow ui
+# then open http://localhost:5000 in your browser
+```
+
+### 6. Part 3 — Evaluate
+```bash
+python evaluate.py
+```
+Outputs:
+- `outputs/eval_results.json` — all metrics  
+- `outputs/detection_images/` — 10 sample images with bounding boxes  
+- MLflow run with all metrics logged
+
+---
+
+## Tips for Best GPU Performance
+
+| Tip | What to change |
+|-----|---------------|
+| Increase batch size | Set `BATCH_SIZE = 4` (or higher) in `train.py` if your VRAM allows |
+| Faster data loading | Increase `num_workers=4` in DataLoader calls |
+| Mixed precision | Wrap training loop with `torch.cuda.amp.autocast()` for ~2× speed |
+| Monitor GPU usage | Run `watch -n 1 nvidia-smi` in a separate terminal |
+
+## MLflow Tracked Metrics
+
+**Training:** `train_loss`, `val_loss`, `lr` (per epoch)  
+**Evaluation:** `mAP_50`, `mAP_50_95`, `precision`, `recall`, `avg_inference_ms`, `fps`, `AP_<class>` per class

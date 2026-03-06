@@ -243,3 +243,6 @@ simulation/maps/outputs/*
 # MLOps Tracking (MLflow)
 mlruns/
 *.sqlite
+
+# Ignore MLflow database
+mlflow.db

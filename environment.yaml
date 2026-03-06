@@ -1,0 +1,10 @@
+name: sumoenv
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - pytorch-cuda=12.4
+  - pytorch
+  - torchvision
+  - pycocotools
+prefix: C:\Users\laptop.house\anaconda3\envs\sumoenv
