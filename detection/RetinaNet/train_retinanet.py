@@ -152,8 +152,9 @@ def main():
                     print(f"✅ New best model saved! mAP@0.5 = {best_map:.4f}")
 
                     try:
-                        subprocess.run(f"dvc add {SAVE_PATH} mlruns/", shell=True, check=True)
-                        subprocess.run("dvc push", shell=True, check=True)
+                        # ⚠️ Disable DVC push during training to prevent Kaggle browser blocks
+                        # subprocess.run(f"dvc add {SAVE_PATH} mlruns/", shell=True, check=True)
+                        # subprocess.run("dvc push", shell=True, check=True)
                         print("Checkpoint secured in Google Drive!")
                     except subprocess.CalledProcessError as e:
                         print(f"Warning: DVC push failed. Error: {e}")
