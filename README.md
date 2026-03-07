@@ -208,7 +208,7 @@ python detection/RetinaNet/train.py
 ```bash
 cd frontend
 npm install
-npm run dev
+npm start
 ```
 
 ---
