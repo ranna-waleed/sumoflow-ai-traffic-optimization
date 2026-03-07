@@ -245,7 +245,7 @@ Includes:
 
 ---
 
-## ⏳ Project Status
+##  Project Status
 
 | Component | Status |
 |-----------|--------|
