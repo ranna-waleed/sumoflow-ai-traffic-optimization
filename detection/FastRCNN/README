@@ -3,7 +3,7 @@
 ## Folder Structure
 
 ```
-FastRCNN/
+FasterRCNN/
 ├── dataloader.py          ← your existing dataloader
 ├── setup_verify.py        ← Part 1: install check + 5-sample test
 ├── train.py               ← Part 2: training (60 epochs, MLflow)
@@ -39,7 +39,7 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
 
 ### 3. Install remaining dependencies
 ```bash
-cd FastRCNN
+cd FasterRCNN
 pip install -r requirements.txt
 ```
 
@@ -48,16 +48,16 @@ pip install -r requirements.txt
 python setup_verify.py
 ```
 You should see:
-- All libraries listed with versions  
-- 'CUDA available: True` and your GPU name  
+- All libraries listed with versions
+- `CUDA available: True` and your GPU name
 - 5 sample images loaded with box counts
 
 ### 5. Part 2 — Train (60 epochs)
 ```bash
 python train.py
 ```
-- Automatically uses GPU if available  
-- Saves `outputs/best_faster_rcnn.pth` whenever val loss improves  
+- Automatically uses GPU if available
+- Saves `outputs/best_faster_rcnn.pth` whenever val loss improves
 - Open MLflow UI in another terminal to watch live:
 ```bash
 mlflow ui
@@ -69,22 +69,25 @@ mlflow ui
 python evaluate.py
 ```
 Outputs:
-- `outputs/eval_results.json` — all metrics  
-- `outputs/detection_images/` — 10 sample images with bounding boxes  
+- `outputs/eval_results.json` — all metrics
+- `outputs/detection_images/` — 10 sample images with bounding boxes
 - MLflow run with all metrics logged
 
 ---
 
 ## Tips for Best GPU Performance
 
-| Tip | What to change |
-|-----|---------------|
-| Increase batch size | Set `BATCH_SIZE = 4` (or higher) in `train.py` if your VRAM allows |
+| Tip | What to Change |
+|-----|----------------|
+| Increase batch size | Set `BATCH_SIZE = 4` in `train.py` if your VRAM allows |
 | Faster data loading | Increase `num_workers=4` in DataLoader calls |
-| Mixed precision | Wrap training loop with `torch.cuda.amp.autocast()` for ~2× speed |
+| Mixed precision | Wrap training loop with `torch.cuda.amp.autocast()` for ~2x speed |
 | Monitor GPU usage | Run `watch -n 1 nvidia-smi` in a separate terminal |
+
+---
 
 ## MLflow Tracked Metrics
 
-**Training:** `train_loss`, `val_loss`, `lr` (per epoch)  
+**Training:** `train_loss`, `val_loss`, `lr` (per epoch)
+
 **Evaluation:** `mAP_50`, `mAP_50_95`, `precision`, `recall`, `avg_inference_ms`, `fps`, `AP_<class>` per class
