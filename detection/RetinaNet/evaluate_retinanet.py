@@ -8,7 +8,12 @@ import random
 
 # ─── 1. Configuration & Mapping ────────────────────────────────
 NUM_CLASSES = 8
-CONFIDENCE_THRESHOLD = 0.50 # Only show boxes if the model is >50% sure
+
+# ⚠️  VISUALIZATION ONLY — never use this threshold when computing mAP.
+# mAP metrics must receive ALL predictions (all confidence levels) so the
+# metric can sweep thresholds internally. Filtering here only affects what
+# gets drawn on screen.
+CONFIDENCE_THRESHOLD = 0.50
 WEIGHTS_PATH = "detection/RetinaNet/retinanet_best.pth"
 TEST_DIR = "detection/dataset_v2/images/test"
 
@@ -55,7 +60,14 @@ def main():
 
     # Load your trained weights
     model = get_retinanet_model(NUM_CLASSES)
-    model.load_state_dict(torch.load(WEIGHTS_PATH, map_location=device))
+        
+    if not os.path.exists(WEIGHTS_PATH):
+        raise FileNotFoundError(
+            f"Weights not found at '{WEIGHTS_PATH}'.\n"
+            f"Train the model first, or check that WEIGHTS_PATH is correct."
+        )
+        
+    model.load_state_dict(torch.load(WEIGHTS_PATH, map_location=device, weights_only=True))
     model.to(device)
     model.eval() # CRITICAL: Set model to evaluation mode!
 
@@ -91,7 +103,6 @@ def main():
     print(f"Found {len(boxes)} vehicles with >{int(CONFIDENCE_THRESHOLD*100)}% confidence.")
 
     # Draw the boxes!
-# Draw the boxes!
     img_draw = img_rgb.copy()
     for box, label, score in zip(boxes, labels, scores):
         x1, y1, x2, y2 = map(int, box.tolist())
@@ -118,9 +129,12 @@ def main():
         # Put the label text in black for high contrast
         cv2.putText(img_draw, text, (x1, text_y - 3), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 0, 0), thickness)
         
-    # Save the output image (Requirements for Issue #24)
+
+    # AFTER
+    os.makedirs("detection", exist_ok=True)
     save_file = f"detection/pred_{sample_img_name}"
     cv2.imwrite(save_file, cv2.cvtColor(img_draw, cv2.COLOR_RGB2BGR))
+    
     print(f"Saved evaluation image to {save_file}")
 
     # Show the image right here in Google Colab!
