@@ -5,7 +5,7 @@ import os
 import sys
 from datetime import datetime
 
-# ─── Config Files per Profile ─────────────────────────
+# Config Files per Profile 
 CONFIGS = {
     "morning_rush": "simulation/maps/config_morning_rush.sumocfg",
     "evening_rush": "simulation/maps/config_evening_rush.sumocfg",
@@ -14,7 +14,7 @@ CONFIGS = {
     "realtime":     "simulation/maps/config_realtime.sumocfg",
 }
 
-# ─── Auto Detect Current Profile ─────────────────────
+# Auto Detect Current Profile 
 def get_current_profile():
     hour = datetime.now().hour
     if   8  <= hour < 10: return "morning_rush"
@@ -32,7 +32,7 @@ def get_period_label(profile):
     }
     return labels.get(profile, profile)
 
-# ─── Main Simulation ──────────────────────────────────
+#  Main Simulation 
 def run_simulation(profile_name=None):
 
     # Auto detect if not given
@@ -53,7 +53,7 @@ def run_simulation(profile_name=None):
     print(f"  Time:     {now.strftime('%H:%M:%S')}")
     print(f"  Config:   {config}")
 
-    # ─── Start SUMO ───────────────────────────────────
+    #  Start SUMO 
     sumo_cmd = [
         "sumo-gui",
         "-c",            config,
@@ -68,7 +68,7 @@ def run_simulation(profile_name=None):
     print(" SUMO started!")
     print("   Speed: 1 simulation second = 1 real second\n")
 
-    # ─── Collect Metrics ──────────────────────────────
+    # Collect Metrics 
     metrics    = []
     step       = 0
     start_time = time.time()
@@ -112,7 +112,7 @@ def run_simulation(profile_name=None):
 
     traci.close()
 
-    # ─── Save Results ─────────────────────────────────
+    #  Save Results 
     os.makedirs("simulation/maps/outputs", exist_ok=True)
     timestamp = now.strftime("%Y%m%d_%H%M")
     csv_path  = (f"simulation/maps/outputs/"
@@ -135,7 +135,7 @@ def run_simulation(profile_name=None):
 
     return metrics
 
-# ─── Entry Point ──────────────────────────────────────
+#  Entry Point 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         run_simulation(sys.argv[1])
