@@ -257,25 +257,25 @@ mlruns/
 
 # Ignore MLflow database
 mlflow.db
-=======
-# ─── Python Virtual Environment ──────────────────────
+
+# Python Virtual Environment
 .venv/
 venv/
 env/
 
-# ─── Python Cache ─────────────────────────────────────
+#Python Cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
 
-# ─── YOLO Weights (too large for GitHub) ─────────────
+#  YOLO Weights (too large for GitHub) 
 *.pt
 *.pth
 *.weights
 
-# ─── Dataset (too large for GitHub) ──────────────────
+# Dataset (too large for GitHub)
 detection/dataset/images/
 detection/dataset/labels/
 detection/dataset_v2/images/
@@ -283,22 +283,22 @@ detection/dataset_v2/labels/
 *.cache
 
 
-# ─── Frontend Dependencies ────────────────────────────
+#  Frontend Dependencies
 frontend/node_modules/
 
-# ─── Frontend Build ───────────────────────────────────
+# Frontend Build
 frontend/build/
 frontend/dist/
 
-# ─── Environment Variables ────────────────────────────
+# Environment Variables 
 .env
 .env.local
 
-# ─── OS Files ─────────────────────────────────────────
+# OS Files 
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# ─── Misc ─────────────────────────────────────────────
+#Misc 
 folder_structure.txt
 *.log
