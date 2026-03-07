@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import os
 import random
 
-# ─── Hourly Traffic Demand (vehicles/hour) ────────────
+#  Hourly Traffic Demand (vehicles/hour)
 # Based on typical Cairo traffic patterns
 HOURLY_DEMAND = {
     0:  200,
@@ -13,7 +13,7 @@ HOURLY_DEMAND = {
     5:  500,
     6:  1500,
     7:  3000,
-    8:  5000,   # MORNING RUSH PEAK → 150+ vehicles
+    8:  5000,   # MORNING RUSH PEAK : 150+ vehicles
     9:  4000,
     10: 2500,
     11: 2000,
@@ -22,7 +22,7 @@ HOURLY_DEMAND = {
     14: 2000,
     15: 2500,
     16: 3500,
-    17: 5500,   # EVENING RUSH PEAK → 200+ vehicles
+    17: 5500,   # EVENING RUSH PEAK : 200+ vehicles
     18: 4500,
     19: 3000,
     20: 2000,
@@ -32,7 +32,7 @@ HOURLY_DEMAND = {
 }
 
 
-# ─── Profile Definitions ──────────────────────────────
+#Profile Definitions
 PROFILES = {
     "morning_rush": {
         "start_hour": 8,
@@ -61,7 +61,7 @@ PROFILES = {
     }
 }
 
-# ─── Vehicle Types ────────────────────────────────────
+#  Vehicle Types
 VEHICLE_TYPES = [
     {"id": "passenger",  "ratio": 0.45,
      "maxSpeed": "13.89", "length": "4.5",
@@ -122,7 +122,7 @@ def generate_profile(profile_name):
 
     new_root = ET.Element("routes")
 
-    # ─── Vehicle Type Definitions ─────────────────────
+    # Vehicle Type Definitions 
     for vtype in VEHICLE_TYPES:
         ET.SubElement(new_root, "vType", {
             "id":       vtype["id"],
@@ -135,14 +135,14 @@ def generate_profile(profile_name):
             "color":    vtype["color"]
         })
 
-    # ─── Route Definitions ────────────────────────────
+    #  Route Definitions 
     for i, edges in enumerate(existing_routes[:num_routes]):
         ET.SubElement(new_root, "route", {
             "id":    f"route_{i}",
             "edges": edges
         })
 
-    # ─── Generate Realistic Hourly Flows ──────────────
+    # Generate Realistic Hourly Flows
     flow_id = 0
 
     for hour in range(start_hour, end_hour):
@@ -194,7 +194,7 @@ def generate_profile(profile_name):
                     })
                     flow_id += 1
 
-    # ─── Save ─────────────────────────────────────────
+    #  Save 
     tree_out = ET.ElementTree(new_root)
     ET.indent(tree_out, space="    ")
     tree_out.write(
