@@ -10,7 +10,7 @@ def analyze_routes():
     route_file = "simulation/maps/tahrir.rou.xml"
     net_file   = "simulation/maps/tahrirupdated.net.xml"
 
-    # ─── Count edge usage in routes ───────────────────
+    # Count edge usage in routes
     tree     = ET.parse(route_file)
     root     = tree.getroot()
     vehicles = root.findall("vehicle")
@@ -27,7 +27,7 @@ def analyze_routes():
             for edge in edge_list:
                 edge_counter[edge] += 1
 
-    # ─── Get all edges from network ───────────────────
+    # Get all edges from network
     net_tree  = ET.parse(net_file)
     net_root  = net_tree.getroot()
     all_edges = set()
@@ -38,11 +38,11 @@ def analyze_routes():
         if not edge_id.startswith(":"):
             all_edges.add(edge_id)
 
-    # ─── Find unused edges ────────────────────────────
+    #  Find unused edges
     used_edges   = set(edge_counter.keys())
     unused_edges = all_edges - used_edges
 
-    # ─── Print Report ─────────────────────────────────
+    #  Print Report
 
     print("  EDGE USAGE ANALYSIS")
     print(f"\nTotal edges in network:  {len(all_edges)}")
@@ -70,7 +70,7 @@ def analyze_routes():
     for edge in list(unused_edges)[:10]:
         print(f"  {edge}")
 
-    # ─── Short Route Warning ──────────────────────────
+    #  Short Route Warning 
     short_routes = [r for r in all_routes if len(r) <= 2]
     print(f"\n Short routes (≤2 edges): "
           f"{len(short_routes)} vehicles")
