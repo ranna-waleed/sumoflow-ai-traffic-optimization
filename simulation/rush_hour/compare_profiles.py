@@ -57,9 +57,8 @@ def compare_profiles():
             "total_samples": len(vehicles_list),
         })
 
-    # ─── Print Table ──────────────────────────────────
+    #Print Table 
     print("  TRAFFIC PROFILE COMPARISON — EL TAHRIR SQUARE")
-
 
     print(f"\n{'Profile':<15} {'Period':<15} {'Avg Veh':>8} "
           f"{'Peak Veh':>9} {'Avg Wait':>9} {'Max Wait':>9} "
@@ -79,7 +78,7 @@ def compare_profiles():
 
     print("-"*70)
 
-    # ─── Save Summary CSV ─────────────────────────────
+    #Save Summary CSV 
     summary_path = f"{output_dir}/comparison_summary.csv"
     fields = [
         "profile", "time_period", "avg_vehicles", "peak_vehicles",
