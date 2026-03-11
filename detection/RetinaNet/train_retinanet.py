@@ -146,14 +146,14 @@ def main():
                 loss_dict = model(images, targets)
                 losses    = sum(loss for loss in loss_dict.values())
 
-                if not torch.isfinite(losses):
+                if not torch.isfinite(losses) or losses.item() > 10.0:
                     print(f"⚠️  Non-finite loss at epoch {epoch+1} batch {batch_idx} — skipping.")
                     optimizer.zero_grad()
                     continue
 
                 optimizer.zero_grad()
                 losses.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)
                 optimizer.step()
 
                 epoch_loss += losses.item()
