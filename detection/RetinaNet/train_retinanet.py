@@ -147,7 +147,7 @@ def main():
                 losses    = sum(loss for loss in loss_dict.values())
 
                 if not torch.isfinite(losses) or losses.item() > 10.0:
-                    print(f"⚠️  Non-finite loss at epoch {epoch+1} batch {batch_idx} — skipping.")
+                    print(f"⚠️  Skipping batch {batch_idx} — loss {losses.item():.2f} exceeds threshold.")
                     optimizer.zero_grad()
                     continue
 
