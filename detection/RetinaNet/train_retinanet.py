@@ -4,18 +4,18 @@ from torchvision.models.detection import RetinaNet_ResNet50_FPN_Weights
 from torchvision.models.detection.retinanet import RetinaNetClassificationHead
 import os
 import mlflow
-import subprocess
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
-from dataloader import get_train_loader, get_val_loader  # get_val_loader now uses val/ not test/
+from dataloader import get_train_loader, get_val_loader
 
 # ─── 1. Configuration ──────────────────────────────────────────
 NUM_CLASSES    = 8
 BATCH_SIZE     = 2
 NUM_EPOCHS     = 60
-LEARNING_RATE = 0.0005
+LEARNING_RATE  = 0.001       # restored to 0.001 — AdamW adaptive scaling prevents regression explosion
 SAVE_PATH      = "detection/RetinaNet/retinanet_best.pth"
-UNFREEZE_EPOCH = 15      # backbone unfreezes after this epoch
-WARMUP_EPOCHS  = 5       # linear LR warmup before cosine decay begins
+UNFREEZE_EPOCH = 15          # backbone unfreezes after this epoch
+WARMUP_EPOCHS  = 5           # linear LR warmup before cosine decay begins
+
 
 # ─── 2. Model Initialization ───────────────────────────────────
 def get_retinanet_model(num_classes):
@@ -24,10 +24,8 @@ def get_retinanet_model(num_classes):
     classification head for our 7-class problem.
 
     Focal loss tuning:
-      - alpha=0.25 is the default. Increase toward 0.5 to up-weight rare classes
-        (motorcycle, bicycle) — try 0.35 if small-class AP is poor after training.
-      - gamma=2.0 is the default. Increase to 3.0 to focus harder on hard examples
-        in dense scenes like Tahrir Square.
+      - alpha=0.35 (up from 0.25) to up-weight rare classes (motorcycle, bicycle)
+      - gamma=2.5 (up from 2.0) to focus harder on hard examples in dense scenes
     """
     print("Loading pre-trained RetinaNet ResNet-50-FPN...")
     model = torchvision.models.detection.retinanet_resnet50_fpn(
@@ -35,11 +33,11 @@ def get_retinanet_model(num_classes):
     )
 
     # Tune focal loss for dense, imbalanced Egyptian traffic
-    model.head.classification_head.focal_loss_alpha = 0.35   # was 0.25
-    model.head.classification_head.focal_loss_gamma = 2.5    # was 2.0
+    model.head.classification_head.focal_loss_alpha = 0.35
+    model.head.classification_head.focal_loss_gamma = 2.5
 
-    in_channels  = model.head.classification_head.conv[0][0].in_channels
-    num_anchors  = model.head.classification_head.num_anchors
+    in_channels = model.head.classification_head.conv[0][0].in_channels
+    num_anchors = model.head.classification_head.num_anchors
     model.head.classification_head = RetinaNetClassificationHead(
         in_channels=in_channels,
         num_anchors=num_anchors,
@@ -53,13 +51,50 @@ def get_retinanet_model(num_classes):
     return model
 
 
-def get_warmup_scheduler(optimizer, warmup_epochs, base_lr):
-    """Linear warmup: LR ramps from base_lr/10 → base_lr over warmup_epochs."""
-    def lr_lambda(epoch):
-        if epoch < warmup_epochs:
-            return (epoch + 1) / warmup_epochs
-        return 1.0
-    return torch.optim.lr_scheduler.LambdaScheduler(optimizer, lr_lambda)
+def build_phase1_optimizer(model, lr):
+    """
+    Phase 1 optimizer: backbone frozen, train head only.
+    Regression head gets half the LR of classification head because
+    regression gradients are ~10x larger on dense frames (100+ vehicles).
+    AdamW adaptive per-parameter scaling prevents the LR-driven spike
+    problem that SGD+momentum caused in all previous runs.
+    """
+    return torch.optim.AdamW([
+        {
+            "params": [p for p in model.head.classification_head.parameters()
+                       if p.requires_grad],
+            "lr": lr,           # 0.001 — classification head
+        },
+        {
+            "params": [p for p in model.head.regression_head.parameters()
+                       if p.requires_grad],
+            "lr": lr * 0.5,     # 0.0005 — regression head (half LR)
+        },
+    ], weight_decay=0.0005)
+
+
+def build_phase2_optimizer(model, lr):
+    """
+    Phase 2 optimizer: full fine-tuning with differential LRs.
+    Backbone gets 10x lower LR to preserve pretrained features.
+    Regression head keeps the 0.5x multiplier from Phase 1.
+    """
+    return torch.optim.AdamW([
+        {
+            "params": model.backbone.parameters(),
+            "lr": lr * 0.1,     # 0.0001 — backbone (preserve pretrained features)
+        },
+        {
+            "params": [p for p in model.head.classification_head.parameters()
+                       if p.requires_grad],
+            "lr": lr,           # 0.001 — classification head
+        },
+        {
+            "params": [p for p in model.head.regression_head.parameters()
+                       if p.requires_grad],
+            "lr": lr * 0.5,     # 0.0005 — regression head
+        },
+    ], weight_decay=0.0005)
 
 
 # ─── 3. Training Loop ──────────────────────────────────────────
@@ -74,20 +109,19 @@ def main():
     model.to(device)
 
     train_loader = get_train_loader(BATCH_SIZE)
-    val_loader   = get_val_loader(batch_size=1)   # ← val/ split, not test/
+    val_loader   = get_val_loader(batch_size=1)
 
     # ── Phase 1: Freeze backbone, train head only ───────────────
     for param in model.backbone.parameters():
         param.requires_grad = False
 
-    head_params = [p for p in model.parameters() if p.requires_grad]
-    optimizer   = torch.optim.SGD(head_params, lr=LEARNING_RATE, momentum=0.9, weight_decay=0.0005)
+    optimizer = build_phase1_optimizer(model, LEARNING_RATE)
 
     # Warmup for WARMUP_EPOCHS, then cosine decay for the rest of Phase 1
-    warmup_scheduler  = torch.optim.lr_scheduler.LinearLR(
+    warmup_scheduler = torch.optim.lr_scheduler.LinearLR(
         optimizer, start_factor=0.1, end_factor=1.0, total_iters=WARMUP_EPOCHS
     )
-    cosine_scheduler  = torch.optim.lr_scheduler.CosineAnnealingLR(
+    cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, T_max=UNFREEZE_EPOCH - WARMUP_EPOCHS, eta_min=1e-5
     )
     scheduler = torch.optim.lr_scheduler.SequentialLR(
@@ -96,19 +130,21 @@ def main():
         milestones=[WARMUP_EPOCHS]
     )
 
-    best_map    = 0.0
-    phase       = 1   # for logging clarity
+    best_map = 0.0
+    phase    = 1
 
-    with mlflow.start_run(run_name="retinanet_v2_1800_images_improved"):
+    with mlflow.start_run(run_name="retinanet_v2_adamw_per_head_lr"):
         mlflow.log_params({
-            "num_epochs":      NUM_EPOCHS,
-            "learning_rate":   LEARNING_RATE,
-            "batch_size":      BATCH_SIZE,
-            "optimizer":       "SGD",
-            "unfreeze_epoch":  UNFREEZE_EPOCH,
-            "warmup_epochs":   WARMUP_EPOCHS,
-            "focal_alpha":     0.35,
-            "focal_gamma":     2.5,
+            "num_epochs":               NUM_EPOCHS,
+            "learning_rate":            LEARNING_RATE,
+            "batch_size":               BATCH_SIZE,
+            "optimizer":                "AdamW",
+            "unfreeze_epoch":           UNFREEZE_EPOCH,
+            "warmup_epochs":            WARMUP_EPOCHS,
+            "focal_alpha":              0.35,
+            "focal_gamma":              2.5,
+            "regression_lr_multiplier": 0.5,
+            "backbone_lr_multiplier":   0.1,
         })
 
         print("Starting fine-tuning on El-Tahrir dataset...")
@@ -121,19 +157,16 @@ def main():
                 for param in model.backbone.parameters():
                     param.requires_grad = True
 
-                params = [
-                    {"params": model.backbone.parameters(), "lr": LEARNING_RATE * 0.1},
-                    {"params": model.head.parameters(),     "lr": LEARNING_RATE}
-                ]
-                optimizer = torch.optim.SGD(params, momentum=0.9, weight_decay=0.0005)
+                optimizer = build_phase2_optimizer(model, LEARNING_RATE)
 
-                # FIX: Build a fresh cosine scheduler starting from the current LR.
-                # Do NOT step this scheduler on the same epoch it's created.
+                # FIX: Build fresh cosine scheduler starting from current LR.
+                # Do NOT step this scheduler on the same epoch it is created.
                 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
                     optimizer, T_max=NUM_EPOCHS - UNFREEZE_EPOCH, eta_min=1e-6
                 )
                 phase = 2
-                print(f"Optimizer rebuilt | backbone LR={LEARNING_RATE*0.1:.6f} | head LR={LEARNING_RATE:.6f}")
+                print(f"Optimizer rebuilt | backbone LR={LEARNING_RATE*0.1:.6f} | "
+                      f"cls LR={LEARNING_RATE:.6f} | reg LR={LEARNING_RATE*0.5:.6f}")
 
             # ── Training ─────────────────────────────────────────
             model.train()
@@ -146,6 +179,7 @@ def main():
                 loss_dict = model(images, targets)
                 losses    = sum(loss for loss in loss_dict.values())
 
+                # Safety guard: skip batches with runaway loss
                 if not torch.isfinite(losses) or losses.item() > 10.0:
                     print(f"⚠️  Skipping batch {batch_idx} — loss {losses.item():.2f} exceeds threshold.")
                     optimizer.zero_grad()
@@ -165,7 +199,8 @@ def main():
             avg_epoch_loss = epoch_loss / len(train_loader)
             mlflow.log_metric("avg_loss", avg_epoch_loss, step=epoch)
 
-            # FIX: scheduler.step() happens here, AFTER the epoch, NOT before it's rebuilt
+            # FIX: scheduler.step() fires AFTER the epoch, never on the same
+            # epoch the scheduler is rebuilt (Phase 2 transition is safe)
             scheduler.step()
 
             try:
@@ -176,7 +211,7 @@ def main():
 
             print(f"─── Epoch {epoch+1} done | Loss: {avg_epoch_loss:.4f} | LR: {current_lr:.7f} ───")
 
-            # ── Validation mAP check every 5 epochs ──────────────
+            # ── Validation mAP every 5 epochs ────────────────────
             if (epoch + 1) % 5 == 0 or epoch == NUM_EPOCHS - 1:
                 model.eval()
                 val_metric = MeanAveragePrecision(
@@ -191,12 +226,12 @@ def main():
                         val_outputs = [{k: v.cpu() for k, v in o.items()} for o in val_outputs]
                         val_metric.update(val_outputs, val_targets)
 
-                val_results  = val_metric.compute()
-                current_map  = val_results['map_50'].item()
+                val_results      = val_metric.compute()
+                current_map      = val_results['map_50'].item()
                 current_map_coco = val_results['map'].item()
 
                 mlflow.log_metric("val_mAP_50", current_map, step=epoch)
-                if current_map_coco >= 0:  # torchmetrics returns -1 when metric is undefined
+                if current_map_coco >= 0:
                     mlflow.log_metric("val_mAP_50_95", current_map_coco, step=epoch)
                 print(f"Val mAP@0.5: {current_map:.4f} | mAP@0.5:0.95: {current_map_coco:.4f}")
 
