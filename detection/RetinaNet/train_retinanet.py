@@ -195,8 +195,9 @@ def main():
                 current_map  = val_results['map_50'].item()
                 current_map_coco = val_results['map'].item()
 
-                mlflow.log_metric("val_mAP_50",      current_map,      step=epoch)
-                mlflow.log_metric("val_mAP_50_95",   current_map_coco, step=epoch)
+                mlflow.log_metric("val_mAP_50", current_map, step=epoch)
+                if current_map_coco >= 0:  # torchmetrics returns -1 when metric is undefined
+                    mlflow.log_metric("val_mAP_50_95", current_map_coco, step=epoch)
                 print(f"Val mAP@0.5: {current_map:.4f} | mAP@0.5:0.95: {current_map_coco:.4f}")
 
                 if current_map > best_map:
