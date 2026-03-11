@@ -90,8 +90,8 @@ class TahrirTrafficDataset(Dataset):
                 boxes[:, [1, 3]] = h - boxes[:, [3, 1]]
 
             # 5. Random small rotation (±10°) — simulates slight camera angle drift
-            if random.random() > 0.7:
-                angle  = random.uniform(-10, 10)
+            if random.random() > 0.85:         # 15% chance  
+                angle = random.uniform(-5, 5)  # smaller angle
                 cx, cy = w / 2, h / 2
                 M      = cv2.getRotationMatrix2D((cx, cy), angle, 1.0)
                 img    = cv2.warpAffine(img, M, (w, h)).astype(np.float32)
