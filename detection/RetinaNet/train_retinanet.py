@@ -17,15 +17,25 @@ UNFREEZE_EPOCH = 15           # backbone unfreezes after this epoch
 WARMUP_EPOCHS  = 5            # linear LR warmup before cosine decay begins
 
 # ─── Resume config ─────────────────────────────────────────────────────────────
-# Set RESUME_WEIGHTS to the Kaggle input path of the best checkpoint.
-# Set START_EPOCH to the number of the last completed epoch (0-indexed).
-#   e.g. checkpoint saved at epoch 30 (displayed as "Epoch 30") → START_EPOCH = 30
-# Set RESUME_BEST_MAP to the val mAP@0.5 of that checkpoint so we only
-#   overwrite it when we actually beat it.
-# To train from scratch: set RESUME_WEIGHTS = None and START_EPOCH = 0.
+# START_EPOCH = the last COMPLETED epoch number shown in training output.
+# "Epoch 30 done" → START_EPOCH = 30.   Fresh run → START_EPOCH = 0.
 RESUME_WEIGHTS  = "/kaggle/input/datasets/roaaraafat/sumoflowai-best-weights/retinanet_best.pth"
-START_EPOCH     = 30          # last completed epoch (0-indexed); loop starts at 30
-RESUME_BEST_MAP = 0.3874      # mAP@0.5 of the checkpoint — prevents overwriting with worse
+START_EPOCH     = 30
+RESUME_BEST_MAP = 0.3874      # mAP@0.5 of the checkpoint — only overwrite when beaten
+
+# ─── Where cosine LR should be at START_EPOCH ─────────────────────────────────
+# Compute manually: CosineAnnealingLR with T_max=45, eta_min=1e-6, after 15 steps.
+# epoch 30 is step 15 into Phase 2 (started at epoch 15).
+# lr(t) = eta_min + 0.5*(lr_max - eta_min)*(1 + cos(pi*t/T_max))
+# For backbone: lr_max=0.00005, t=15, T_max=45
+#   = 1e-6 + 0.5*(0.00005-1e-6)*(1 + cos(pi*15/45))
+#   = 1e-6 + 0.5*0.000049*(1 + cos(pi/3))
+#   = 1e-6 + 0.5*0.000049*(1 + 0.5) = 1e-6 + 0.5*0.000049*1.5 ≈ 0.0000378
+# For cls head: lr_max=0.001,    same ratio → ≈ 0.0007560
+# For reg head: lr_max=0.0005,   same ratio → ≈ 0.0003780
+RESUME_LR_BACKBONE = 0.0000378
+RESUME_LR_CLS      = 0.0007560
+RESUME_LR_REG      = 0.0003780
 
 
 # ─── 2. Model ──────────────────────────────────────────────────────────────────
@@ -62,71 +72,54 @@ def get_retinanet_model(num_classes):
 
 # ─── 3. Optimizers ─────────────────────────────────────────────────────────────
 def build_phase1_optimizer(model, lr):
-    """
-    Phase 1: backbone frozen, train heads only.
-    Regression head gets lr*0.5 — regression gradients are ~10x larger on
-    dense frames so a lower LR prevents runaway updates.
-    AdamW replaces SGD — per-parameter adaptive scaling eliminates the
-    momentum-driven spikes that killed runs 1-6.
-    """
+    """Phase 1: backbone frozen, heads only."""
     return torch.optim.AdamW([
         {
             "params": [p for p in model.head.classification_head.parameters()
                        if p.requires_grad],
-            "lr": lr,           # 0.001
+            "lr": lr,        # 0.001
         },
         {
             "params": [p for p in model.head.regression_head.parameters()
                        if p.requires_grad],
-            "lr": lr * 0.5,     # 0.0005
+            "lr": lr * 0.5,  # 0.0005
         },
     ], weight_decay=0.0005)
 
 
-def build_phase2_optimizer(model, lr):
+def build_phase2_optimizer(model, lr,
+                           backbone_lr=None, cls_lr=None, reg_lr=None):
     """
     Phase 2: full fine-tuning with differential LRs.
 
-    KEY CHANGE vs run 7: backbone LR is lr*0.05 (= 0.00005), halved from
-    the previous lr*0.1 (= 0.0001).
+    backbone_lr / cls_lr / reg_lr let the caller inject exact LR values
+    (used on resume to restore the cosine position without stepping the
+    scheduler, which would cause a v_t=0 explosion).
 
-    Root cause of the epoch-32 catastrophic collapse: AdamW accumulates a
-    running average of squared gradients (v_t) per parameter.  After 16
-    Phase-2 epochs at backbone LR=0.0001 some v_t values grew very large.
-    A degenerate batch then produced a gradient whose effective step size
-    (g / sqrt(v_t + eps)) exploded → NaN weights → all subsequent batches
-    skipped.  Halving backbone LR to 0.00005 keeps effective steps in a
-    safe range for the remaining ~30 epochs without sacrificing adaptation.
+    KEY CHANGE vs run 7: default backbone LR is lr*0.05 (= 0.00005), halved
+    from the previous lr*0.1 (= 0.0001) to prevent AdamW v_t accumulation
+    from reaching the explosive threshold that caused the epoch-32 collapse.
     """
+    b_lr = backbone_lr if backbone_lr is not None else lr * 0.05
+    c_lr = cls_lr      if cls_lr      is not None else lr
+    r_lr = reg_lr      if reg_lr      is not None else lr * 0.5
+
     return torch.optim.AdamW([
         {
             "params": model.backbone.parameters(),
-            "lr": lr * 0.05,    # 0.00005 — HALVED from run 7's 0.0001
+            "lr": b_lr,
         },
         {
             "params": [p for p in model.head.classification_head.parameters()
                        if p.requires_grad],
-            "lr": lr,           # 0.001
+            "lr": c_lr,
         },
         {
             "params": [p for p in model.head.regression_head.parameters()
                        if p.requires_grad],
-            "lr": lr * 0.5,     # 0.0005
+            "lr": r_lr,
         },
     ], weight_decay=0.0005)
-
-
-def reset_optimizer_state(optimizer):
-    """
-    Wipe all accumulated AdamW first/second-moment buffers.
-    Called on resume so stale moments from run 7's Phase 2 (which caused
-    the epoch-32 collapse) do not carry into this resumed run.
-    """
-    for group in optimizer.param_groups:
-        for p in group["params"]:
-            if p in optimizer.state:
-                optimizer.state[p] = {}
-    print("🔄 Optimizer moment state reset — fresh AdamW buffers")
 
 
 # ─── 4. Training Loop ──────────────────────────────────────────────────────────
@@ -143,7 +136,7 @@ def main():
     train_loader = get_train_loader(BATCH_SIZE)
     val_loader   = get_val_loader(batch_size=1)
 
-    # ── Phase 1 optimizer + scheduler (always built first) ────────────────────
+    # ── Phase 1 setup (always built first; may be replaced below) ─────────────
     for param in model.backbone.parameters():
         param.requires_grad = False
 
@@ -161,63 +154,84 @@ def main():
         milestones=[WARMUP_EPOCHS]
     )
 
-    best_map = 0.0
-    phase    = 1
+    best_map     = 0.0
+    phase        = 1
+    resume_epoch = False   # flag: first epoch after resume needs gentle treatment
 
     # ── Resume logic ──────────────────────────────────────────────────────────
-    # If resuming, we:
-    #   1. Load weights
-    #   2. Decide if we are in Phase 1 or Phase 2
-    #   3. Rebuild the correct optimizer + scheduler and fast-forward its state
-    #   4. Reset optimizer moments (prevents carrying stale v_t into this run)
+    # IMPORTANT: We do NOT step the scheduler N times to fast-forward it.
+    # Stepping a fresh scheduler (with v_t=0) causes enormous effective steps
+    # on the first real batch — this is what caused the epoch-31 spikes you saw.
+    #
+    # Instead we:
+    #   1. Load weights.
+    #   2. Build Phase-2 optimizer with the exact LR values that cosine decay
+    #      would have produced at START_EPOCH (pre-computed above).
+    #   3. Build a fresh CosineAnnealingLR with last_epoch set to the correct
+    #      position so future scheduler.step() calls continue smoothly.
     if START_EPOCH > 0 and RESUME_WEIGHTS:
         print(f"\n▶  Loading checkpoint: {RESUME_WEIGHTS}")
         state = torch.load(RESUME_WEIGHTS, map_location=device)
         model.load_state_dict(state)
         print(f"   Weights loaded. Resuming from epoch {START_EPOCH + 1}.")
 
-        best_map = RESUME_BEST_MAP
-        print(f"   best_map = {best_map:.4f} (checkpoint value — will only save when beaten)")
+        best_map     = RESUME_BEST_MAP
+        resume_epoch = True
+        print(f"   best_map = {best_map:.4f}")
 
         if START_EPOCH >= UNFREEZE_EPOCH:
-            # ── Resuming inside Phase 2 ──────────────────────────────────────
-            print(f"   START_EPOCH ({START_EPOCH}) ≥ UNFREEZE_EPOCH ({UNFREEZE_EPOCH})")
-            print("   Rebuilding Phase-2 optimizer with halved backbone LR and fresh moments...")
+            print(f"   Resuming inside Phase 2 (epoch {START_EPOCH+1})")
 
             for param in model.backbone.parameters():
                 param.requires_grad = True
 
-            optimizer = build_phase2_optimizer(model, LEARNING_RATE)
-            reset_optimizer_state(optimizer)   # ← critical: wipe stale v_t
+            # Build optimizer with the exact LR values at START_EPOCH.
+            # This skips scheduler fast-forwarding entirely — no v_t=0 explosion.
+            optimizer = build_phase2_optimizer(
+                model, LEARNING_RATE,
+                backbone_lr=RESUME_LR_BACKBONE,
+                cls_lr=RESUME_LR_CLS,
+                reg_lr=RESUME_LR_REG,
+            )
+            print(f"   backbone LR={RESUME_LR_BACKBONE:.7f} | "
+                  f"cls LR={RESUME_LR_CLS:.7f} | "
+                  f"reg LR={RESUME_LR_REG:.7f}  (direct set, no scheduler stepping)")
 
-            # Phase-2 cosine scheduler spans epochs UNFREEZE_EPOCH → NUM_EPOCHS
+            # Build a fresh CosineAnnealingLR whose internal clock is at the
+            # correct position.  Pass last_epoch= steps already done in Phase 2.
+            # The scheduler will then produce the right LR on the next .step() call.
+            epochs_into_phase2 = START_EPOCH - UNFREEZE_EPOCH  # = 15
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
                 optimizer,
-                T_max=NUM_EPOCHS - UNFREEZE_EPOCH,
-                eta_min=1e-6
+                T_max=NUM_EPOCHS - UNFREEZE_EPOCH,  # = 45
+                eta_min=1e-6,
+                last_epoch=epochs_into_phase2,       # ← correct clock position
             )
-            # Fast-forward to the position we were at when training stopped
-            epochs_into_phase2 = START_EPOCH - UNFREEZE_EPOCH
-            for _ in range(epochs_into_phase2):
-                scheduler.step()
-
             phase = 2
-            current_lr = scheduler.get_last_lr()[0]
-            print(f"   Scheduler fast-forwarded {epochs_into_phase2} steps.")
-            print(f"   backbone LR={LEARNING_RATE*0.05:.6f} | "
-                  f"cls LR={LEARNING_RATE:.6f} | "
-                  f"reg LR={LEARNING_RATE*0.5:.6f} | "
-                  f"cosine position LR={current_lr:.7f}\n")
+            print(f"   CosineAnnealingLR last_epoch={epochs_into_phase2} "
+                  f"(next .step() → epoch {epochs_into_phase2+1} of 45)\n")
 
         else:
-            # ── Resuming inside Phase 1 ──────────────────────────────────────
-            for _ in range(START_EPOCH):
-                scheduler.step()
-            reset_optimizer_state(optimizer)
-            print(f"   Phase-1 scheduler fast-forwarded {START_EPOCH} steps.\n")
+            # Resuming inside Phase 1 — rebuild SequentialLR at correct position
+            optimizer = build_phase1_optimizer(model, LEARNING_RATE)
+            warmup_scheduler = torch.optim.lr_scheduler.LinearLR(
+                optimizer, start_factor=0.1, end_factor=1.0,
+                total_iters=WARMUP_EPOCHS
+            )
+            cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=UNFREEZE_EPOCH - WARMUP_EPOCHS, eta_min=1e-5,
+                last_epoch=max(START_EPOCH - WARMUP_EPOCHS, 0)
+            )
+            scheduler = torch.optim.lr_scheduler.SequentialLR(
+                optimizer,
+                schedulers=[warmup_scheduler, cosine_scheduler],
+                milestones=[WARMUP_EPOCHS],
+                last_epoch=START_EPOCH,
+            )
+            print(f"   Phase-1 scheduler resumed at step {START_EPOCH}\n")
 
     # ── MLflow run ────────────────────────────────────────────────────────────
-    run_label = (f"retinanet_v3_resume_ep{START_EPOCH+1}_halved_backbone_lr"
+    run_label = (f"retinanet_v3_resume_ep{START_EPOCH+1}"
                  if START_EPOCH > 0 else "retinanet_v2_adamw_per_head_lr")
 
     with mlflow.start_run(run_name=run_label):
@@ -231,7 +245,7 @@ def main():
             "focal_alpha":              0.35,
             "focal_gamma":              2.5,
             "regression_lr_multiplier": 0.5,
-            "backbone_lr_multiplier":   0.05,   # halved vs run 7
+            "backbone_lr_multiplier":   0.05,
             "resume_from_epoch":        START_EPOCH,
             "resume_best_map":          RESUME_BEST_MAP,
         })
@@ -240,16 +254,13 @@ def main():
 
         for epoch in range(START_EPOCH, NUM_EPOCHS):
 
-            # ── Phase 2 transition (fresh run only — resume handles this above) ──
+            # ── Phase 2 transition (fresh-start run only) ─────────────────────
             if epoch == UNFREEZE_EPOCH and START_EPOCH < UNFREEZE_EPOCH:
                 print("\nUnfreezing backbone for full fine-tuning...")
                 for param in model.backbone.parameters():
                     param.requires_grad = True
 
                 optimizer = build_phase2_optimizer(model, LEARNING_RATE)
-                # No reset needed here — this is a fresh Phase-2 start, no
-                # accumulated moments exist yet.
-
                 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
                     optimizer, T_max=NUM_EPOCHS - UNFREEZE_EPOCH, eta_min=1e-6
                 )
@@ -262,23 +273,38 @@ def main():
             epoch_loss   = 0.0
             batches_used = 0
 
+            # On the very first epoch after resume the AdamW moment buffers are
+            # empty (v_t=0).  The first few batches will see large effective step
+            # sizes until v_t accumulates.  We tighten the spike threshold to 5.0
+            # and add a 10-batch mini-warmup that scales LR from 10% → 100%.
+            is_first_resume_epoch = resume_epoch and (epoch == START_EPOCH)
+            spike_threshold = 5.0 if is_first_resume_epoch else 10.0
+
             for batch_idx, (images, targets) in enumerate(train_loader):
                 images  = [img.to(device) for img in images]
                 targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
+                # Mini-warmup for first 10 batches of the first resume epoch.
+                # Scales each param group LR from 10% → 100% over 10 batches.
+                if is_first_resume_epoch and batch_idx < 10:
+                    scale = 0.1 + 0.09 * batch_idx   # 0.10 → 0.91 → 1.0 at step 10
+                    for group in optimizer.param_groups:
+                        group["lr"] = group["lr"] * scale if batch_idx == 0 else group["lr"] / (0.1 + 0.09 * (batch_idx - 1)) * scale
+
                 loss_dict = model(images, targets)
                 losses    = sum(loss for loss in loss_dict.values())
 
-                # Guard 1 — runaway loss value
-                if not torch.isfinite(losses) or losses.item() > 10.0:
-                    print(f"⚠️  Batch {batch_idx} skipped — loss={losses.item():.2f}")
+                # Guard 1 — runaway loss
+                if not torch.isfinite(losses) or losses.item() > spike_threshold:
+                    print(f"⚠️  Batch {batch_idx} skipped — loss={losses.item():.2f} "
+                          f"(threshold={spike_threshold})")
                     optimizer.zero_grad()
                     continue
 
                 optimizer.zero_grad()
                 losses.backward()
 
-                # Guard 2 — NaN/Inf gradient (new defence against epoch-32 collapse)
+                # Guard 2 — NaN/Inf gradient
                 nan_grad = any(
                     torch.isnan(p.grad).any() or torch.isinf(p.grad).any()
                     for p in model.parameters() if p.grad is not None
@@ -291,6 +317,13 @@ def main():
                 torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=3.0)
                 optimizer.step()
 
+                # Restore correct LR after mini-warmup completes
+                if is_first_resume_epoch and batch_idx == 9:
+                    optimizer.param_groups[0]["lr"] = RESUME_LR_BACKBONE
+                    optimizer.param_groups[1]["lr"] = RESUME_LR_CLS
+                    optimizer.param_groups[2]["lr"] = RESUME_LR_REG
+                    print(f"   Mini-warmup complete — LR restored to cosine position")
+
                 epoch_loss   += losses.item()
                 batches_used += 1
 
@@ -299,15 +332,12 @@ def main():
                           f"Batch [{batch_idx}/{len(train_loader)}] | "
                           f"Loss: {losses.item():.4f}")
 
-            # Guard against all-skipped epoch (NaN weights would give 0/0)
+            resume_epoch = False   # only applies to the very first epoch
+
             avg_epoch_loss = epoch_loss / max(batches_used, 1)
             mlflow.log_metric("avg_loss",     avg_epoch_loss, step=epoch)
             mlflow.log_metric("batches_used", batches_used,   step=epoch)
 
-            # scheduler.step() always fires AFTER the full epoch.
-            # It is never called on the same epoch the scheduler was just built
-            # (Phase-2 transition and resume fast-forward are both handled before
-            # the loop body, so the first step() here is safe).
             scheduler.step()
 
             try:
