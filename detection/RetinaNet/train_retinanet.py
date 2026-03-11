@@ -12,7 +12,7 @@ from dataloader import get_train_loader, get_val_loader  # get_val_loader now us
 NUM_CLASSES    = 8
 BATCH_SIZE     = 2
 NUM_EPOCHS     = 60
-LEARNING_RATE  = 0.001
+LEARNING_RATE = 0.0005
 SAVE_PATH      = "detection/RetinaNet/retinanet_best.pth"
 UNFREEZE_EPOCH = 15      # backbone unfreezes after this epoch
 WARMUP_EPOCHS  = 3       # linear LR warmup before cosine decay begins
@@ -153,7 +153,7 @@ def main():
 
                 optimizer.zero_grad()
                 losses.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=3.0)
                 optimizer.step()
 
                 epoch_loss += losses.item()
