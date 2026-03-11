@@ -15,7 +15,7 @@ NUM_EPOCHS     = 60
 LEARNING_RATE = 0.0005
 SAVE_PATH      = "detection/RetinaNet/retinanet_best.pth"
 UNFREEZE_EPOCH = 15      # backbone unfreezes after this epoch
-WARMUP_EPOCHS  = 3       # linear LR warmup before cosine decay begins
+WARMUP_EPOCHS  = 5       # linear LR warmup before cosine decay begins
 
 # ─── 2. Model Initialization ───────────────────────────────────
 def get_retinanet_model(num_classes):
