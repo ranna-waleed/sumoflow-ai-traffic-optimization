@@ -5,7 +5,7 @@ import torchvision
 import argparse
 from torchvision.models.detection.retinanet import RetinaNetClassificationHead
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
-from dataloader import get_test_loader   # FIX: use the held-out test split
+from dataloader import get_test_loader
 import os
 
 # ─── 1. Configuration ──────────────────────────────────────────
@@ -14,8 +14,8 @@ BATCH_SIZE   = 1
 WEIGHTS_PATH = "detection/RetinaNet/retinanet_best.pth"
 
 IDX_TO_CLASS = {
-    1: 'car', 2: 'bus', 3: 'truck', 4: 'motorcycle',
-    5: 'taxi', 6: 'microbus', 7: 'bicycle'
+    0: 'car', 1: 'bus', 2: 'truck', 3: 'motorcycle',
+    4: 'taxi', 5: 'microbus', 6: 'bicycle'
 }
 
 # ─── 2. Model Initialization ───────────────────────────────────
@@ -29,6 +29,21 @@ def get_retinanet_model(num_classes):
         num_classes=num_classes
     )
     return model
+
+
+def remap_labels_to_zero_indexed(items):
+    """
+    torchmetrics MeanAveragePrecision expects 0-indexed class labels.
+    Our dataset uses 1-indexed labels (car=1 ... bicycle=7).
+    Subtract 1 from every label so the metric can match them correctly.
+    """
+    remapped = []
+    for item in items:
+        remapped.append({
+            **item,
+            "labels": item["labels"] - 1
+        })
+    return remapped
 
 
 # ─── 3. Evaluation Loop ────────────────────────────────────────
@@ -53,12 +68,11 @@ def main():
     model.to(device)
     model.eval()
 
-    # FIX: evaluate on the true held-out test set
     test_loader = get_test_loader(BATCH_SIZE)
 
     metric = MeanAveragePrecision(
         box_format='xyxy',
-        class_metrics=True,                          # enables per-class AP
+        class_metrics=True,
         max_detection_thresholds=[1, 10, 300]
     )
 
@@ -80,9 +94,14 @@ def main():
             total_inference_time += (end_time - start_time)
             num_images           += len(images)
 
-            # No confidence filtering here — metric sweeps all thresholds internally
             targets = [{k: v.cpu() for k, v in t.items()} for t in targets]
             outputs = [{k: v.cpu() for k, v in o.items()} for o in outputs]
+
+            # FIX: remap 1-indexed labels → 0-indexed so torchmetrics
+            # can correctly match predictions to ground-truth classes.
+            targets = remap_labels_to_zero_indexed(targets)
+            outputs = remap_labels_to_zero_indexed(outputs)
+
             metric.update(outputs, targets)
 
             if batch_idx % 10 == 0:
@@ -97,7 +116,7 @@ def main():
 
     map_50         = mAP_results['map_50'].item()
     map_50_95      = mAP_results['map'].item()
-    mar_300        = mAP_results['mar_300'].item()   # Mean Average Recall @ 300 dets/img
+    mar_300        = mAP_results['mar_300'].item()
     map_per_class  = mAP_results.get('map_per_class', None)
 
     print("\n══════════════════════════════════")
@@ -112,7 +131,7 @@ def main():
     if map_per_class is not None:
         print("\n  Per-class AP@0.5:")
         for idx, ap in enumerate(mAP_results['map_per_class']):
-            class_name = IDX_TO_CLASS.get(idx + 1, f"class_{idx+1}")
+            class_name = IDX_TO_CLASS.get(idx, f"class_{idx}")
             print(f"    {class_name:<12}: {ap.item():.4f}")
     print("══════════════════════════════════\n")
 
@@ -121,16 +140,16 @@ def main():
 
     with mlflow.start_run(run_id=args.run_id):
         mlflow.log_metrics({
-            "test_FPS":               fps,
+            "test_FPS":                fps,
             "test_Inference_Time_sec": avg_inference_time,
-            "test_mAP_0.5":           map_50,
-            "test_mAP_0.5_0.95":      map_50_95,
-            "test_MAR_at_300":        mar_300,
+            "test_mAP_0.5":            map_50,
+            "test_mAP_0.5_0.95":       map_50_95,
+            "test_MAR_at_300":         mar_300,
         })
 
         if map_per_class is not None:
             for idx, ap in enumerate(mAP_results['map_per_class']):
-                class_name = IDX_TO_CLASS.get(idx + 1, f"class_{idx+1}")
+                class_name = IDX_TO_CLASS.get(idx, f"class_{idx}")
                 mlflow.log_metric(f"test_AP_{class_name}", ap.item())
 
         print("✅ Evaluation metrics logged to MLflow run:", args.run_id)
