@@ -37,6 +37,12 @@ RESUME_LR_BACKBONE = 0.0000378
 RESUME_LR_CLS      = 0.0007560
 RESUME_LR_REG      = 0.0003780
 
+# Phase-2 peak LRs (lr_max in the cosine formula, = LR at epoch UNFREEZE_EPOCH).
+# CosineAnnealingLR uses these as 'initial_lr' when last_epoch > 0.
+PHASE2_BASE_LR_BACKBONE = LEARNING_RATE * 0.05   # 0.00005
+PHASE2_BASE_LR_CLS      = LEARNING_RATE           # 0.001
+PHASE2_BASE_LR_REG      = LEARNING_RATE * 0.5     # 0.0005
+
 
 # ─── 2. Model ──────────────────────────────────────────────────────────────────
 def get_retinanet_model(num_classes):
@@ -161,14 +167,28 @@ def main():
     # ── Resume logic ──────────────────────────────────────────────────────────
     # IMPORTANT: We do NOT step the scheduler N times to fast-forward it.
     # Stepping a fresh scheduler (with v_t=0) causes enormous effective steps
-    # on the first real batch — this is what caused the epoch-31 spikes you saw.
+    # on the first real batch — this is what caused the epoch-31 spikes.
     #
     # Instead we:
     #   1. Load weights.
     #   2. Build Phase-2 optimizer with the exact LR values that cosine decay
     #      would have produced at START_EPOCH (pre-computed above).
-    #   3. Build a fresh CosineAnnealingLR with last_epoch set to the correct
-    #      position so future scheduler.step() calls continue smoothly.
+    #   3. Stamp 'initial_lr' (= Phase-2 lr_max) into every param group BEFORE
+    #      constructing CosineAnnealingLR with last_epoch > 0.
+    #
+    #      WHY: PyTorch's _LRScheduler.__init__ reads 'initial_lr' from each
+    #      param group to compute the closed-form LR at last_epoch. On a freshly
+    #      built AdamW that has never had .step() called, 'initial_lr' does not
+    #      exist yet, causing:
+    #        KeyError: "param 'initial_lr' is not specified in param_groups[0]
+    #                   when resuming an optimizer"
+    #
+    #      The value must be the Phase-2 PEAK lr (lr_max), not the already-
+    #      decayed resume value — the scheduler applies the cosine formula on
+    #      top of initial_lr to arrive at the correct decayed LR automatically.
+    #
+    #   4. Build CosineAnnealingLR with last_epoch= correct position so future
+    #      scheduler.step() calls continue from the right point.
     if START_EPOCH > 0 and RESUME_WEIGHTS:
         print(f"\n▶  Loading checkpoint: {RESUME_WEIGHTS}")
         state = torch.load(RESUME_WEIGHTS, map_location=device)
@@ -197,9 +217,16 @@ def main():
                   f"cls LR={RESUME_LR_CLS:.7f} | "
                   f"reg LR={RESUME_LR_REG:.7f}  (direct set, no scheduler stepping)")
 
-            # Build a fresh CosineAnnealingLR whose internal clock is at the
-            # correct position.  Pass last_epoch= steps already done in Phase 2.
-            # The scheduler will then produce the right LR on the next .step() call.
+            # FIX: stamp 'initial_lr' = Phase-2 peak LR into each param group
+            # before constructing CosineAnnealingLR with last_epoch > 0.
+            phase2_base_lrs = [
+                PHASE2_BASE_LR_BACKBONE,   # 0.00005
+                PHASE2_BASE_LR_CLS,        # 0.001
+                PHASE2_BASE_LR_REG,        # 0.0005
+            ]
+            for group, base_lr in zip(optimizer.param_groups, phase2_base_lrs):
+                group["initial_lr"] = base_lr
+
             epochs_into_phase2 = START_EPOCH - UNFREEZE_EPOCH  # = 15
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
                 optimizer,
@@ -208,8 +235,15 @@ def main():
                 last_epoch=epochs_into_phase2,       # ← correct clock position
             )
             phase = 2
+
+            # Sanity-check: scheduler LRs should match our pre-computed values.
+            actual_lrs = scheduler.get_last_lr()
             print(f"   CosineAnnealingLR last_epoch={epochs_into_phase2} "
-                  f"(next .step() → epoch {epochs_into_phase2+1} of 45)\n")
+                  f"(next .step() → epoch {epochs_into_phase2+1} of 45)")
+            print(f"   Scheduler LR check → backbone={actual_lrs[0]:.7f} "
+                  f"cls={actual_lrs[1]:.7f} reg={actual_lrs[2]:.7f}")
+            print(f"   Expected           → backbone={RESUME_LR_BACKBONE:.7f} "
+                  f"cls={RESUME_LR_CLS:.7f} reg={RESUME_LR_REG:.7f}\n")
 
         else:
             # Resuming inside Phase 1 — rebuild SequentialLR at correct position
