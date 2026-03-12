@@ -36,6 +36,10 @@ def remap_labels_to_zero_indexed(items):
     torchmetrics MeanAveragePrecision expects 0-indexed class labels.
     Our dataset uses 1-indexed labels (car=1 ... bicycle=7).
     Subtract 1 from every label so the metric can match them correctly.
+
+    Also removed max_detection_thresholds from the metric constructor —
+    torchmetrics 1.8.2 has a bug where that parameter causes class_metrics
+    to return -1.0 for all classes regardless of predictions.
     """
     remapped = []
     for item in items:
@@ -63,18 +67,21 @@ def main():
             f"Train the model first, or verify WEIGHTS_PATH."
         )
 
-    model.load_state_dict(torch.load(WEIGHTS_PATH, map_location=device, weights_only=True))
+    model.load_state_dict(torch.load(WEIGHTS_PATH, map_location=device,
+                                     weights_only=True))
     print(f"Loaded weights from {WEIGHTS_PATH}")
     model.to(device)
     model.eval()
 
     test_loader = get_test_loader(BATCH_SIZE)
 
+    # NOTE: max_detection_thresholds removed — breaks class_metrics in
+    # torchmetrics 1.8.2, causing all per-class APs to return -1.0.
     metric = MeanAveragePrecision(
         box_format='xyxy',
         class_metrics=True,
-        max_detection_thresholds=[1, 10, 300]
     )
+    metric.warn_on_many_detections = False  # suppress >100 detections warning
 
     total_inference_time = 0.0
     num_images           = 0
@@ -97,8 +104,7 @@ def main():
             targets = [{k: v.cpu() for k, v in t.items()} for t in targets]
             outputs = [{k: v.cpu() for k, v in o.items()} for o in outputs]
 
-            # FIX: remap 1-indexed labels → 0-indexed so torchmetrics
-            # can correctly match predictions to ground-truth classes.
+            # Remap 1-indexed labels → 0-indexed for torchmetrics
             targets = remap_labels_to_zero_indexed(targets)
             outputs = remap_labels_to_zero_indexed(outputs)
 
@@ -114,10 +120,10 @@ def main():
     fps                = 1.0 / avg_inference_time
     mAP_results        = metric.compute()
 
-    map_50         = mAP_results['map_50'].item()
-    map_50_95      = mAP_results['map'].item()
-    mar_300        = mAP_results['mar_300'].item()
-    map_per_class  = mAP_results.get('map_per_class', None)
+    map_50        = mAP_results['map_50'].item()
+    map_50_95     = mAP_results['map'].item()
+    mar_100       = mAP_results['mar_100'].item()
+    map_per_class = mAP_results.get('map_per_class', None)
 
     print("\n══════════════════════════════════")
     print("  Evaluation Results (Test Set)  ")
@@ -125,12 +131,12 @@ def main():
     print(f"  FPS:                    {fps:.2f}")
     print(f"  Inference Time:         {avg_inference_time:.4f} sec/image")
     print(f"  mAP@0.5:                {map_50:.4f}")
-    print(f"  mAP@0.5:0.95 (COCO):    {map_50_95:.4f}   ← strict metric")
-    print(f"  Mean Avg Recall @300:   {mar_300:.4f}   ← COCO MAR, not plain recall")
+    print(f"  mAP@0.5:0.95 (COCO):    {map_50_95:.4f}")
+    print(f"  Mean Avg Recall @100:   {mar_100:.4f}")
 
     if map_per_class is not None:
         print("\n  Per-class AP@0.5:")
-        for idx, ap in enumerate(mAP_results['map_per_class']):
+        for idx, ap in enumerate(map_per_class):
             class_name = IDX_TO_CLASS.get(idx, f"class_{idx}")
             print(f"    {class_name:<12}: {ap.item():.4f}")
     print("══════════════════════════════════\n")
@@ -144,11 +150,11 @@ def main():
             "test_Inference_Time_sec": avg_inference_time,
             "test_mAP_0.5":            map_50,
             "test_mAP_0.5_0.95":       map_50_95,
-            "test_MAR_at_300":         mar_300,
+            "test_MAR_at_100":         mar_100,
         })
 
         if map_per_class is not None:
-            for idx, ap in enumerate(mAP_results['map_per_class']):
+            for idx, ap in enumerate(map_per_class):
                 class_name = IDX_TO_CLASS.get(idx, f"class_{idx}")
                 mlflow.log_metric(f"test_AP_{class_name}", ap.item())
 
