@@ -10,13 +10,13 @@
 
 ---
 
-##  Project Overview
+## Project Overview
 
 SUMOFlow AI is a graduation project that integrates AI-based vehicle detection with the SUMO traffic simulator to optimize traffic light timing at El-Tahrir Square, Cairo. The system detects 7 vehicle classes in real time, simulates 4 rush hour profiles, and uses optimizer to reduce congestion and CO2 emissions.
 
 ---
 
-##  System Architecture
+## System Architecture
 
 ```text
 1- INPUT LAYER
@@ -58,7 +58,7 @@ SUMOFlow AI is a graduation project that integrates AI-based vehicle detection w
 
 ---
 
-##  Rush Hour Simulation Results
+## Rush Hour Simulation Results
 
 | Profile | Time | Peak Vehicles | Avg Wait | Peak CO2 |
 | --- | --- | --- | --- | --- |
@@ -69,7 +69,7 @@ SUMOFlow AI is a graduation project that integrates AI-based vehicle detection w
 
 ---
 
-##  Project Structure
+## Project Structure
 
 ```text
 sumoflow-ai-traffic-optimization/
@@ -129,7 +129,7 @@ sumoflow-ai-traffic-optimization/
 
 ---
 
-##  Installation & Setup
+## Installation & Setup
 
 **Step 1: Clone the repository**
 
@@ -168,7 +168,7 @@ python -c "import traci; import cv2; import ultralytics; print('All packages ins
 
 ---
 
-##  Running the Simulation
+## Running the Simulation
 
 **Run a specific rush hour profile:**
 
@@ -203,7 +203,7 @@ python simulation/rush_hour/compare_profiles.py
 
 ---
 
-##  Training the Models
+## Training the Models
 
 **YOLOv8s (Google Colab recommended):**
 
@@ -228,7 +228,7 @@ python detection/RetinaNet/train.py
 
 ---
 
-##  Running the Frontend
+## Running the Frontend
 
 ```bash
 cd frontend
@@ -272,7 +272,7 @@ Includes:
 
 ---
 
-##  Project Status
+## Project Status
 
 | Component | Status |
 | --- | --- |
