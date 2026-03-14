@@ -1,5 +1,5 @@
 outs:
-- md5: 83c4e1435eb6f115312d779b011643fe
-  size: 129708874
+- md5: 8018563d2c4697be8cf9bb6bc2c534ba
+  size: 129711023
   hash: md5
   path: retinanet_best.pth
