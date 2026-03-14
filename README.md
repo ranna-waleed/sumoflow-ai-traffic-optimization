@@ -168,7 +168,7 @@ python -c "import traci; import cv2; import ultralytics; print('All packages ins
 
 ---
 
-## Running the Simulation
+## Running the Simulation
 
 **Run a specific rush hour profile:**
 
