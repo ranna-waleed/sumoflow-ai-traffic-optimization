@@ -1,124 +1,287 @@
-import React from "react";
-import { Maximize2, ZoomIn, ZoomOut, Camera, Play, Square } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Play, Square, Pause, Maximize2, Activity } from "lucide-react";
+import {
+  ResponsiveContainer, LineChart, Line, AreaChart, Area,
+  XAxis, YAxis, Tooltip, CartesianGrid,
+} from "recharts";
 
-const detectionClasses = [
-  { name: "Car", count: 142, color: "#94a3b8" },
-  { name: "Taxi", count: 48, color: "#eab308" },
-  { name: "Bus", count: 22, color: "#f97316" },
-  { name: "Microbus", count: 24, color: "#38bdf8" },
-  { name: "Truck", count: 8, color: "#a78bfa" },
-  { name: "Motorcycle", count: 3, color: "#ef4444" },
+const API = "http://127.0.0.1:8000";
+
+const CLASS_COLORS = {
+  car:        "#94a3b8",
+  taxi:       "#eab308",
+  bus:        "#f97316",
+  microbus:   "#38bdf8",
+  truck:      "#a78bfa",
+  motorcycle: "#ef4444",
+  bicycle:    "#34d399",
+};
+
+const chartStyle = {
+  tooltip: {
+    backgroundColor: "#161c24",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "10px",
+    fontSize: "12px",
+  },
+};
+
+const LSTM_DIRS = [
+  { dir: "North", color: "#38bdf8" },
+  { dir: "South", color: "#34d399" },
+  { dir: "East",  color: "#f97316" },
+  { dir: "West",  color: "#a78bfa" },
 ];
-
-const lstmPredictions = [
-  { dir: "North", value: 30, color: "#38bdf8" },
-  { dir: "South", value: 12, color: "#34d399" },
-  { dir: "East", value: 18, color: "#f97316" },
-  { dir: "West", value: 6, color: "#a78bfa" },
-];
-
-const maxVehicles = 247;
 
 function LiveSimulation() {
+  const [simRunning, setSimRunning] = useState(false);
+  const [simPaused, setSimPaused]   = useState(false);
+  const [simStep, setSimStep]       = useState(0);
+  const [liveData, setLiveData]     = useState(null);
+  const [liveChart, setLiveChart]   = useState([]);
+  const [frame, setFrame]           = useState(null);
+  const [simError, setSimError]     = useState(null);
+  const [simLoading, setSimLoading] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  const pollRef = useRef(null);
+
+  // Poll every 2s
+  useEffect(() => {
+    if (simRunning && !simPaused) {
+      pollRef.current = setInterval(async () => {
+        try {
+          const res  = await fetch(`${API}/api/sumo/step`, {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ steps: 30 }),
+          });
+          const data = await res.json();
+
+          if (data.latest) {
+            const s = data.latest;
+            setSimStep(s.step);
+            setLiveData(s);
+            setLiveChart(prev => [...prev, {
+              t:        s.step,
+              vehicles: s.vehicles,
+              wait:     s.avg_wait_s,
+              co2:      Math.round(s.total_co2_mg / 1000),
+            }].slice(-40));
+            if (s.simulation_done) handleStop();
+          }
+          if (data.image) setFrame(data.image);
+
+        } catch {
+          setSimError("Lost connection to simulation");
+          handleStop();
+        }
+      }, 2000);
+    }
+    return () => clearInterval(pollRef.current);
+  }, [simRunning, simPaused]);
+
+  const handleStart = async () => {
+    setSimError(null);
+    setSimLoading(true);
+    setLiveChart([]);
+    setFrame(null);
+    try {
+      const res  = await fetch(`${API}/api/sumo/start`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ profile: "custom", gui: true }),
+      });
+      const data = await res.json();
+      if (data.status === "started" || data.status === "already_running") {
+        setSimRunning(true);
+        setSimPaused(false);
+        setSimStep(0);
+      } else {
+        setSimError(data.detail || "Failed to start");
+      }
+    } catch {
+      setSimError("Cannot reach backend — is it running?");
+    }
+    setSimLoading(false);
+  };
+
+  const handleStop = async () => {
+    clearInterval(pollRef.current);
+    setSimRunning(false);
+    setSimPaused(false);
+    setLiveData(null);
+    setFrame(null);
+    try { await fetch(`${API}/api/sumo/stop`, { method: "POST" }); } catch {}
+  };
+
+  const handlePause = () => setSimPaused(p => !p);
+
+  // Vehicle composition for bars
+  const typeCounts  = liveData?.type_counts || {};
+  const totalVehicles = Object.values(typeCounts).reduce((a, b) => a + b, 0) || 1;
+
   return (
     <div className="space-y-6 pt-4">
-      {/* Page header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-white">Live Simulation</h1>
           <p className="text-sm text-[#94a3b8] mt-0.5">
-            Real-time SUMO stream with YOLO detection
+            Custom traffic — OD-based routes · El-Tahrir Square
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Live
+          <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border ${
+            simRunning ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                       : "bg-white/5 border-white/10 text-[#94a3b8]"}`}>
+            <span className={`w-2 h-2 rounded-full ${simRunning ? "bg-emerald-400 animate-pulse" : "bg-[#64748b]"}`} />
+            {simRunning ? (simPaused ? "Paused" : "Live") : "Stopped"}
           </span>
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-medium">
-            Epoch: 42/50
+          <span className="px-3 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-mono">
+            config_file.sumocfg
           </span>
-          <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-medium transition-colors">
-            <Play className="w-4 h-4" strokeWidth={2.5} />
-            Run Simulation
-          </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/40 text-sm font-medium transition-colors">
-            <Square className="w-4 h-4" strokeWidth={2.5} />
-            Stop
-          </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-[#94a3b8] border border-white/10 text-sm font-medium transition-colors">
-            <Camera className="w-4 h-4" strokeWidth={2.5} />
-            Capture Frame
-          </button>
+          {simRunning && (
+            <span className="px-3 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-mono">
+              Step: {simStep.toLocaleString()}
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_320px] gap-6">
-        {/* Simulation viewport */}
+      {simError && (
+        <div className="px-4 py-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-300 text-sm">
+          ⚠ {simError}
+        </div>
+      )}
+
+      {/* Top row — viewport + right panel */}
+      <div className="grid lg:grid-cols-[1fr_300px] gap-6">
+
+        {/* Viewport */}
         <div className="card p-5 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 className="text-sm font-semibold text-white">Simulation Viewport</h2>
-            <div className="flex gap-2">
-              <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[#94a3b8] border border-white/10 text-xs font-medium transition-colors">
-                <ZoomIn className="w-3.5 h-3.5" />
-                Zoom In
-              </button>
-              <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[#94a3b8] border border-white/10 text-xs font-medium transition-colors">
-                <ZoomOut className="w-3.5 h-3.5" />
-                Zoom Out
-              </button>
-              <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-xs font-medium transition-colors">
-                <Maximize2 className="w-3.5 h-3.5" />
-                Fullscreen
-              </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-indigo-400" />
+              <h2 className="text-sm font-semibold text-white">Simulation Viewport</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              {frame && (
+                <button onClick={() => setFullscreen(true)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[#94a3b8] border border-white/10 text-xs">
+                  <Maximize2 className="w-3.5 h-3.5" /> Fullscreen
+                </button>
+              )}
+              <span className="text-xs font-mono text-[#64748b]">SUMO + TraCI</span>
             </div>
           </div>
 
-          <div className="relative viewport-frame scanline h-80 lg:h-96 flex items-center justify-center rounded-xl overflow-hidden">
-            <div className="absolute top-4 right-4 z-20">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono font-medium">
-                YOLO Detection On
-              </span>
-            </div>
-            <div className="relative z-10 text-center px-6">
-              <p className="text-base font-semibold text-indigo-300 mb-1">SUMO-GUI Stream</p>
-              <p className="text-sm text-[#94a3b8] mb-2">
-                Real-time El-Tahrir Square with vehicle detection overlays
-              </p>
-              <p className="text-xs text-[#64748b] font-mono">
-                Frame: 12,406 · Model: YOLOv8 · Threshold: 0.45
-              </p>
-            </div>
+          {/* Buttons */}
+          <div className="flex gap-2">
+            <button onClick={handleStart} disabled={simRunning || simLoading}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                simRunning || simLoading ? "bg-indigo-500/30 text-indigo-300 cursor-not-allowed"
+                : "bg-indigo-500 hover:bg-indigo-400 text-white"}`}>
+              <Play className="w-4 h-4" strokeWidth={2.5} />
+              {simLoading ? "Starting..." : "Start"}
+            </button>
+            <button onClick={handleStop} disabled={!simRunning}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                !simRunning ? "bg-red-500/10 text-red-300/40 border-red-500/20 cursor-not-allowed"
+                : "bg-red-500/20 hover:bg-red-500/30 text-red-400 border-red-500/40"}`}>
+              <Square className="w-4 h-4" strokeWidth={2.5} /> Stop
+            </button>
+            <button onClick={handlePause} disabled={!simRunning}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                !simRunning ? "bg-white/5 text-[#94a3b8]/40 border-white/10 cursor-not-allowed"
+                : simPaused ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                : "bg-white/5 hover:bg-white/10 text-[#94a3b8] border-white/10"}`}>
+              <Pause className="w-4 h-4" strokeWidth={2.5} />
+              {simPaused ? "Resume" : "Pause"}
+            </button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-[#94a3b8]">
-            <span>Step: <span className="text-indigo-400">1,240</span></span>
-            <span>Time: <span className="text-indigo-400">620s</span></span>
-            <span>Vehicles: <span className="text-indigo-400">247</span></span>
-            <span>FPS: <span className="text-indigo-400">126</span></span>
+          {/* Frame */}
+          <div className="relative h-72 md:h-80 rounded-xl overflow-hidden bg-[#0a0f16]">
+            {frame ? (
+              <>
+                <img src={frame} alt="SUMO" className="w-full h-full object-cover" />
+                <div className="absolute top-3 left-3 flex gap-2 z-10">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/70 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    {simPaused ? "PAUSED" : "LIVE"}
+                  </span>
+                  <span className="px-2.5 py-1 rounded-lg bg-black/70 border border-indigo-500/30 text-indigo-300 text-[11px] font-mono">
+                    Step {simStep.toLocaleString()}
+                  </span>
+                </div>
+                {liveData && (
+                  <div className="absolute bottom-3 left-3 right-3 z-10 flex justify-between">
+                    <span className="px-2.5 py-1 rounded-lg bg-black/70 text-[11px] font-mono text-white">
+                      🚗 {liveData.vehicles} vehicles
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-black/70 text-[11px] font-mono text-white">
+                      ⏱ {liveData.avg_wait_s}s avg wait
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-black/70 text-[11px] font-mono text-white">
+                      💨 {(liveData.total_co2_mg / 1000).toFixed(0)}k mg CO₂
+                    </span>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="scanline h-full flex items-center justify-center">
+                <div className="text-center px-6">
+                  {simRunning ? (
+                    <>
+                      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                      <p className="text-sm text-indigo-300">Loading SUMO-GUI...</p>
+                      <p className="text-xs text-[#64748b] mt-1">First frame incoming</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-base font-semibold text-indigo-300 mb-1">Custom Traffic Simulation</p>
+                      <p className="text-sm text-[#94a3b8] mb-2">OD-based routes · El-Tahrir Square</p>
+                      <p className="text-xs text-[#64748b]">Press <span className="text-indigo-400">Start</span> to run</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Right column */}
+        {/* Right panel */}
         <div className="space-y-4">
+          {/* Vehicle Classes */}
           <div className="card p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-white">Detection Results</h3>
-              <span className="text-[11px] font-mono text-[#64748b]">Max: {maxVehicles}</span>
+              <h3 className="text-sm font-semibold text-white">Vehicle Classes</h3>
+              {liveData && (
+                <span className="text-[11px] font-mono text-[#64748b]">
+                  Total: {liveData.vehicles}
+                </span>
+              )}
             </div>
             <div className="space-y-3">
-              {detectionClasses.map((cls) => {
-                const pct = Math.min(100, (cls.count / maxVehicles) * 100);
+              {Object.entries(CLASS_COLORS).map(([cls, color]) => {
+                const count = typeCounts[cls] || 0;
+                const pct   = totalVehicles > 0 ? Math.round((count / totalVehicles) * 100) : 0;
                 return (
-                  <div key={cls.name}>
+                  <div key={cls}>
                     <div className="flex items-center justify-between text-xs mb-1.5">
-                      <span className="text-[#e2e8f0]">{cls.name}</span>
-                      <span className="font-mono text-[#94a3b8]">{cls.count}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                        <span className="text-[#e2e8f0] capitalize">{cls}</span>
+                      </div>
+                      <span className="font-mono text-[#94a3b8]">
+                        {simRunning ? `${count} (${pct}%)` : "—"}
+                      </span>
                     </div>
-                    <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                    <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%`, backgroundColor: cls.color }}
+                        style={{ width: simRunning ? `${pct}%` : "0%", backgroundColor: color }}
                       />
                     </div>
                   </div>
@@ -127,30 +290,115 @@ function LiveSimulation() {
             </div>
           </div>
 
+          {/* LSTM Prediction */}
           <div className="card p-5">
             <div className="mb-4">
               <h3 className="text-sm font-semibold text-white">LSTM Prediction</h3>
-              <p className="text-xs text-[#94a3b8] mt-0.5">Next 30 seconds</p>
+              <p className="text-xs text-[#94a3b8] mt-0.5">Next 30 seconds — by direction</p>
             </div>
             <div className="space-y-2">
-              {lstmPredictions.map((row) => (
-                <div
-                  key={row.dir}
-                  className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 border border-white/5"
-                >
+              {LSTM_DIRS.map(row => (
+                <div key={row.dir}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 border border-white/5">
                   <span className="text-xs font-medium text-[#e2e8f0]">{row.dir}</span>
-                  <span
-                    className="text-sm font-mono font-medium"
-                    style={{ color: row.color }}
-                  >
-                    {row.value} vehicles
-                  </span>
+                  <span className="text-xs text-amber-400 font-mono">⏳ In Development</span>
                 </div>
               ))}
             </div>
+            <p className="mt-3 text-[11px] text-amber-400 bg-amber-500/10 rounded-lg px-3 py-2">
+              ⚠ LSTM predictor under development
+            </p>
           </div>
         </div>
       </div>
+
+      {/* Live Charts */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Vehicles */}
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-white">Vehicles</h3>
+            <span className="text-xs font-mono text-[#64748b]">{simRunning ? "● Live" : "No data"}</span>
+          </div>
+          <div className="h-40">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={liveChart} margin={{ left: -20, right: 4, top: 4, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gV" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#818cf8" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#818cf8" stopOpacity={0}   />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="t" tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
+                <YAxis tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
+                <Tooltip contentStyle={chartStyle.tooltip} formatter={v => [v, "Vehicles"]} />
+                <Area type="monotone" dataKey="vehicles" stroke="#818cf8" strokeWidth={2} fill="url(#gV)" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Wait time */}
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-white">Avg Wait Time</h3>
+            <span className="text-xs font-mono text-[#64748b]">{simRunning ? "● Live · seconds" : "No data"}</span>
+          </div>
+          <div className="h-40">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={liveChart} margin={{ left: -20, right: 4, top: 4, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gW" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#34d399" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#34d399" stopOpacity={0}   />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="t" tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
+                <YAxis tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
+                <Tooltip contentStyle={chartStyle.tooltip} formatter={v => [`${v}s`, "Avg Wait"]} />
+                <Area type="monotone" dataKey="wait" stroke="#34d399" strokeWidth={2} fill="url(#gW)" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* CO2 */}
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-white">CO₂ Emissions</h3>
+            <span className="text-xs font-mono text-[#64748b]">{simRunning ? "● Live · ×1000 mg" : "No data"}</span>
+          </div>
+          <div className="h-40">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={liveChart} margin={{ left: -20, right: 4, top: 4, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gC" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#fbbf24" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}   />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="t" tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
+                <YAxis tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
+                <Tooltip contentStyle={chartStyle.tooltip} formatter={v => [`${v}k mg`, "CO₂"]} />
+                <Area type="monotone" dataKey="co2" stroke="#fbbf24" strokeWidth={2} fill="url(#gC)" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Fullscreen */}
+      {fullscreen && frame && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+          onClick={() => setFullscreen(false)}>
+          <img src={frame} alt="fullscreen" className="max-w-full max-h-full rounded-xl" />
+          <button className="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20"
+            onClick={() => setFullscreen(false)}>✕ Close</button>
+        </div>
+      )}
     </div>
   );
 }

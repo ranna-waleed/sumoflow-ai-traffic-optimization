@@ -187,3 +187,6 @@ zipp==3.23.0
 pytorch-cuda=12.4
 pycocotools
 pytorch
+fastapi==0.115.0
+uvicorn==0.30.6
+python-multipart==0.0.9
