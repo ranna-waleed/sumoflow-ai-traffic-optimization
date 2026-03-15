@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Play, Square, Pause, Maximize2, Activity } from "lucide-react";
+import { Play, Square, Pause, Maximize2, Activity, Brain } from "lucide-react";
 import {
-  ResponsiveContainer, LineChart, Line, AreaChart, Area,
+  ResponsiveContainer, AreaChart, Area,
   XAxis, YAxis, Tooltip, CartesianGrid,
 } from "recharts";
 
@@ -17,6 +17,13 @@ const CLASS_COLORS = {
   bicycle:    "#34d399",
 };
 
+const DIR_COLORS = {
+  North: "#38bdf8",
+  South: "#34d399",
+  East:  "#f97316",
+  West:  "#a78bfa",
+};
+
 const chartStyle = {
   tooltip: {
     backgroundColor: "#161c24",
@@ -25,13 +32,6 @@ const chartStyle = {
     fontSize: "12px",
   },
 };
-
-const LSTM_DIRS = [
-  { dir: "North", color: "#38bdf8" },
-  { dir: "South", color: "#34d399" },
-  { dir: "East",  color: "#f97316" },
-  { dir: "West",  color: "#a78bfa" },
-];
 
 function LiveSimulation() {
   const [simRunning, setSimRunning] = useState(false);
@@ -44,9 +44,15 @@ function LiveSimulation() {
   const [simLoading, setSimLoading] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
 
-  const pollRef = useRef(null);
+  // LSTM state
+  const [lstmPred, setLstmPred]         = useState(null);
+  const [lstmStatus, setLstmStatus]     = useState("waiting");  // waiting | collecting | ready | error
+  const [lstmHistoryLen, setLstmHistoryLen] = useState(0);
 
-  // Poll every 2s
+  const pollRef = useRef(null);
+  const lstmRef = useRef(null);
+
+  // Poll simulation every 2s
   useEffect(() => {
     if (simRunning && !simPaused) {
       pollRef.current = setInterval(async () => {
@@ -57,21 +63,18 @@ function LiveSimulation() {
             body:    JSON.stringify({ steps: 30 }),
           });
           const data = await res.json();
-
           if (data.latest) {
             const s = data.latest;
             setSimStep(s.step);
             setLiveData(s);
             setLiveChart(prev => [...prev, {
-              t:        s.step,
-              vehicles: s.vehicles,
-              wait:     s.avg_wait_s,
-              co2:      Math.round(s.total_co2_mg / 1000),
+              t: s.step, vehicles: s.vehicles,
+              wait: s.avg_wait_s,
+              co2:  Math.round(s.total_co2_mg / 1000),
             }].slice(-40));
             if (s.simulation_done) handleStop();
           }
           if (data.image) setFrame(data.image);
-
         } catch {
           setSimError("Lost connection to simulation");
           handleStop();
@@ -81,11 +84,44 @@ function LiveSimulation() {
     return () => clearInterval(pollRef.current);
   }, [simRunning, simPaused]);
 
+  // Poll LSTM every 4s
+  useEffect(() => {
+    if (simRunning && !simPaused) {
+      lstmRef.current = setInterval(async () => {
+        try {
+          const res  = await fetch(`${API}/api/lstm/predict/live`);
+          const data = await res.json();
+
+          if (data.status === "collecting") {
+            setLstmStatus("collecting");
+            setLstmHistoryLen(data.history_len || 0);
+          } else if (data.status === "ok" && data.next_30s) {
+            setLstmStatus("ready");
+            setLstmPred(data.next_30s);
+            setLstmHistoryLen(data.history_len || 0);
+          }
+        } catch {
+          setLstmStatus("error");
+        }
+      }, 4000);
+    } else {
+      clearInterval(lstmRef.current);
+      if (!simRunning) {
+        setLstmStatus("waiting");
+        setLstmPred(null);
+        setLstmHistoryLen(0);
+      }
+    }
+    return () => clearInterval(lstmRef.current);
+  }, [simRunning, simPaused]);
+
   const handleStart = async () => {
     setSimError(null);
     setSimLoading(true);
     setLiveChart([]);
     setFrame(null);
+    setLstmPred(null);
+    setLstmStatus("collecting");
     try {
       const res  = await fetch(`${API}/api/sumo/start`, {
         method:  "POST",
@@ -108,18 +144,28 @@ function LiveSimulation() {
 
   const handleStop = async () => {
     clearInterval(pollRef.current);
+    clearInterval(lstmRef.current);
     setSimRunning(false);
     setSimPaused(false);
     setLiveData(null);
     setFrame(null);
+    setLstmPred(null);
+    setLstmStatus("waiting");
     try { await fetch(`${API}/api/sumo/stop`, { method: "POST" }); } catch {}
   };
 
-  const handlePause = () => setSimPaused(p => !p);
+  const handlePause = () => {
+    setSimPaused(p => !p);
+    if (!simPaused) clearInterval(lstmRef.current);
+  };
 
-  // Vehicle composition for bars
-  const typeCounts  = liveData?.type_counts || {};
+  const typeCounts    = liveData?.type_counts || {};
   const totalVehicles = Object.values(typeCounts).reduce((a, b) => a + b, 0) || 1;
+
+  // Max prediction for bar scaling
+  const maxPred = lstmPred
+    ? Math.max(...Object.values(lstmPred), 1)
+    : 1;
 
   return (
     <div className="space-y-6 pt-4">
@@ -128,7 +174,7 @@ function LiveSimulation() {
         <div>
           <h1 className="text-xl font-semibold text-white">Live Simulation</h1>
           <p className="text-sm text-[#94a3b8] mt-0.5">
-            Custom traffic — OD-based routes · El-Tahrir Square
+            Custom traffic · OD-based routes · El-Tahrir Square
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -155,7 +201,7 @@ function LiveSimulation() {
         </div>
       )}
 
-      {/* Top row — viewport + right panel */}
+      {/* Top row */}
       <div className="grid lg:grid-cols-[1fr_300px] gap-6">
 
         {/* Viewport */}
@@ -176,7 +222,6 @@ function LiveSimulation() {
             </div>
           </div>
 
-          {/* Buttons */}
           <div className="flex gap-2">
             <button onClick={handleStart} disabled={simRunning || simLoading}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -201,7 +246,6 @@ function LiveSimulation() {
             </button>
           </div>
 
-          {/* Frame */}
           <div className="relative h-72 md:h-80 rounded-xl overflow-hidden bg-[#0a0f16]">
             {frame ? (
               <>
@@ -224,7 +268,7 @@ function LiveSimulation() {
                       ⏱ {liveData.avg_wait_s}s avg wait
                     </span>
                     <span className="px-2.5 py-1 rounded-lg bg-black/70 text-[11px] font-mono text-white">
-                      💨 {(liveData.total_co2_mg / 1000).toFixed(0)}k mg CO₂
+                      💨 {(liveData.total_co2_mg/1000).toFixed(0)}k mg CO₂
                     </span>
                   </div>
                 )}
@@ -236,7 +280,6 @@ function LiveSimulation() {
                     <>
                       <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                       <p className="text-sm text-indigo-300">Loading SUMO-GUI...</p>
-                      <p className="text-xs text-[#64748b] mt-1">First frame incoming</p>
                     </>
                   ) : (
                     <>
@@ -253,14 +296,13 @@ function LiveSimulation() {
 
         {/* Right panel */}
         <div className="space-y-4">
+
           {/* Vehicle Classes */}
           <div className="card p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-white">Vehicle Classes</h3>
               {liveData && (
-                <span className="text-[11px] font-mono text-[#64748b]">
-                  Total: {liveData.vehicles}
-                </span>
+                <span className="text-[11px] font-mono text-[#64748b]">Total: {liveData.vehicles}</span>
               )}
             </div>
             <div className="space-y-3">
@@ -279,10 +321,8 @@ function LiveSimulation() {
                       </span>
                     </div>
                     <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: simRunning ? `${pct}%` : "0%", backgroundColor: color }}
-                      />
+                      <div className="h-full rounded-full transition-all duration-500"
+                        style={{ width: simRunning ? `${pct}%` : "0%", backgroundColor: color }} />
                     </div>
                   </div>
                 );
@@ -290,104 +330,115 @@ function LiveSimulation() {
             </div>
           </div>
 
-          {/* LSTM Prediction */}
+          {/* LSTM Prediction — REAL DATA */}
           <div className="card p-5">
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-white">LSTM Prediction</h3>
-              <p className="text-xs text-[#94a3b8] mt-0.5">Next 30 seconds — by direction</p>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <Brain className="w-4 h-4 text-indigo-400" />
+                <h3 className="text-sm font-semibold text-white">BILSTM Prediction</h3>
+              </div>
+              <span className={`text-[11px] font-mono px-2 py-0.5 rounded ${
+                lstmStatus === "ready"      ? "bg-emerald-500/15 text-emerald-400" :
+                lstmStatus === "collecting" ? "bg-amber-500/15 text-amber-400" :
+                                              "bg-white/5 text-[#64748b]"
+              }`}>
+                {lstmStatus === "ready"      ? "● Live" :
+                 lstmStatus === "collecting" ? `${lstmHistoryLen}/60` :
+                 lstmStatus === "error"      ? "Error" : "Waiting"}
+              </span>
             </div>
-            <div className="space-y-2">
-              {LSTM_DIRS.map(row => (
-                <div key={row.dir}
-                  className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 border border-white/5">
-                  <span className="text-xs font-medium text-[#e2e8f0]">{row.dir}</span>
-                  <span className="text-xs text-amber-400 font-mono">⏳ In Development</span>
-                </div>
-              ))}
-            </div>
-            <p className="mt-3 text-[11px] text-amber-400 bg-amber-500/10 rounded-lg px-3 py-2">
-              ⚠ LSTM predictor under development
+            <p className="text-xs text-[#94a3b8] mb-4">
+              Predicted vehicles — next 30 seconds
             </p>
+
+            {lstmStatus === "waiting" && (
+              <p className="text-xs text-[#64748b] text-center py-4">
+                Start simulation to see predictions
+              </p>
+            )}
+
+            {lstmStatus === "collecting" && (
+              <div className="space-y-2">
+                <p className="text-xs text-amber-400 text-center">
+                  Collecting history... {lstmHistoryLen}/60 steps
+                </p>
+                <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                  <div className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                    style={{ width: `${(lstmHistoryLen / 60) * 100}%` }} />
+                </div>
+              </div>
+            )}
+
+            {lstmStatus === "ready" && lstmPred && (
+              <div className="space-y-3">
+                {Object.entries(DIR_COLORS).map(([dir, color]) => {
+                  const key   = dir.toLowerCase();
+                  const count = lstmPred[key] || 0;
+                  const pct   = Math.round((count / maxPred) * 100);
+                  return (
+                    <div key={dir}>
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className="text-[#e2e8f0] font-medium">{dir}</span>
+                        <span className="font-mono" style={{ color }}>
+                          {count} vehicles
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-700"
+                          style={{ width: `${pct}%`, backgroundColor: color }} />
+                      </div>
+                    </div>
+                  );
+                })}
+                <p className="text-[11px] text-[#64748b] mt-2 text-center">
+                  MSE: 0.0023 · BiLSTM 2×128 · MAE: 3.15
+                </p>
+              </div>
+            )}
+
+            {lstmStatus === "error" && (
+              <p className="text-xs text-red-400 text-center py-2">
+                ⚠ LSTM prediction failed
+              </p>
+            )}
           </div>
         </div>
       </div>
 
       {/* Live Charts */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Vehicles */}
-        <div className="card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-white">Vehicles</h3>
-            <span className="text-xs font-mono text-[#64748b]">{simRunning ? "● Live" : "No data"}</span>
+        {[
+          { key: "vehicles", label: "Vehicles",       unit: "count",        color: "#818cf8", id: "gV", fmt: v => [v, "Vehicles"] },
+          { key: "wait",     label: "Avg Wait Time",  unit: "seconds",      color: "#34d399", id: "gW", fmt: v => [`${v}s`, "Avg Wait"] },
+          { key: "co2",      label: "CO₂ Emissions",  unit: "×1000 mg",     color: "#fbbf24", id: "gC", fmt: v => [`${v}k mg`, "CO₂"] },
+        ].map(chart => (
+          <div key={chart.key} className="card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-white">{chart.label}</h3>
+              <span className="text-xs font-mono text-[#64748b]">
+                {simRunning ? "● Live · " : ""}{chart.unit}
+              </span>
+            </div>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={liveChart} margin={{ left: -20, right: 4, top: 4, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id={chart.id} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor={chart.color} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={chart.color} stopOpacity={0}   />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="t" tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
+                  <YAxis tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
+                  <Tooltip contentStyle={chartStyle.tooltip} formatter={chart.fmt} />
+                  <Area type="monotone" dataKey={chart.key} stroke={chart.color}
+                    strokeWidth={2} fill={`url(#${chart.id})`} dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={liveChart} margin={{ left: -20, right: 4, top: 4, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gV" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#818cf8" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#818cf8" stopOpacity={0}   />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="t" tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
-                <YAxis tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
-                <Tooltip contentStyle={chartStyle.tooltip} formatter={v => [v, "Vehicles"]} />
-                <Area type="monotone" dataKey="vehicles" stroke="#818cf8" strokeWidth={2} fill="url(#gV)" dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Wait time */}
-        <div className="card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-white">Avg Wait Time</h3>
-            <span className="text-xs font-mono text-[#64748b]">{simRunning ? "● Live · seconds" : "No data"}</span>
-          </div>
-          <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={liveChart} margin={{ left: -20, right: 4, top: 4, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gW" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#34d399" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#34d399" stopOpacity={0}   />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="t" tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
-                <YAxis tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
-                <Tooltip contentStyle={chartStyle.tooltip} formatter={v => [`${v}s`, "Avg Wait"]} />
-                <Area type="monotone" dataKey="wait" stroke="#34d399" strokeWidth={2} fill="url(#gW)" dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* CO2 */}
-        <div className="card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-white">CO₂ Emissions</h3>
-            <span className="text-xs font-mono text-[#64748b]">{simRunning ? "● Live · ×1000 mg" : "No data"}</span>
-          </div>
-          <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={liveChart} margin={{ left: -20, right: 4, top: 4, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gC" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#fbbf24" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}   />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="t" tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
-                <YAxis tick={{ fill: "#64748b", fontSize: 9 }} tickLine={false} />
-                <Tooltip contentStyle={chartStyle.tooltip} formatter={v => [`${v}k mg`, "CO₂"]} />
-                <Area type="monotone" dataKey="co2" stroke="#fbbf24" strokeWidth={2} fill="url(#gC)" dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Fullscreen */}

@@ -1,8 +1,5 @@
 # backend/services/sumo_runner.py
-import os
-import sys
-import time
-import base64
+import os, sys, time, base64
 import traci
 
 if "SUMO_HOME" in os.environ:
@@ -19,7 +16,7 @@ PROFILES = {
     "evening_rush": os.path.join(MAPS_DIR, "config_evening_rush.sumocfg"),
     "midday":       os.path.join(MAPS_DIR, "config_midday.sumocfg"),
     "night":        os.path.join(MAPS_DIR, "config_night.sumocfg"),
-    "custom":       os.path.join(MAPS_DIR, "config_file.sumocfg"),   # ← custom traffic
+    "custom":       os.path.join(MAPS_DIR, "config_file.sumocfg"),
 }
 
 _running       = False
@@ -30,15 +27,26 @@ _port          = 8813
 _view_id       = None
 _last_ss_error = None
 
+# ── LSTM history buffer — stores last 60 timestep features ───
+_lstm_history  = []   # list of {north, south, east, west, total, avg_speed}
+
+
+def _angle_to_direction(angle: float) -> str:
+    a = float(angle) % 360
+    if a < 45 or a >= 315:  return "north"
+    if 45  <= a < 135:      return "east"
+    if 135 <= a < 225:      return "south"
+    return "west"
+
 
 def start(profile: str = "morning_rush", gui: bool = True) -> dict:
-    global _running, _profile, _step, _gui, _view_id
+    global _running, _profile, _step, _gui, _view_id, _lstm_history
 
     if _running:
         return {"status": "already_running", "profile": _profile, "step": _step}
 
     if profile not in PROFILES:
-        raise ValueError(f"Unknown profile '{profile}'. Choose from: {list(PROFILES.keys())}")
+        raise ValueError(f"Unknown profile '{profile}'.")
 
     config_path = PROFILES[profile]
     if not os.path.exists(config_path):
@@ -53,17 +61,17 @@ def start(profile: str = "morning_rush", gui: bool = True) -> dict:
     sumo_cmd = [
         binary, "-c", config_path,
         "--no-warnings", "true",
-        "--start",
-        "--delay", "50",
+        "--start", "--delay", "50",
         "--window-size", "1920,1080",
         "--window-pos", "0,0",
     ]
 
     traci.start(sumo_cmd, port=_port)
-    _running = True
-    _profile = profile
-    _gui     = gui
-    _step    = 0
+    _running      = True
+    _profile      = profile
+    _gui          = gui
+    _step         = 0
+    _lstm_history = []
 
     time.sleep(2.0)
 
@@ -71,42 +79,35 @@ def start(profile: str = "morning_rush", gui: bool = True) -> dict:
         try:
             views    = traci.gui.getIDList()
             _view_id = views[0] if views else "View #0"
-            print(f"[SUMO] Available views: {views}")
-            print(f"[SUMO] Using view: {_view_id}")
-
             traci.gui.setSize(_view_id, 1920, 1080)
-
             boundary = traci.simulation.getNetBoundary()
-            min_x, min_y = boundary[0]
-            max_x, max_y = boundary[1]
-            center_x = (min_x + max_x) / 2
-            center_y = (min_y + max_y) / 2
-            traci.gui.setOffset(_view_id, center_x, center_y)
+            cx = (boundary[0][0] + boundary[1][0]) / 2
+            cy = (boundary[0][1] + boundary[1][1]) / 2
+            traci.gui.setOffset(_view_id, cx, cy)
             traci.gui.setZoom(_view_id, 1500)
-
-            print(f"[SUMO] Auto-zoomed: center=({center_x:.1f},{center_y:.1f}) zoom=1500")
-
+            print(f"[SUMO] View={_view_id}, zoomed to center")
         except Exception as e:
             _view_id = "View #0"
-            print(f"[SUMO] GUI setup failed: {e}")
+            print(f"[SUMO] GUI setup: {e}")
 
-    return {"status": "started", "profile": profile, "gui": gui, "view_id": _view_id}
+    return {"status": "started", "profile": profile, "gui": gui}
 
 
 def stop() -> dict:
-    global _running, _profile, _step, _gui, _view_id
+    global _running, _profile, _step, _gui, _view_id, _lstm_history
     if not _running:
         return {"status": "not_running"}
     try:
         traci.close()
     except Exception:
         pass
-    _running  = False
-    _step     = 0
-    _gui      = False
-    _view_id  = None
-    profile   = _profile
-    _profile  = None
+    _running      = False
+    _step         = 0
+    _gui          = False
+    _view_id      = None
+    _lstm_history = []
+    profile       = _profile
+    _profile      = None
     return {"status": "stopped", "profile": profile}
 
 
@@ -122,52 +123,71 @@ def run_steps_with_screenshot(n: int = 30) -> dict:
         traci.simulationStep()
         _step += 1
 
+    # Screenshot
     image_b64 = None
     if _gui and _view_id:
         try:
             traci.gui.screenshot(_view_id, FRAME_PATH, width=960, height=600)
             time.sleep(0.3)
-            if os.path.exists(FRAME_PATH):
-                size = os.path.getsize(FRAME_PATH)
-                if size > 0:
-                    with open(FRAME_PATH, "rb") as f:
-                        image_b64 = "data:image/jpeg;base64," + base64.b64encode(f.read()).decode("utf-8")
-                    print(f"[screenshot] done: length={len(image_b64)}")
-                else:
-                    _last_ss_error = "File empty"
-            else:
-                _last_ss_error = "File not written"
+            if os.path.exists(FRAME_PATH) and os.path.getsize(FRAME_PATH) > 0:
+                with open(FRAME_PATH, "rb") as f:
+                    image_b64 = "data:image/jpeg;base64," + base64.b64encode(f.read()).decode()
+                print(f"[screenshot] done length={len(image_b64)}")
         except Exception as e:
             _last_ss_error = str(e)
-            print(f"[screenshot] failed: {e}")
+            print(f"[screenshot] with error: {e}")
 
     state = _get_state_safe()
+
+    # Update LSTM history
+    _lstm_history.append({
+        "north":     state.get("direction_counts", {}).get("north", 0),
+        "south":     state.get("direction_counts", {}).get("south", 0),
+        "east":      state.get("direction_counts", {}).get("east",  0),
+        "west":      state.get("direction_counts", {}).get("west",  0),
+        "total":     state["vehicles"],
+        "avg_speed": state.get("avg_speed", 0.0),
+    })
+    # Keep last 120 for LSTM
+    if len(_lstm_history) > 120:
+        _lstm_history.pop(0)
 
     return {
         "steps_run":        n,
         "latest":           state,
         "image":            image_b64,
+        "lstm_history_len": len(_lstm_history),
         "screenshot_error": _last_ss_error if image_b64 is None else None,
     }
+
+
+def get_lstm_history() -> list:
+    return _lstm_history
 
 
 def _get_state_safe() -> dict:
     vehicle_ids  = traci.vehicle.getIDList()
     num_vehicles = len(vehicle_ids)
-    waiting_times, co2_values, type_counts = [], [], {}
+    waiting_times, co2_values, speeds = [], [], []
+    type_counts = {}
+    dir_counts  = {"north": 0, "south": 0, "east": 0, "west": 0}
 
     for v in vehicle_ids:
         try:
             waiting_times.append(traci.vehicle.getWaitingTime(v))
             co2_values.append(traci.vehicle.getCO2Emission(v))
+            speeds.append(traci.vehicle.getSpeed(v))
             readable = _map_type(traci.vehicle.getTypeID(v))
             type_counts[readable] = type_counts.get(readable, 0) + 1
+            angle = traci.vehicle.getAngle(v)
+            dir_counts[_angle_to_direction(angle)] += 1
         except traci.exceptions.TraCIException:
             continue
 
     avg_wait  = round(sum(waiting_times) / len(waiting_times), 2) if waiting_times else 0.0
     max_wait  = round(max(waiting_times), 2) if waiting_times else 0.0
     total_co2 = round(sum(co2_values), 2)
+    avg_speed = round(sum(speeds) / len(speeds), 2) if speeds else 0.0
 
     tl_states = {}
     for tl in traci.trafficlight.getIDList():
@@ -177,16 +197,18 @@ def _get_state_safe() -> dict:
             continue
 
     return {
-        "step":            _step,
-        "profile":         _profile,
-        "time_s":          round(_step * 1.0, 1),
-        "vehicles":        num_vehicles,
-        "avg_wait_s":      avg_wait,
-        "max_wait_s":      max_wait,
-        "total_co2_mg":    total_co2,
-        "type_counts":     type_counts,
-        "traffic_lights":  tl_states,
-        "simulation_done": traci.simulation.getMinExpectedNumber() == 0,
+        "step":             _step,
+        "profile":          _profile,
+        "time_s":           round(_step * 1.0, 1),
+        "vehicles":         num_vehicles,
+        "avg_wait_s":       avg_wait,
+        "max_wait_s":       max_wait,
+        "total_co2_mg":     total_co2,
+        "avg_speed":        avg_speed,
+        "type_counts":      type_counts,
+        "direction_counts": dir_counts,
+        "traffic_lights":   tl_states,
+        "simulation_done":  traci.simulation.getMinExpectedNumber() == 0,
     }
 
 
@@ -205,6 +227,7 @@ def get_status() -> dict:
         "step":                  _step,
         "gui":                   _gui,
         "view_id":               _view_id,
+        "lstm_history_len":      len(_lstm_history),
         "last_screenshot_error": _last_ss_error,
     }
 

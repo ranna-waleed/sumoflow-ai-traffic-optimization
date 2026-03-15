@@ -61,7 +61,7 @@ def detect_image(image_bytes: bytes, conf: float = CONFIDENCE_THRESHOLD) -> dict
     """
     model = get_model()
 
-    # Convert bytes → PIL Image → numpy array
+    # Convert bytes , PIL Image , numpy array
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     img_array = np.array(image)
     img_w, img_h = image.size
