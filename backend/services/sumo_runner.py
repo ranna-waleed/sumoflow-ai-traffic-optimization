@@ -72,24 +72,22 @@ def start(profile: str = "morning_rush", gui: bool = True) -> dict:
             views    = traci.gui.getIDList()
             _view_id = views[0] if views else "View #0"
             print(f"[SUMO] Available views: {views}")
-            print(f"[SUMO] Using view: {_view_id}")
-
-            traci.gui.setSize(_view_id, 1920, 1080)
-
-            boundary = traci.simulation.getNetBoundary()
-            min_x, min_y = boundary[0]
-            max_x, max_y = boundary[1]
-            center_x = (min_x + max_x) / 2
-            center_y = (min_y + max_y) / 2
-            traci.gui.setOffset(_view_id, center_x, center_y)
-            traci.gui.setZoom(_view_id, 1500)
-
-            print(f"[SUMO] Auto-zoomed: center=({center_x:.1f},{center_y:.1f}) zoom=1500")
-
+            print(f"[SUMO] View: {_view_id}")
         except Exception as e:
             _view_id = "View #0"
-            print(f"[SUMO] GUI setup failed: {e}")
+            print(f"[SUMO] View error: {e}")
 
+        # Zoom separately so one failure doesn't break everything
+        try:
+            # El-Tahrir Square exact SUMO coordinates
+            tahrir_x = 3694.5
+            tahrir_y = 1539.5
+
+            traci.gui.setOffset(_view_id, tahrir_x, tahrir_y)
+            traci.gui.setZoom(_view_id, 1500)   # start with 1500, adjust if needed
+            print(f"[SUMO] Zoomed to Tahrir Square ({tahrir_x}, {tahrir_y}) zoom=1500")
+        except Exception as e:
+            print(f"[SUMO] Zoom error: {e}")
     return {"status": "started", "profile": profile, "gui": gui, "view_id": _view_id}
 
 
@@ -210,10 +208,10 @@ def get_status() -> dict:
 
 def _map_type(vtype_id: str) -> str:
     v = vtype_id.lower()
+    if "motorcycle" in v: return "motorcycle"
+    if "microbus"   in v: return "microbus"  
     if "bus"        in v: return "bus"
     if "truck"      in v: return "truck"
     if "taxi"       in v: return "taxi"
-    if "microbus"   in v: return "microbus"
-    if "motorcycle" in v: return "motorcycle"
     if "bicycle"    in v: return "bicycle"
     return "car"
