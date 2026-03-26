@@ -1,0 +1,1334 @@
+{
+  "profile": "morning_rush",
+  "total_steps": 165,
+  "avg_wait_s": 9.518396836165572,
+  "avg_co2_mg": 197070.72900597658,
+  "action_log": [
+    {
+      "step": 30,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 0.643,
+      "co2_mg": 119629.3,
+      "reward": -0.6429
+    },
+    {
+      "step": 50,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 2.152,
+      "co2_mg": 97269.2,
+      "reward": -1.5093
+    },
+    {
+      "step": 70,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.968,
+      "co2_mg": 107654.5,
+      "reward": 0.1839
+    },
+    {
+      "step": 90,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 6.393,
+      "co2_mg": 129405.5,
+      "reward": -4.4246
+    },
+    {
+      "step": 110,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 6.46,
+      "co2_mg": 103110.1,
+      "reward": -0.0671
+    },
+    {
+      "step": 140,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 7.458,
+      "co2_mg": 144511.5,
+      "reward": -0.9983
+    },
+    {
+      "step": 170,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 7.438,
+      "co2_mg": 124012.7,
+      "reward": 0.02
+    },
+    {
+      "step": 190,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 3.443,
+      "co2_mg": 148455.2,
+      "reward": 3.9957
+    },
+    {
+      "step": 220,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 5.65,
+      "co2_mg": 113882.9,
+      "reward": -2.2074
+    },
+    {
+      "step": 250,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 5.275,
+      "co2_mg": 141296.7,
+      "reward": 0.3746
+    },
+    {
+      "step": 270,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 3.366,
+      "co2_mg": 181619.8,
+      "reward": 1.9092
+    },
+    {
+      "step": 290,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 3.615,
+      "co2_mg": 121982.6,
+      "reward": -0.2492
+    },
+    {
+      "step": 310,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 4.415,
+      "co2_mg": 97131.5,
+      "reward": -0.8
+    },
+    {
+      "step": 330,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 6.831,
+      "co2_mg": 98517.8,
+      "reward": -2.4154
+    },
+    {
+      "step": 350,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.217,
+      "co2_mg": 130132.0,
+      "reward": 5.6134
+    },
+    {
+      "step": 370,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 3.703,
+      "co2_mg": 160658.5,
+      "reward": -2.4853
+    },
+    {
+      "step": 390,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 3.938,
+      "co2_mg": 141291.8,
+      "reward": -0.2358
+    },
+    {
+      "step": 410,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 7.282,
+      "co2_mg": 123706.3,
+      "reward": -3.3432
+    },
+    {
+      "step": 430,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.645,
+      "co2_mg": 138471.1,
+      "reward": 5.6365
+    },
+    {
+      "step": 450,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 5.86,
+      "co2_mg": 116036.2,
+      "reward": -4.2145
+    },
+    {
+      "step": 470,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 2.5,
+      "co2_mg": 147147.7,
+      "reward": 3.3596
+    },
+    {
+      "step": 490,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 4.565,
+      "co2_mg": 174763.6,
+      "reward": -2.0652
+    },
+    {
+      "step": 510,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 3.5,
+      "co2_mg": 186034.3,
+      "reward": 1.0652
+    },
+    {
+      "step": 530,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 7.473,
+      "co2_mg": 136959.8,
+      "reward": -3.973
+    },
+    {
+      "step": 550,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 6.494,
+      "co2_mg": 143578.9,
+      "reward": 0.9791
+    },
+    {
+      "step": 580,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 7.471,
+      "co2_mg": 122613.8,
+      "reward": -0.9768
+    },
+    {
+      "step": 610,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 7.412,
+      "co2_mg": 173601.8,
+      "reward": 0.0588
+    },
+    {
+      "step": 630,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.688,
+      "co2_mg": 169032.1,
+      "reward": 5.7235
+    },
+    {
+      "step": 660,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 8.243,
+      "co2_mg": 143320.3,
+      "reward": -6.5549
+    },
+    {
+      "step": 690,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 10.547,
+      "co2_mg": 161492.7,
+      "reward": -2.3034
+    },
+    {
+      "step": 710,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 2.625,
+      "co2_mg": 159856.0,
+      "reward": 7.9217
+    },
+    {
+      "step": 730,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 4.398,
+      "co2_mg": 165481.8,
+      "reward": -1.7726
+    },
+    {
+      "step": 750,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.206,
+      "co2_mg": 142140.3,
+      "reward": 3.1917
+    },
+    {
+      "step": 770,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 3.967,
+      "co2_mg": 114451.7,
+      "reward": -2.7613
+    },
+    {
+      "step": 790,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.055,
+      "co2_mg": 176716.7,
+      "reward": 2.9124
+    },
+    {
+      "step": 810,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 4.779,
+      "co2_mg": 146836.4,
+      "reward": -3.7246
+    },
+    {
+      "step": 830,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.328,
+      "co2_mg": 127939.1,
+      "reward": 3.4513
+    },
+    {
+      "step": 850,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 3.896,
+      "co2_mg": 173809.2,
+      "reward": -2.568
+    },
+    {
+      "step": 870,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 2.671,
+      "co2_mg": 136496.4,
+      "reward": 1.2249
+    },
+    {
+      "step": 890,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 7.188,
+      "co2_mg": 132530.1,
+      "reward": -4.5163
+    },
+    {
+      "step": 910,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.863,
+      "co2_mg": 169090.4,
+      "reward": 5.325
+    },
+    {
+      "step": 940,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 7.441,
+      "co2_mg": 115909.3,
+      "reward": -5.5787
+    },
+    {
+      "step": 970,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 4.179,
+      "co2_mg": 177507.9,
+      "reward": 3.2626
+    },
+    {
+      "step": 990,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 3.587,
+      "co2_mg": 141901.5,
+      "reward": 0.5919
+    },
+    {
+      "step": 1010,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 4.452,
+      "co2_mg": 117341.5,
+      "reward": -0.8654
+    },
+    {
+      "step": 1030,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.659,
+      "co2_mg": 159169.4,
+      "reward": 2.7935
+    },
+    {
+      "step": 1050,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 5.62,
+      "co2_mg": 178794.4,
+      "reward": -3.9612
+    },
+    {
+      "step": 1070,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 5.492,
+      "co2_mg": 100110.8,
+      "reward": 0.1279
+    },
+    {
+      "step": 1090,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 7.679,
+      "co2_mg": 182177.5,
+      "reward": -2.1877
+    },
+    {
+      "step": 1110,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.403,
+      "co2_mg": 133801.2,
+      "reward": 6.2767
+    },
+    {
+      "step": 1130,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 6.429,
+      "co2_mg": 111617.5,
+      "reward": -5.0258
+    },
+    {
+      "step": 1150,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.31,
+      "co2_mg": 169102.9,
+      "reward": 5.119
+    },
+    {
+      "step": 1170,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 7.104,
+      "co2_mg": 136959.1,
+      "reward": -5.7944
+    },
+    {
+      "step": 1190,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 2.861,
+      "co2_mg": 152963.4,
+      "reward": 4.2431
+    },
+    {
+      "step": 1220,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 7.747,
+      "co2_mg": 185928.7,
+      "reward": -4.8866
+    },
+    {
+      "step": 1250,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 9.6,
+      "co2_mg": 160530.0,
+      "reward": -1.8526
+    },
+    {
+      "step": 1270,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 2.573,
+      "co2_mg": 184968.1,
+      "reward": 7.027
+    },
+    {
+      "step": 1290,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 4.952,
+      "co2_mg": 152904.7,
+      "reward": -2.3788
+    },
+    {
+      "step": 1310,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 3.427,
+      "co2_mg": 164842.3,
+      "reward": 1.525
+    },
+    {
+      "step": 1330,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 4.968,
+      "co2_mg": 172630.5,
+      "reward": -1.5416
+    },
+    {
+      "step": 1350,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.542,
+      "co2_mg": 151045.6,
+      "reward": 3.4263
+    },
+    {
+      "step": 1370,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 3.198,
+      "co2_mg": 159575.5,
+      "reward": -1.6554
+    },
+    {
+      "step": 1390,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 3.073,
+      "co2_mg": 187725.0,
+      "reward": 0.1244
+    },
+    {
+      "step": 1410,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 7.899,
+      "co2_mg": 139136.2,
+      "reward": -4.8256
+    },
+    {
+      "step": 1430,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 3.867,
+      "co2_mg": 142981.9,
+      "reward": 4.0321
+    },
+    {
+      "step": 1450,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 5.258,
+      "co2_mg": 161282.8,
+      "reward": -1.3918
+    },
+    {
+      "step": 1470,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 6.733,
+      "co2_mg": 161900.3,
+      "reward": -1.4749
+    },
+    {
+      "step": 1490,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 14.18,
+      "co2_mg": 126828.9,
+      "reward": -7.4464
+    },
+    {
+      "step": 1510,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 20.528,
+      "co2_mg": 185715.9,
+      "reward": -6.348
+    },
+    {
+      "step": 1540,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 12.68,
+      "co2_mg": 162803.4,
+      "reward": 7.8478
+    },
+    {
+      "step": 1560,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 5.178,
+      "co2_mg": 201527.3,
+      "reward": 7.5018
+    },
+    {
+      "step": 1590,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 9.311,
+      "co2_mg": 192439.9,
+      "reward": -4.1325
+    },
+    {
+      "step": 1620,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 15.074,
+      "co2_mg": 157550.3,
+      "reward": -5.7638
+    },
+    {
+      "step": 1640,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 9.848,
+      "co2_mg": 219966.0,
+      "reward": 5.226
+    },
+    {
+      "step": 1670,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 10.25,
+      "co2_mg": 186829.1,
+      "reward": -0.4015
+    },
+    {
+      "step": 1690,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 8.133,
+      "co2_mg": 216582.7,
+      "reward": 2.1167
+    },
+    {
+      "step": 1710,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 6.637,
+      "co2_mg": 219826.4,
+      "reward": 1.4962
+    },
+    {
+      "step": 1730,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 14.717,
+      "co2_mg": 147111.3,
+      "reward": -8.08
+    },
+    {
+      "step": 1750,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 17.495,
+      "co2_mg": 215807.0,
+      "reward": -2.7779
+    },
+    {
+      "step": 1770,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 22.47,
+      "co2_mg": 167942.3,
+      "reward": -4.975
+    },
+    {
+      "step": 1800,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 18.043,
+      "co2_mg": 154754.0,
+      "reward": 4.4274
+    },
+    {
+      "step": 1820,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 15.204,
+      "co2_mg": 228235.5,
+      "reward": 2.8388
+    },
+    {
+      "step": 1840,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 4.0,
+      "co2_mg": 179278.9,
+      "reward": 11.2037
+    },
+    {
+      "step": 1860,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 7.604,
+      "co2_mg": 190882.1,
+      "reward": -3.6036
+    },
+    {
+      "step": 1880,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 6.438,
+      "co2_mg": 212374.7,
+      "reward": 1.1655
+    },
+    {
+      "step": 1900,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 6.5,
+      "co2_mg": 205452.0,
+      "reward": -0.0619
+    },
+    {
+      "step": 1930,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 10.509,
+      "co2_mg": 177782.2,
+      "reward": -4.0093
+    },
+    {
+      "step": 1960,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 9.828,
+      "co2_mg": 184599.3,
+      "reward": 0.681
+    },
+    {
+      "step": 1980,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 6.392,
+      "co2_mg": 195321.2,
+      "reward": 3.4361
+    },
+    {
+      "step": 2010,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 14.065,
+      "co2_mg": 149479.9,
+      "reward": -7.6727
+    },
+    {
+      "step": 2030,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 5.319,
+      "co2_mg": 194180.9,
+      "reward": 8.7462
+    },
+    {
+      "step": 2050,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 6.777,
+      "co2_mg": 190048.7,
+      "reward": -1.4582
+    },
+    {
+      "step": 2070,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 6.217,
+      "co2_mg": 166497.3,
+      "reward": 0.5598
+    },
+    {
+      "step": 2090,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 5.648,
+      "co2_mg": 198403.7,
+      "reward": 0.5688
+    },
+    {
+      "step": 2110,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 3.578,
+      "co2_mg": 192172.9,
+      "reward": 2.0697
+    },
+    {
+      "step": 2130,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 5.736,
+      "co2_mg": 235382.6,
+      "reward": -2.1574
+    },
+    {
+      "step": 2150,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 1.96,
+      "co2_mg": 181301.6,
+      "reward": 3.7763
+    },
+    {
+      "step": 2170,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 5.635,
+      "co2_mg": 162696.1,
+      "reward": -3.675
+    },
+    {
+      "step": 2190,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 5.691,
+      "co2_mg": 204305.4,
+      "reward": -0.0563
+    },
+    {
+      "step": 2210,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 11.297,
+      "co2_mg": 170205.7,
+      "reward": -5.6064
+    },
+    {
+      "step": 2230,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 10.327,
+      "co2_mg": 186010.1,
+      "reward": 0.97
+    },
+    {
+      "step": 2250,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 8.183,
+      "co2_mg": 229965.5,
+      "reward": 2.1447
+    },
+    {
+      "step": 2270,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 14.634,
+      "co2_mg": 208378.2,
+      "reward": -6.4514
+    },
+    {
+      "step": 2290,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 15.405,
+      "co2_mg": 206173.8,
+      "reward": -0.7712
+    },
+    {
+      "step": 2310,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 21.402,
+      "co2_mg": 237706.4,
+      "reward": -5.9964
+    },
+    {
+      "step": 2330,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 29.213,
+      "co2_mg": 202830.9,
+      "reward": -7.8115
+    },
+    {
+      "step": 2360,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 31.477,
+      "co2_mg": 244722.5,
+      "reward": -2.2642
+    },
+    {
+      "step": 2390,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 17.27,
+      "co2_mg": 220209.7,
+      "reward": 14.2074
+    },
+    {
+      "step": 2410,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 11.972,
+      "co2_mg": 267228.6,
+      "reward": 5.2976
+    },
+    {
+      "step": 2430,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 8.964,
+      "co2_mg": 260658.0,
+      "reward": 3.0079
+    },
+    {
+      "step": 2450,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 8.508,
+      "co2_mg": 234285.8,
+      "reward": 0.4566
+    },
+    {
+      "step": 2470,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 12.581,
+      "co2_mg": 226576.6,
+      "reward": -4.0737
+    },
+    {
+      "step": 2490,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 17.725,
+      "co2_mg": 259426.7,
+      "reward": -5.1438
+    },
+    {
+      "step": 2510,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 22.485,
+      "co2_mg": 222844.1,
+      "reward": -4.7594
+    },
+    {
+      "step": 2540,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 12.908,
+      "co2_mg": 225945.1,
+      "reward": 9.5762
+    },
+    {
+      "step": 2560,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 6.116,
+      "co2_mg": 264138.5,
+      "reward": 6.7921
+    },
+    {
+      "step": 2590,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 15.651,
+      "co2_mg": 223582.4,
+      "reward": -9.5345
+    },
+    {
+      "step": 2610,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 14.791,
+      "co2_mg": 253075.3,
+      "reward": 0.8597
+    },
+    {
+      "step": 2630,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 12.302,
+      "co2_mg": 224392.2,
+      "reward": 2.4895
+    },
+    {
+      "step": 2650,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 11.786,
+      "co2_mg": 225280.2,
+      "reward": 0.5159
+    },
+    {
+      "step": 2670,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 17.409,
+      "co2_mg": 216682.1,
+      "reward": -5.623
+    },
+    {
+      "step": 2690,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 27.046,
+      "co2_mg": 231069.6,
+      "reward": -9.637
+    },
+    {
+      "step": 2720,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 24.317,
+      "co2_mg": 250442.9,
+      "reward": 2.7289
+    },
+    {
+      "step": 2750,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 16.06,
+      "co2_mg": 233403.1,
+      "reward": 8.2568
+    },
+    {
+      "step": 2770,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 14.252,
+      "co2_mg": 292372.4,
+      "reward": 1.8084
+    },
+    {
+      "step": 2790,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 10.212,
+      "co2_mg": 244841.3,
+      "reward": 4.0396
+    },
+    {
+      "step": 2820,
+      "action": 1,
+      "action_name": "E-W Green (39s)",
+      "wait_s": 13.657,
+      "co2_mg": 259193.4,
+      "reward": -3.445
+    },
+    {
+      "step": 2840,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 4.969,
+      "co2_mg": 211267.6,
+      "reward": 8.6877
+    },
+    {
+      "step": 2860,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 7.05,
+      "co2_mg": 241134.6,
+      "reward": -2.0809
+    },
+    {
+      "step": 2880,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 10.685,
+      "co2_mg": 228618.9,
+      "reward": -3.6347
+    },
+    {
+      "step": 2900,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 8.496,
+      "co2_mg": 223215.0,
+      "reward": 2.1887
+    },
+    {
+      "step": 2920,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 4.375,
+      "co2_mg": 266422.6,
+      "reward": 4.1214
+    },
+    {
+      "step": 2940,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 6.482,
+      "co2_mg": 226324.6,
+      "reward": -2.1073
+    },
+    {
+      "step": 2960,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 7.087,
+      "co2_mg": 260209.3,
+      "reward": -0.6044
+    },
+    {
+      "step": 2980,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 4.21,
+      "co2_mg": 254846.7,
+      "reward": 2.8769
+    },
+    {
+      "step": 3000,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 5.286,
+      "co2_mg": 245042.6,
+      "reward": -1.0759
+    },
+    {
+      "step": 3020,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 5.51,
+      "co2_mg": 261209.6,
+      "reward": -0.2242
+    },
+    {
+      "step": 3040,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 4.432,
+      "co2_mg": 262375.6,
+      "reward": 1.0783
+    },
+    {
+      "step": 3060,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 5.701,
+      "co2_mg": 254508.7,
+      "reward": -1.2696
+    },
+    {
+      "step": 3080,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 5.149,
+      "co2_mg": 282782.5,
+      "reward": 0.5519
+    },
+    {
+      "step": 3100,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 6.032,
+      "co2_mg": 272847.9,
+      "reward": -0.8829
+    },
+    {
+      "step": 3120,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 3.318,
+      "co2_mg": 296910.6,
+      "reward": 2.7141
+    },
+    {
+      "step": 3140,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 6.365,
+      "co2_mg": 248111.6,
+      "reward": -3.0466
+    },
+    {
+      "step": 3160,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 4.956,
+      "co2_mg": 296913.0,
+      "reward": 1.4088
+    },
+    {
+      "step": 3180,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 3.95,
+      "co2_mg": 280213.8,
+      "reward": 1.0063
+    },
+    {
+      "step": 3200,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 5.055,
+      "co2_mg": 235006.1,
+      "reward": -1.1055
+    },
+    {
+      "step": 3220,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 9.166,
+      "co2_mg": 248986.7,
+      "reward": -4.1104
+    },
+    {
+      "step": 3240,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 9.338,
+      "co2_mg": 253638.0,
+      "reward": -0.172
+    },
+    {
+      "step": 3260,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 8.517,
+      "co2_mg": 307656.6,
+      "reward": 0.8205
+    },
+    {
+      "step": 3280,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 8.469,
+      "co2_mg": 309513.7,
+      "reward": 0.0479
+    },
+    {
+      "step": 3300,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 5.912,
+      "co2_mg": 259034.4,
+      "reward": 2.5566
+    },
+    {
+      "step": 3320,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 8.783,
+      "co2_mg": 283075.3,
+      "reward": -2.8706
+    },
+    {
+      "step": 3340,
+      "action": 3,
+      "action_name": "E-W Green (20s)",
+      "wait_s": 11.41,
+      "co2_mg": 257420.6,
+      "reward": -2.6268
+    },
+    {
+      "step": 3360,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 14.635,
+      "co2_mg": 308753.1,
+      "reward": -3.2254
+    },
+    {
+      "step": 3380,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 20.602,
+      "co2_mg": 279803.3,
+      "reward": -5.967
+    },
+    {
+      "step": 3400,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 27.691,
+      "co2_mg": 297742.1,
+      "reward": -7.0883
+    },
+    {
+      "step": 3420,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 20.075,
+      "co2_mg": 319792.6,
+      "reward": 7.6157
+    },
+    {
+      "step": 3440,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 23.732,
+      "co2_mg": 306452.9,
+      "reward": -3.6574
+    },
+    {
+      "step": 3460,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 24.84,
+      "co2_mg": 311039.5,
+      "reward": -1.1075
+    },
+    {
+      "step": 3480,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 19.805,
+      "co2_mg": 251500.3,
+      "reward": 5.035
+    },
+    {
+      "step": 3500,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 27.553,
+      "co2_mg": 252706.0,
+      "reward": -7.7481
+    },
+    {
+      "step": 3520,
+      "action": 2,
+      "action_name": "N-S Green (20s)",
+      "wait_s": 30.826,
+      "co2_mg": 293058.3,
+      "reward": -3.2728
+    },
+    {
+      "step": 3550,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 37.439,
+      "co2_mg": 280290.1,
+      "reward": -6.6137
+    },
+    {
+      "step": 3580,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 45.42,
+      "co2_mg": 275188.3,
+      "reward": -7.9808
+    },
+    {
+      "step": 3600,
+      "action": 0,
+      "action_name": "N-S Green (39s)",
+      "wait_s": 49.947,
+      "co2_mg": 301860.3,
+      "reward": -4.5269
+    }
+  ],
+  "action_counts": {
+    "0": 14,
+    "3": 43,
+    "2": 91,
+    "1": 17
+  }
+}

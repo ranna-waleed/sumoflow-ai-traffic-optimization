@@ -1,0 +1,45 @@
+{
+  "type": "fixed_timing_baseline",
+  "profiles": {
+    "morning_rush": {
+      "profile": "morning_rush",
+      "avg_wait_s": 10.671107860726922,
+      "max_wait_s": 40.951219512195124,
+      "avg_co2_mg": 338.2636750889094,
+      "total_co2_mg": 1217749.230320074,
+      "peak_vehicles": 188,
+      "total_steps": 3600
+    },
+    "evening_rush": {
+      "profile": "evening_rush",
+      "avg_wait_s": 10.720564624026277,
+      "max_wait_s": 24.923076923076923,
+      "avg_co2_mg": 275.62729621311445,
+      "total_co2_mg": 992258.266367212,
+      "peak_vehicles": 184,
+      "total_steps": 3600
+    },
+    "midday": {
+      "profile": "midday",
+      "avg_wait_s": 10.707592097181175,
+      "max_wait_s": 27.802083333333332,
+      "avg_co2_mg": 269.97186188870023,
+      "total_co2_mg": 971898.7027993209,
+      "peak_vehicles": 126,
+      "total_steps": 3600
+    },
+    "night": {
+      "profile": "night",
+      "avg_wait_s": 8.250254450136353,
+      "max_wait_s": 27.677419354838708,
+      "avg_co2_mg": 209.5030663068687,
+      "total_co2_mg": 754211.0387047273,
+      "peak_vehicles": 86,
+      "total_steps": 3600
+    }
+  },
+  "overall": {
+    "avg_wait_s": 10.087379758017683,
+    "avg_co2_mg": 273.3414748743982
+  }
+}

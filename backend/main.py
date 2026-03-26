@@ -4,7 +4,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import simulation, models, detection, sumo_control, lstm
+from routers import simulation, models, detection, sumo_control, lstm , dqn
 
 
 app = FastAPI(
@@ -28,6 +28,7 @@ app.include_router(models.router,     prefix="/api/models",     tags=["Models"])
 app.include_router(detection.router,  prefix="/api/detection",  tags=["Detection"])
 app.include_router(sumo_control.router, prefix="/api/sumo", tags=["SUMO Control"])
 app.include_router(lstm.router, prefix="/api/lstm", tags=["LSTM"])
+app.include_router(dqn.router, prefix="/api/dqn", tags=["DQN"])
 #  Health Check 
 @app.get("/")
 def root():

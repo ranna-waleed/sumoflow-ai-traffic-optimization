@@ -1,0 +1,33 @@
+{
+  "type": "dqn_controlled",
+  "profiles": {
+    "morning_rush": {
+      "profile": "morning_rush",
+      "avg_wait_s": 9.518396836165572,
+      "avg_co2_mg": 208.85497463647093,
+      "total_co2_mg": 34461.0708150177
+    },
+    "evening_rush": {
+      "profile": "evening_rush",
+      "avg_wait_s": 5.155674255768008,
+      "avg_co2_mg": 153.73890559315302,
+      "total_co2_mg": 23675.791461345565
+    },
+    "midday": {
+      "profile": "midday",
+      "avg_wait_s": 4.7796785767696806,
+      "avg_co2_mg": 149.88272602679177,
+      "total_co2_mg": 23081.93980812593
+    },
+    "night": {
+      "profile": "night",
+      "avg_wait_s": 4.960710522580304,
+      "avg_co2_mg": 104.52747472675422,
+      "total_co2_mg": 15783.648683739888
+    }
+  },
+  "overall": {
+    "avg_wait_s": 6.103615047820891,
+    "avg_co2_mg": 154.2510202457925
+  }
+}
