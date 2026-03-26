@@ -1,290 +1,255 @@
-# SUMOFlow AI 
-### AI-Driven Traffic Optimization for Next-Generation Smart Cities
-> A YOLO-SUMO Integration Approach — Team 46 | Zewail City of Science and Technology
+# SUMOFlow AI 🚦
+### AI-Driven Traffic Optimization for Next-Generation Smart Cities: A YOLO-SUMO Integration Approach
 
-[![Python](https://img.shields.io/badge/Python-3.x-blue)](https://python.org)
-[![SUMO](https://img.shields.io/badge/SUMO-1.x-green)](https://sumo.dlr.de)
-[![YOLOv8](https://img.shields.io/badge/YOLOv8s-Ultralytics-red)](https://ultralytics.com)
-[![React](https://img.shields.io/badge/Frontend-React_18-61DAFB)](https://reactjs.org)
-[![MLflow](https://img.shields.io/badge/Tracking-MLflow-blue)](https://mlflow.org)
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green?style=for-the-badge&logo=fastapi)
+![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?style=for-the-badge&logo=pytorch)
+![SUMO](https://img.shields.io/badge/SUMO-1.24-orange?style=for-the-badge)
+
+**Team 46 | Zewail City University of Science and Technology**  
+**Department of Data Science and Artificial Intelligence (DSAI)**  
+**Supervisor: Dr. Mohamed Maher Ata**
+
+[Rana Waleed (202201737)](https://github.com/ranna-waleed) · Roaa Raafat (202202079) · Mariam Alhaj (202200529)
+
+</div>
 
 ---
 
-## Project Overview
+## Overview
 
-SUMOFlow AI is a graduation project that integrates AI-based vehicle detection with the SUMO traffic simulator to optimize traffic light timing at El-Tahrir Square, Cairo. The system detects 7 vehicle classes in real time, simulates 4 rush hour profiles, and uses optimizer to reduce congestion and CO2 emissions.
+SUMOFlow AI is a complete smart city traffic optimization system for **El-Tahrir Square, Cairo**. It integrates real-time vehicle detection, traffic flow prediction, and deep reinforcement learning to reduce congestion and CO₂ emissions.
+
+### Key Results
+| Metric | Before (Fixed Timing) | After (DQN) | Improvement |
+|---|---|---|---|
+| Avg Wait Time | 10.09s | 6.10s | **↓39.49%** |
+| CO₂ Emissions | 273.3 mg/step | 154.3 mg/step | **↓43.57%** |
+| BiLSTM MAE | — | 3.15 vehicles | — |
+| YOLOv8s mAP@0.5 | — | 0.478 | 208 FPS |
 
 ---
 
-## System Architecture
+##  System Architecture
 
-```text
-1- INPUT LAYER
-   ├── SUMO Network Files (.net.xml, .rou.xml) — El-Tahrir Square (OSM)
-   ├── Simulation Frames (1,800 JPEG frames via TraCI)
-   └── Rush Hour Profiles (Morning / Evening / Midday / Night)
-
-2- DETECTION & SIMULATION LAYER
-   ├── YOLOv8s       — mAP@0.5: 0.478 | 208 FPS  
-   ├── Faster RCNN   — mAP@0.5: 0.430 | 10.93 FPS
-   ├── RetinaNet     — mAP@0.5: 0.413 | 9.4 FPS
-   └── SUMO Simulator — 4 rush hour profiles | peak 275 vehicles
-
-3- DATA PIPELINE & TRACKING
-   ├── Dataset Pipeline — 1,800 images | 7 classes | 70/20/10 split
-   ├── MLflow Tracking  — hyperparams, metrics, artifacts
-   └── Simulation Metrics — vehicle count, wait time, CO2 (CSV)
-
-4- CONTROL LAYER (TraCI)
-   ├── Metrics Calculator — wait times, queue stats, CO2, KPIs
-   └── Optimization Engine —  Optimizer + LSTM Predictor (in progress)
-
-5- OUTPUT LAYER
-   ├── Performance Reports — CSV metrics per profile
-   ├── Signal Timing Logs  — phase changes, durations
-   └── React Dashboard     — 5 pages, live charts
-
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      SUMOFlow AI Pipeline                    │
+├──────────────┬──────────────┬──────────────┬────────────────┤
+│  SUMO Sim    │  Detection   │  BiLSTM      │  DQN           │
+│  El-Tahrir   │  YOLOv8s     │  Predictor   │  Optimizer     │
+│  5 profiles  │  FasterRCNN  │  MAE=3.15    │  ↓39.5% wait   │
+│  TraCI API   │  RetinaNet   │  30s horizon │  ↓43.6% CO₂    │
+├──────────────┴──────────────┴──────────────┴────────────────┤
+│              FastAPI Backend (15+ REST endpoints)            │
+├─────────────────────────────────────────────────────────────┤
+│         React Dashboard (5 pages, real-time charts)         │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Model Comparison
+##  Features
 
-| Model | mAP@0.5 | mAP@0.5:95 | Precision | Recall | FPS |
-| --- | --- | --- | --- | --- | --- |
-| YOLOv8s  | 0.478  | 0.341 | 0.801 | 0.407 | 208 |
-| Faster RCNN | 0.430 | 0.310 | 0.863 | 0.338 | 10.93 |
-| RetinaNet | 0.413 | 0.285 | — | 0.334 | 9.4 |
+### Live SUMO Simulation
+- El-Tahrir Square network with 5 traffic profiles (morning rush, evening rush, midday, night, custom OD)
+- Real-time screenshot streaming to React dashboard via TraCI
+- Live metrics: vehicle count, waiting time, CO₂ emissions, avg speed
+- Traffic light status display (real TraCI data)
+
+###  Vehicle Detection (3 Models)
+| Model | mAP@0.5 | mAP@0.5:0.95 | FPS | Inference |
+|---|---|---|---|---|
+| **YOLOv8s**  | **0.478** | 0.341 | **208** | 4.8ms |
+| Faster RCNN | 0.470 | 0.343 | 7.08 | 141.2ms |
+| RetinaNet | 0.413 | 0.285 | 9.38 | 106.6ms |
+
+7 vehicle classes: car, bus, truck, taxi, microbus, motorcycle, bicycle
+
+###  BiLSTM Traffic Predictor
+- 2-layer Bidirectional LSTM, hidden=128
+- Trained on 10,167 sequences across 5 profiles
+- **Overall MAE: 3.15 vehicles** (30-second prediction horizon)
+- Live predictions for N/S/E/W directions every 4 seconds
+
+###  DQN Signal Optimizer
+- Deep Q-Network with experience replay and target network
+- State: `[N, S, E, W vehicle counts, current phase, avg wait]`
+- 4 actions using real SUMO phase definitions for TL 315744796
+- Trained for 50 episodes across 4 rush hour profiles
+- **Results: ↓39.49% wait time, ↓43.57% CO₂**
 
 ---
 
-## Rush Hour Simulation Results
+##  Project Structure
 
-| Profile | Time | Peak Vehicles | Avg Wait | Peak CO2 |
-| --- | --- | --- | --- | --- |
-| Morning Rush | 8–10 AM | 275 | ~15s | 435,006 mg |
-| Evening Rush | 4–7 PM | 194 | ~12s | 335,171 mg |
-| Midday | 12–2 PM | 90 | ~12s | 181,981 mg |
-| Night | 10 PM–12 AM | 61 | ~10s | 143,066 mg |
-
----
-
-## Project Structure
-
-```text
+```
 sumoflow-ai-traffic-optimization/
-├── simulation/
-│   ├── maps/
-│   │   ├── tahrirupdated.net.xml       ← SUMO network (OSM)
-│   │   ├── tahrir.rou.xml              ← base routes (250 vehicles)
-│   │   ├── tahrir_fixed.rou.xml        ← extended routes (164 unique)
-│   │   ├── routes_morning_rush.rou.xml
-│   │   ├── routes_evening_rush.rou.xml
-│   │   ├── routes_midday.rou.xml
-│   │   ├── routes_night.rou.xml
-│   │   ├── config_*.sumocfg            ← 4 rush hour configs
-│   │   └── outputs/
-│   │       ├── metrics_morning_rush_*.csv
-│   │       ├── metrics_evening_rush_*.csv
-│   │       ├── metrics_midday_*.csv
-│   │       ├── metrics_night_*.csv
-│   │       └── comparison_summary.csv
-│   └── rush_hour/
-│       ├── generate_rush_hour.py       ← generate route files
-│       ├── run_realtime.py             ← run simulation profiles
-│       ├── check_edges.py              ← edge analysis + fix short routes
-│       └── compare_profiles.py        ← cross-profile comparison
-│
-├── detection/
-│   ├── yolo/
-│   │   ├── train.py                    ← YOLOv8s training (60 epochs)
-│   │   ├── evaluate.py
-│   │   └── results/                    ← metrics CSV, confusion matrix
-│   ├── FasterRCNN/
-│   │   ├── train.py
-│   │   ├── evaluate.py
-│   │   ├── dataloader.py
-│   │   └── outputs/
-│   │       ├── eval_results.json
-│   │       └── detection_images/
-│   ├── RetinaNet/
-│   │   ├── train.py
-│   │   ├── evaluate.py
-│   │   └── retinanet_best.pth.dvc      ← Tracked weights via DVC
-│   └── results/
-│       └── model_comparison.csv        ← YOLO vs Faster RCNN vs RetinaNet
-│
-├── frontend/
-│   ├── src/
-│   │   ├── pages/                      ← Dashboard, LiveSim, ModelComparison, etc.
-│   │   └── components/                 ← Navbar, MetricCard, Charts
-│   ├── package.json
-│   └── README.md
-│
-├── requirements.txt
-├── .gitignore
-└── README.md
-
+├── backend/                    # FastAPI backend
+│   ├── main.py
+│   ├── routers/
+│   │   ├── simulation.py       # SUMO simulation endpoints
+│   │   ├── models.py           # Detection model comparison
+│   │   ├── detection.py        # YOLO inference
+│   │   ├── sumo_control.py     # TraCI control
+│   │   ├── lstm.py             # BiLSTM predictions
+│   │   └── dqn.py              # DQN optimizer + live sim
+│   └── services/
+│       ├── sumo_runner.py      # TraCI manager
+│       ├── yolo_detect.py      # YOLOv8 inference
+│       └── dqn_runner.py       # DQN live simulation
+├── frontend/                   # React dashboard (5 pages)
+│   └── src/pages/
+│       ├── Dashboard.jsx        # Live SUMO stream + metrics
+│       ├── LiveSimulation.jsx   # Custom OD + LSTM predictions
+│       ├── ModelComparison.jsx  # 3-model comparison table
+│       ├── BeforeAfter.jsx      # DQN results + live DQN sim
+│       └── About.jsx
+├── dqn/                        # DQN optimizer
+│   ├── environment.py          # SUMO-TraCI environment
+│   ├── agent.py                # DQN agent + QNetwork
+│   ├── train_dqn.py            # Training script
+│   ├── run_baseline.py         # Fixed timing baseline
+│   ├── run_dqn.py              # DQN evaluation
+│   ├── compare.py              # Before/After comparison
+│   └── visualize.py            # Watch DQN control lights
+├── lstm/                       # BiLSTM predictor
+│   ├── train_lstm.py           # Training script (BiLSTM)
+│   ├── predict.py              # Inference module
+│   └── evaluate.py             # MAE evaluation
+├── detection/                  # Detection models
+│   ├── yolo/                   # YOLOv8s weights + results
+│   └── FasterRCNN/             # Faster RCNN weights + results
+└── simulation/
+    └── maps/                   # SUMO network + route files
 ```
 
 ---
 
-## Installation & Setup
+##  Installation
 
-**Step 1: Clone the repository**
+### Prerequisites
+- Python 3.10+
+- Node.js 18+
+- [SUMO 1.24](https://sumo.dlr.de/docs/Downloads.php) with `SUMO_HOME` set
+- CUDA GPU (optional — CPU works)
 
+### Backend Setup
 ```bash
-git clone [https://github.com/ranna-waleed/sumoflow-ai-traffic-optimization.git](https://github.com/ranna-waleed/sumoflow-ai-traffic-optimization.git)
+# Clone repo
+git clone https://github.com/ranna-waleed/sumoflow-ai-traffic-optimization.git
 cd sumoflow-ai-traffic-optimization
 
-```
-
-**Step 2: Create and activate virtual environment**
-
-```bash
+# Create virtual environment
 python -m venv sumoflow_env
+sumoflow_env\Scripts\activate        # Windows
+# source sumoflow_env/bin/activate   # Linux/Mac
 
-# Windows
-sumoflow_env\Scripts\activate
-
-# Mac/Linux
-source sumoflow_env/bin/activate
-
-```
-
-**Step 3: Install dependencies**
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
-
 ```
 
-**Step 4: Verify installation**
-
-```bash
-python -c "import traci; import cv2; import ultralytics; print('All packages installed!')"
-
-```
-
----
-
-## Running the Simulation
-
-**Run a specific rush hour profile:**
-
-```bash
-python simulation/rush_hour/run_realtime.py morning_rush
-python simulation/rush_hour/run_realtime.py evening_rush
-python simulation/rush_hour/run_realtime.py midday
-python simulation/rush_hour/run_realtime.py night
-
-```
-
-**Regenerate all route files:**
-
-```bash
-python simulation/rush_hour/generate_rush_hour.py
-
-```
-
-**Analyze network edges:**
-
-```bash
-python simulation/rush_hour/check_edges.py
-
-```
-
-**Compare all 4 profiles:**
-
-```bash
-python simulation/rush_hour/compare_profiles.py
-
-```
-
----
-
-## Training the Models
-
-**YOLOv8s (Google Colab recommended):**
-
-```bash
-python detection/yolo/train.py
-
-```
-
-**Faster RCNN:**
-
-```bash
-python detection/FasterRCNN/train.py
-
-```
-
-**RetinaNet:**
-
-```bash
-python detection/RetinaNet/train.py
-
-```
-
----
-
-## Running the Frontend
-
+### Frontend Setup
 ```bash
 cd frontend
 npm install
-npm start
-
 ```
 
 ---
 
-## Large Files (Google Drive)
+##  Running the System
 
-Model weights and large simulation outputs are stored on Google Drive:
+### 1. Start Backend
+```bash
+cd backend
+uvicorn main:app --port 8000 --workers 1
+```
 
- [Google Drive — Outputs & Weights](https://drive.google.com/drive/u/0/folders/1ULhxaaJfYKngSDmra5949AVY5koPnaeH)
+### 2. Start Frontend
+```bash
+cd frontend
+npm start
+```
 
-Includes:
+Open `http://localhost:3000`
 
-* `best.pt` — YOLOv8s weights
-* `best_faster_rcnn.pth` — Faster RCNN weights
-* `retinanet_best.pth` — RetinaNet weights (tracked via DVC)
-* `mlflow.db` — MLflow experiment tracking database
-* Simulation XML outputs (fcd, emission, ssm)
-* dataset_v2.zip
-* SumoFlowAI_DVC_Storage
-* Rush hour output files
+### 3. Train DQN (optional — model included)
+```bash
+# Train
+python dqn/train_dqn.py
+
+# Run baseline comparison
+python dqn/run_baseline.py
+python dqn/run_dqn.py
+python dqn/compare.py
+```
+
+### 4. Watch DQN Control Traffic Lights
+```bash
+python dqn/visualize.py
+```
 
 ---
 
-## Team
+##  API Endpoints
 
-| Member | ID | Role |
-| --- | --- | --- |
-| Rana Waleed | 202201737 | SUMO Simulation, YOLO Training, Frontend, Rush Hour |
-| Roaa Raafat | 202202079 | SUMO Simulation,Dataset Labeling,Frontend, RetinaNet |
-| Mariam Alhaj | 202200529 | SUMO Simulation,Faster RCNN, Frontend |
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/sumo/start` | Start SUMO simulation |
+| GET | `/api/sumo/screenshot` | Get live frame |
+| GET | `/api/sumo/state` | Get live metrics |
+| GET | `/api/models/comparison` | 3-model comparison |
+| GET | `/api/lstm/predict/live` | Live N/S/E/W predictions |
+| GET | `/api/dqn/results` | DQN comparison results |
+| POST | `/api/dqn/sim/start/{profile}` | Start DQN live simulation |
+| GET | `/api/dqn/sim/screenshot` | DQN simulation frame |
 
-**Supervisor:** Dr. Mohamed Maher Ata
-**University:** Zewail City of Science and Technology
-**Program:** Data Science and Artificial Intelligence (DSAI)
+Full API docs: `http://localhost:8000/docs`
 
 ---
 
-## Project Status
+##  DQN Results by Profile
 
-| Component | Status |
-| --- | --- |
-| SUMO Simulation | Complete |
-| Rush Hour Profiles | Complete |
-| Dataset Pipeline |   Complete |
-| YOLOv8s Training | Complete |
-| Faster RCNN Training | Complete |
-| RetinaNet Training | Complete |
-| Frontend Dashboard |   Complete (static) |
-| MLflow Tracking |   Complete |
-| DQN Optimizer |   In Progress |
-| LSTM Predictor | In Progress |
-| FastAPI Backend | In Progress |
-| Frontend-Backend Integration |   In Progress |
+| Profile | Fixed Wait | DQN Wait | Wait ↓ | CO₂ ↓ |
+|---|---|---|---|---|
+| Morning Rush  | 10.67s | 9.52s | 10.8% | 38.26% |
+| Evening Rush  | 10.72s | 5.16s | **51.91%** | 44.22% |
+| Midday  | 10.71s | 4.78s | **55.36%** | 44.48% |
+| Night  | 8.25s | 4.96s | 39.87% | **50.11%** |
+| **Overall** | **10.09s** | **6.10s** | **39.49%** | **43.57%** |
+
+---
+
+##  MLflow Experiment Tracking
+
+```bash
+# View all training runs
+python -m mlflow ui --port 5000
+# Open http://127.0.0.1:5000
+```
+
+---
+
+##  Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Simulation | SUMO 1.24, TraCI |
+| Detection | YOLOv8s, Faster RCNN, RetinaNet |
+| Prediction | BiLSTM (PyTorch) |
+| Optimization | DQN (PyTorch) |
+| Backend | FastAPI, Python |
+| Frontend | React 18, Recharts, Tailwind CSS |
+| Experiment Tracking | MLflow |
+| Version Control | Git, GitHub |
+
+---
+
+## License
+
+This project is developed as a graduation project at Zewail City University of Science and Technology. All rights reserved.
+
+---
