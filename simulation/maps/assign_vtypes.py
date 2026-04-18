@@ -12,8 +12,8 @@ VEHICLE_MIX = {
     "bicycle":    0.03,   # 3%  bicycles
 }
 
-# TAZ sources on TRUNK roads → disallow bicycle (trunk disallows bicycle in net.xml)
-TRUNK_TAZ_SOURCES = {"taz_south_in", "taz_east_in"}
+# TAZ sources on TRUNK roads : disallow bicycle (trunk disallows bicycle in net.xml)
+TRUNK_TAZ_SOURCE = {"taz_south_in", "taz_east_in"}
 
 # Buses only on these TAZ pairs (routes that pass near bus stops)
 BUS_ALLOWED_TAZ_PAIRS = [
@@ -23,20 +23,22 @@ BUS_ALLOWED_TAZ_PAIRS = [
     ("taz_west_in",  "taz_east_out"),
 ]
 
-INPUT_FILE  = "od_tahrir.odtrips.xml"
+INPUT_FILE = "od_tahrir.odtrips.xml"
 OUTPUT_FILE = "od_tahrir_typed.odtrips.xml"
 
 random.seed(42)
+
 
 def normalize(mix):
     total = sum(mix.values())
     return {k: v / total for k, v in mix.items()}
 
+
 def pick_vtype(from_taz, to_taz):
     mix = dict(VEHICLE_MIX)
 
     # Remove bicycle & truck from trunk road TAZs
-    if from_taz in TRUNK_TAZ_SOURCES:
+    if from_taz in TRUNK_TAZ_SOURCE:
         mix.pop("bicycle", None)
 
     # Remove bus from non-bus routes
@@ -53,6 +55,7 @@ def pick_vtype(from_taz, to_taz):
             return vtype
     return "car"  # fallback
 
+
 tree = ET.parse(INPUT_FILE)
 root = tree.getroot()
 
@@ -60,8 +63,8 @@ type_counts = {}
 
 for trip in root.findall("trip"):
     from_taz = trip.get("fromTaz", "")
-    to_taz   = trip.get("toTaz", "")
-    vtype    = pick_vtype(from_taz, to_taz)
+    to_taz = trip.get("toTaz", "")
+    vtype = pick_vtype(from_taz, to_taz)
     trip.set("type", vtype)
     type_counts[vtype] = type_counts.get(vtype, 0) + 1
 
