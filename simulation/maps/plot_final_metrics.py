@@ -12,9 +12,7 @@ except FileNotFoundError as e:
     print(f"Error finding file: {e}. Make sure they are in the outputs folder!")
     exit()
 
-# ---------------------------------------------------------
 # Plot 3: Network Congestion (Active Vehicles Over Time)
-# ---------------------------------------------------------
 print("Generating Plot 3: Network Congestion...")
 time_col_sum = [c for c in summary.columns if 'time' in c.lower()][0]
 running_col = [c for c in summary.columns if 'running' in c.lower()][0]
@@ -30,9 +28,7 @@ plt.tight_layout()
 plt.savefig(r'outputs/Report_Plot_Congestion.png', dpi=300)
 plt.close()
 
-# ---------------------------------------------------------
 # Plot 4: Lane Changing & Weaving Behavior
-# ---------------------------------------------------------
 print("Generating Plot 4: Lane Changes...")
 time_col_lc = [c for c in lanechange.columns if 'time' in c.lower()][0]
 
@@ -46,9 +42,7 @@ plt.tight_layout()
 plt.savefig(r'outputs/Report_Plot_LaneChanges.png', dpi=300)
 plt.close()
 
-# ---------------------------------------------------------
 # Plot 5: Time Loss vs. Total Travel Time (Delays)
-# ---------------------------------------------------------
 print("Generating Plot 5: Traffic Delays...")
 duration_col = [c for c in tripinfo.columns if 'duration' in c.lower()][0]
 loss_col = [c for c in tripinfo.columns if 'timeloss' in c.lower()][0]

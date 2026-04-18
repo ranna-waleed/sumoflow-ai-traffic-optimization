@@ -1,4 +1,4 @@
-# dqn/environment.py - Simple 6-feature version 
+# dqn/environment.py
 import os, sys
 import numpy as np
 
@@ -12,9 +12,22 @@ import traci
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MAPS_DIR = os.path.join(BASE_DIR, "simulation", "maps")
 
-ACTION_PERIOD = 30
-MAX_STEPS     = 3600
-ACTION_NAMES  = ["N-S Green (39s)", "E-W Green (39s)", "N-S Green (20s)", "E-W Green (20s)"]
+ACTION_PERIOD   = 30
+YELLOW_DURATION = 3
+
+MAX_STEPS_PER_PROFILE = {
+    "morning_rush": 10800,
+    "evening_rush": 18000,
+    "midday":       10800,
+    "night":        7200,
+}
+
+ACTION_NAMES = [
+    "N-S Green (39s)",
+    "E-W Green (39s)",
+    "N-S Green (20s)",
+    "E-W Green (20s)",
+]
 
 MAIN_TL = "315744796"
 
@@ -27,13 +40,16 @@ SECONDARY_TL_PHASES = {
 SECONDARY_TL_PHASES[2] = SECONDARY_TL_PHASES[0]
 SECONDARY_TL_PHASES[3] = SECONDARY_TL_PHASES[1]
 
+YELLOW_PHASE = 1
+MAX_PRED     = 100.0   # normalization cap for LSTM predictions
+
 
 class TahrirEnv:
     def __init__(self, profile="morning_rush", gui=False, port=8814, verbose=False):
-        self.profile = profile
-        self.gui     = gui
-        self.port    = port
-        self.verbose = verbose
+        self.profile  = profile
+        self.gui      = gui
+        self.port     = port
+        self.verbose  = verbose
 
         self.config_paths = {
             "morning_rush": os.path.join(MAPS_DIR, "config_morning_rush.sumocfg"),
@@ -42,10 +58,16 @@ class TahrirEnv:
             "night":        os.path.join(MAPS_DIR, "config_night.sumocfg"),
         }
 
-        self.state_size  = 6
+        # State: 14 features
+        # [N_ratio, S_ratio, E_ratio, W_ratio,        (4) live direction ratios
+        #  N_queue, S_queue, E_queue, W_queue,         (4) queue lengths
+        #  N_pred,  S_pred,  E_pred,  W_pred,          (4) LSTM predictions
+        #  current_phase_norm, avg_wait_norm]           (2) phase + wait
+        self.state_size  = 14
         self.action_size = 4
 
         self._step          = 0
+        self._max_steps     = MAX_STEPS_PER_PROFILE.get(profile, 7200)
         self._current_phase = 0
         self._prev_wait     = 0.0
         self._tl_ids        = []
@@ -54,9 +76,25 @@ class TahrirEnv:
         self.episode_waits = []
         self.episode_co2   = []
 
+        # LSTM predictions — injected externally from dqn_runner
+        self._lstm_pred = {"north": 0.0, "south": 0.0, "east": 0.0, "west": 0.0}
+
+    def set_lstm_prediction(self, pred: dict):
+        """
+        Called by dqn_runner after each LSTM inference.
+        pred = {"north": int, "south": int, "east": int, "west": int}
+        """
+        self._lstm_pred = {
+            "north": float(pred.get("north", 0)),
+            "south": float(pred.get("south", 0)),
+            "east":  float(pred.get("east",  0)),
+            "west":  float(pred.get("west",  0)),
+        }
+
     def reset(self, profile=None):
         if profile:
-            self.profile = profile
+            self.profile    = profile
+            self._max_steps = MAX_STEPS_PER_PROFILE.get(profile, 7200)
 
         try:
             traci.close()
@@ -76,6 +114,7 @@ class TahrirEnv:
         self._prev_wait     = 0.0
         self.episode_waits  = []
         self.episode_co2    = []
+        self._lstm_pred     = {"north": 0.0, "south": 0.0, "east": 0.0, "west": 0.0}
         self._tl_ids        = list(traci.trafficlight.getIDList())
 
         self._phase_counts = {}
@@ -89,7 +128,25 @@ class TahrirEnv:
         self._apply_action(0)
         return self._get_state()
 
+    def _apply_yellow(self):
+        """Yellow transition between phases — realistic signal behaviour."""
+        for tl in self._tl_ids:
+            try:
+                n = self._phase_counts.get(tl, 1)
+                if n > YELLOW_PHASE:
+                    traci.trafficlight.setPhase(tl, YELLOW_PHASE)
+            except Exception:
+                pass
+        for _ in range(YELLOW_DURATION):
+            if traci.simulation.getMinExpectedNumber() == 0:
+                break
+            traci.simulationStep()
+            self._step += 1
+
     def _apply_action(self, action: int):
+        if action != self._current_phase:
+            self._apply_yellow()
+
         self._current_phase = action
 
         if MAIN_TL in self._tl_ids:
@@ -111,27 +168,26 @@ class TahrirEnv:
 
     def step(self, action: int):
         self._apply_action(action)
-
         duration = 20 if action in [2, 3] else ACTION_PERIOD
 
         if self.verbose:
             n_veh = len(traci.vehicle.getIDList())
             print(f"  [DQN] Step {self._step:4d} | "
                   f"Action: {action} ({ACTION_NAMES[action]:<18}) | "
-                  f"Vehicles: {n_veh:3d}")
+                  f"Vehicles: {n_veh:3d} | "
+                  f"LSTM_N={self._lstm_pred['north']:.0f}")
 
         for _ in range(duration):
-            if self._step >= MAX_STEPS:
+            if self._step >= self._max_steps:
                 break
             if traci.simulation.getMinExpectedNumber() == 0:
                 break
-            self._apply_action(action)
             traci.simulationStep()
             self._step += 1
 
         state  = self._get_state()
         reward = self._get_reward()
-        done   = (self._step >= MAX_STEPS or
+        done   = (self._step >= self._max_steps or
                   traci.simulation.getMinExpectedNumber() == 0)
 
         vehicle_ids = traci.vehicle.getIDList()
@@ -148,8 +204,7 @@ class TahrirEnv:
         total_co2 = sum(co2_vals) if co2_vals else 0.0
 
         self.episode_waits.append(avg_wait)
-        co2_per_step = total_co2 / max(self._step, 1)
-        self.episode_co2.append(co2_per_step)
+        self.episode_co2.append(total_co2 / max(self._step, 1))
 
         info = {
             "step":                     self._step,
@@ -166,49 +221,76 @@ class TahrirEnv:
     def _get_state(self):
         vehicle_ids = traci.vehicle.getIDList()
         dir_counts  = {"north": 0, "south": 0, "east": 0, "west": 0}
+        dir_queues  = {"north": 0, "south": 0, "east": 0, "west": 0}
         waiting     = []
 
         for v in vehicle_ids:
             try:
-                a = float(traci.vehicle.getAngle(v)) % 360
-                if a < 45 or a >= 315:   dir_counts["north"] += 1
-                elif 45  <= a < 135:     dir_counts["east"]  += 1
-                elif 135 <= a < 225:     dir_counts["south"] += 1
-                else:                    dir_counts["west"]  += 1
-                waiting.append(traci.vehicle.getWaitingTime(v))
+                a    = float(traci.vehicle.getAngle(v)) % 360
+                wait = traci.vehicle.getWaitingTime(v)
+
+                if a < 45 or a >= 315:   direction = "north"
+                elif 45  <= a < 135:     direction = "east"
+                elif 135 <= a < 225:     direction = "south"
+                else:                    direction = "west"
+
+                dir_counts[direction] += 1
+                if wait > 1.0:
+                    dir_queues[direction] += 1
+                waiting.append(wait)
             except Exception:
                 continue
 
-        total    = max(len(vehicle_ids), 1)
-        avg_wait = sum(waiting) / len(waiting) if waiting else 0.0
+        total     = max(len(vehicle_ids), 1)
+        avg_wait  = sum(waiting) / len(waiting) if waiting else 0.0
+        max_queue = 50.0
 
         return np.array([
+            # Live ratios (4)
             dir_counts["north"] / total,
             dir_counts["south"] / total,
             dir_counts["east"]  / total,
             dir_counts["west"]  / total,
+            # Queue lengths normalized (4)
+            min(dir_queues["north"] / max_queue, 1.0),
+            min(dir_queues["south"] / max_queue, 1.0),
+            min(dir_queues["east"]  / max_queue, 1.0),
+            min(dir_queues["west"]  / max_queue, 1.0),
+            # LSTM predictions normalized (4)
+            min(self._lstm_pred["north"] / MAX_PRED, 1.0),
+            min(self._lstm_pred["south"] / MAX_PRED, 1.0),
+            min(self._lstm_pred["east"]  / MAX_PRED, 1.0),
+            min(self._lstm_pred["west"]  / MAX_PRED, 1.0),
+            # Phase + wait (2)
             self._current_phase / max(self.action_size - 1, 1),
-            min(avg_wait / 120.0, 1.0),
+            min(avg_wait / 300.0, 1.0),
         ], dtype=np.float32)
 
     def _get_reward(self):
         vehicle_ids = traci.vehicle.getIDList()
-        waiting = []
+        waiting     = []
+        queued      = 0
         for v in vehicle_ids:
             try:
-                waiting.append(traci.vehicle.getWaitingTime(v))
+                w = traci.vehicle.getWaitingTime(v)
+                waiting.append(w)
+                if w > 1.0:
+                    queued += 1
             except Exception:
                 continue
+
         avg_wait        = sum(waiting) / len(waiting) if waiting else 0.0
-        reward          = self._prev_wait - avg_wait
+        wait_reward     = self._prev_wait - avg_wait
+        queue_penalty   = -0.01 * queued
+        reward          = wait_reward + queue_penalty
         self._prev_wait = avg_wait
         return reward
 
     def get_episode_summary(self):
         return {
-            "avg_wait_s":   float(np.mean(self.episode_waits))  if self.episode_waits else 0.0,
-            "avg_co2_mg":   float(np.mean(self.episode_co2))    if self.episode_co2   else 0.0,
-            "total_co2_mg": float(np.sum(self.episode_co2))     if self.episode_co2   else 0.0,
+            "avg_wait_s":   float(np.mean(self.episode_waits)) if self.episode_waits else 0.0,
+            "avg_co2_mg":   float(np.mean(self.episode_co2))   if self.episode_co2   else 0.0,
+            "total_co2_mg": float(np.sum(self.episode_co2))    if self.episode_co2   else 0.0,
         }
 
     def close(self):

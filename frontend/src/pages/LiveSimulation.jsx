@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Play, Square, Pause, Maximize2, Activity, Brain } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area,
@@ -33,24 +33,60 @@ const chartStyle = {
   },
 };
 
+// FIXED: profile selector — was always hardcoded to "custom"
+const PROFILES = [
+  { key: "morning_rush", label: "Morning Rush", icon: "🌅", time: "7:30–10:30 AM" },
+  { key: "evening_rush", label: "Evening Rush", icon: "🌆", time: "3:00–8:00 PM"  },
+  { key: "midday",       label: "Midday",       icon: "☀️", time: "12:00–3:00 PM" },
+  { key: "night",        label: "Night",        icon: "🌙", time: "10:00 PM–12 AM"},
+  { key: "custom",       label: "Custom OD",    icon: "🗺️", time: "config_file.sumocfg" },
+];
+
 function LiveSimulation() {
-  const [simRunning, setSimRunning] = useState(false);
-  const [simPaused, setSimPaused]   = useState(false);
-  const [simStep, setSimStep]       = useState(0);
-  const [liveData, setLiveData]     = useState(null);
-  const [liveChart, setLiveChart]   = useState([]);
-  const [frame, setFrame]           = useState(null);
-  const [simError, setSimError]     = useState(null);
-  const [simLoading, setSimLoading] = useState(false);
-  const [fullscreen, setFullscreen] = useState(false);
+  // FIXED: profile selector state — was hardcoded "custom"
+  const [selectedProfile, setSelectedProfile] = useState("morning_rush");
+
+  const [simRunning,  setSimRunning]  = useState(false);
+  const [simPaused,   setSimPaused]   = useState(false);
+  const [simStep,     setSimStep]     = useState(0);
+  const [liveData,    setLiveData]    = useState(null);
+  const [liveChart,   setLiveChart]   = useState([]);
+  const [frame,       setFrame]       = useState(null);
+  const [simError,    setSimError]    = useState(null);
+  const [simLoading,  setSimLoading]  = useState(false);
+  const [fullscreen,  setFullscreen]  = useState(false);
 
   // LSTM state
-  const [lstmPred, setLstmPred]         = useState(null);
-  const [lstmStatus, setLstmStatus]     = useState("waiting");  // waiting | collecting | ready | error
+  const [lstmPred,       setLstmPred]       = useState(null);
+  const [lstmStatus,     setLstmStatus]     = useState("waiting");
   const [lstmHistoryLen, setLstmHistoryLen] = useState(0);
+
+  // FIXED: fetch real LSTM model info from API — was hardcoded
+  const [lstmModelInfo, setLstmModelInfo] = useState(null);
 
   const pollRef = useRef(null);
   const lstmRef = useRef(null);
+
+  // Fetch LSTM model info on mount
+  useEffect(() => {
+    fetch(`${API}/api/lstm/status`)
+      .then(r => r.json())
+      .then(data => setLstmModelInfo(data))
+      .catch(() => setLstmModelInfo(null));
+  }, []);
+
+  // FIXED: handleStop stable with useCallback
+  const handleStop = useCallback(async () => {
+    clearInterval(pollRef.current);
+    clearInterval(lstmRef.current);
+    setSimRunning(false);
+    setSimPaused(false);
+    setLiveData(null);
+    setFrame(null);
+    setLstmPred(null);
+    setLstmStatus("waiting");
+    try { await fetch(`${API}/api/sumo/stop`, { method: "POST" }); } catch {}
+  }, []);
 
   // Poll simulation every 2s
   useEffect(() => {
@@ -82,7 +118,7 @@ function LiveSimulation() {
       }, 2000);
     }
     return () => clearInterval(pollRef.current);
-  }, [simRunning, simPaused]);
+  }, [simRunning, simPaused, handleStop]);
 
   // Poll LSTM every 4s
   useEffect(() => {
@@ -91,7 +127,6 @@ function LiveSimulation() {
         try {
           const res  = await fetch(`${API}/api/lstm/predict/live`);
           const data = await res.json();
-
           if (data.status === "collecting") {
             setLstmStatus("collecting");
             setLstmHistoryLen(data.history_len || 0);
@@ -126,7 +161,8 @@ function LiveSimulation() {
       const res  = await fetch(`${API}/api/sumo/start`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ profile: "custom", gui: true }),
+        // FIXED: use selectedProfile — was hardcoded "custom"
+        body:    JSON.stringify({ profile: selectedProfile, gui: true }),
       });
       const data = await res.json();
       if (data.status === "started" || data.status === "already_running") {
@@ -142,18 +178,6 @@ function LiveSimulation() {
     setSimLoading(false);
   };
 
-  const handleStop = async () => {
-    clearInterval(pollRef.current);
-    clearInterval(lstmRef.current);
-    setSimRunning(false);
-    setSimPaused(false);
-    setLiveData(null);
-    setFrame(null);
-    setLstmPred(null);
-    setLstmStatus("waiting");
-    try { await fetch(`${API}/api/sumo/stop`, { method: "POST" }); } catch {}
-  };
-
   const handlePause = () => {
     setSimPaused(p => !p);
     if (!simPaused) clearInterval(lstmRef.current);
@@ -161,11 +185,11 @@ function LiveSimulation() {
 
   const typeCounts    = liveData?.type_counts || {};
   const totalVehicles = Object.values(typeCounts).reduce((a, b) => a + b, 0) || 1;
+  const maxPred       = lstmPred ? Math.max(...Object.values(lstmPred), 1) : 1;
 
-  // Max prediction for bar scaling
-  const maxPred = lstmPred
-    ? Math.max(...Object.values(lstmPred), 1)
-    : 1;
+  // FIXED: LSTM model description from API — was hardcoded text
+  const lstmModelLabel = lstmModelInfo?.model || "BiLSTM 2×128";
+  const lstmPredictsLabel = lstmModelInfo?.predicts || "Next 30s per direction";
 
   return (
     <div className="space-y-6 pt-4">
@@ -174,18 +198,16 @@ function LiveSimulation() {
         <div>
           <h1 className="text-xl font-semibold text-white">Live Simulation</h1>
           <p className="text-sm text-[#94a3b8] mt-0.5">
-            Custom traffic · OD-based routes · El-Tahrir Square
+            Real-time traffic · El-Tahrir Square, Cairo
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border ${
-            simRunning ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-                       : "bg-white/5 border-white/10 text-[#94a3b8]"}`}>
+            simRunning
+              ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+              : "bg-white/5 border-white/10 text-[#94a3b8]"}`}>
             <span className={`w-2 h-2 rounded-full ${simRunning ? "bg-emerald-400 animate-pulse" : "bg-[#64748b]"}`} />
             {simRunning ? (simPaused ? "Paused" : "Live") : "Stopped"}
-          </span>
-          <span className="px-3 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-mono">
-            config_file.sumocfg
           </span>
           {simRunning && (
             <span className="px-3 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-mono">
@@ -193,6 +215,25 @@ function LiveSimulation() {
             </span>
           )}
         </div>
+      </div>
+
+      {/* FIXED: Profile selector */}
+      <div className="flex flex-wrap gap-2 items-center">
+        {PROFILES.map(p => (
+          <button key={p.key}
+            onClick={() => { if (!simRunning) setSelectedProfile(p.key); }}
+            disabled={simRunning}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+              selectedProfile === p.key
+                ? "bg-indigo-500 border-indigo-400 text-white"
+                : simRunning
+                ? "bg-white/5 border-white/10 text-[#64748b] cursor-not-allowed"
+                : "bg-white/5 border-white/10 text-[#94a3b8] hover:bg-white/10"}`}>
+            <span>{p.icon}</span>
+            <span>{p.label}</span>
+          </button>
+        ))}
+        {simRunning && <span className="text-xs text-[#64748b]">← Stop to change profile</span>}
       </div>
 
       {simError && (
@@ -225,22 +266,26 @@ function LiveSimulation() {
           <div className="flex gap-2">
             <button onClick={handleStart} disabled={simRunning || simLoading}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                simRunning || simLoading ? "bg-indigo-500/30 text-indigo-300 cursor-not-allowed"
-                : "bg-indigo-500 hover:bg-indigo-400 text-white"}`}>
+                simRunning || simLoading
+                  ? "bg-indigo-500/30 text-indigo-300 cursor-not-allowed"
+                  : "bg-indigo-500 hover:bg-indigo-400 text-white"}`}>
               <Play className="w-4 h-4" strokeWidth={2.5} />
               {simLoading ? "Starting..." : "Start"}
             </button>
             <button onClick={handleStop} disabled={!simRunning}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                !simRunning ? "bg-red-500/10 text-red-300/40 border-red-500/20 cursor-not-allowed"
-                : "bg-red-500/20 hover:bg-red-500/30 text-red-400 border-red-500/40"}`}>
+                !simRunning
+                  ? "bg-red-500/10 text-red-300/40 border-red-500/20 cursor-not-allowed"
+                  : "bg-red-500/20 hover:bg-red-500/30 text-red-400 border-red-500/40"}`}>
               <Square className="w-4 h-4" strokeWidth={2.5} /> Stop
             </button>
             <button onClick={handlePause} disabled={!simRunning}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                !simRunning ? "bg-white/5 text-[#94a3b8]/40 border-white/10 cursor-not-allowed"
-                : simPaused ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                : "bg-white/5 hover:bg-white/10 text-[#94a3b8] border-white/10"}`}>
+                !simRunning
+                  ? "bg-white/5 text-[#94a3b8]/40 border-white/10 cursor-not-allowed"
+                  : simPaused
+                  ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                  : "bg-white/5 hover:bg-white/10 text-[#94a3b8] border-white/10"}`}>
               <Pause className="w-4 h-4" strokeWidth={2.5} />
               {simPaused ? "Resume" : "Pause"}
             </button>
@@ -268,7 +313,7 @@ function LiveSimulation() {
                       ⏱ {liveData.avg_wait_s}s avg wait
                     </span>
                     <span className="px-2.5 py-1 rounded-lg bg-black/70 text-[11px] font-mono text-white">
-                      💨 {(liveData.total_co2_mg/1000).toFixed(0)}k mg CO₂
+                      💨 {(liveData.total_co2_mg / 1000).toFixed(0)}k mg CO₂
                     </span>
                   </div>
                 )}
@@ -283,9 +328,9 @@ function LiveSimulation() {
                     </>
                   ) : (
                     <>
-                      <p className="text-base font-semibold text-indigo-300 mb-1">Custom Traffic Simulation</p>
-                      <p className="text-sm text-[#94a3b8] mb-2">OD-based routes · El-Tahrir Square</p>
-                      <p className="text-xs text-[#64748b]">Press <span className="text-indigo-400">Start</span> to run</p>
+                      <p className="text-base font-semibold text-indigo-300 mb-1">Live Traffic Simulation</p>
+                      <p className="text-sm text-[#94a3b8] mb-2">El-Tahrir Square, Cairo</p>
+                      <p className="text-xs text-[#64748b]">Select a profile and press <span className="text-indigo-400">Start</span></p>
                     </>
                   )}
                 </div>
@@ -302,7 +347,9 @@ function LiveSimulation() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-white">Vehicle Classes</h3>
               {liveData && (
-                <span className="text-[11px] font-mono text-[#64748b]">Total: {liveData.vehicles}</span>
+                <span className="text-[11px] font-mono text-[#64748b]">
+                  Total: {liveData.vehicles}
+                </span>
               )}
             </div>
             <div className="space-y-3">
@@ -330,25 +377,27 @@ function LiveSimulation() {
             </div>
           </div>
 
-          {/* LSTM Prediction — REAL DATA */}
+          {/* LSTM Prediction */}
           <div className="card p-5">
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <Brain className="w-4 h-4 text-indigo-400" />
-                <h3 className="text-sm font-semibold text-white">BILSTM Prediction</h3>
+                <h3 className="text-sm font-semibold text-white">BiLSTM Prediction</h3>
               </div>
               <span className={`text-[11px] font-mono px-2 py-0.5 rounded ${
                 lstmStatus === "ready"      ? "bg-emerald-500/15 text-emerald-400" :
-                lstmStatus === "collecting" ? "bg-amber-500/15 text-amber-400" :
+                lstmStatus === "collecting" ? "bg-amber-500/15 text-amber-400"    :
                                               "bg-white/5 text-[#64748b]"
               }`}>
-                {lstmStatus === "ready"      ? "● Live" :
-                 lstmStatus === "collecting" ? `${lstmHistoryLen}/60` :
-                 lstmStatus === "error"      ? "Error" : "Waiting"}
+                {lstmStatus === "ready"      ? "● Live"                    :
+                 lstmStatus === "collecting" ? `${lstmHistoryLen}/60`      :
+                 lstmStatus === "error"      ? "Error"                     : "Waiting"}
               </span>
             </div>
+
+            {/* FIXED: model info from API — was hardcoded */}
             <p className="text-xs text-[#94a3b8] mb-4">
-              Predicted vehicles — next 30 seconds
+              {lstmModelLabel} · {lstmPredictsLabel}
             </p>
 
             {lstmStatus === "waiting" && (
@@ -379,9 +428,7 @@ function LiveSimulation() {
                     <div key={dir}>
                       <div className="flex items-center justify-between text-xs mb-1.5">
                         <span className="text-[#e2e8f0] font-medium">{dir}</span>
-                        <span className="font-mono" style={{ color }}>
-                          {count} vehicles
-                        </span>
+                        <span className="font-mono" style={{ color }}>{count} vehicles</span>
                       </div>
                       <div className="h-2 rounded-full bg-white/5 overflow-hidden">
                         <div className="h-full rounded-full transition-all duration-700"
@@ -390,9 +437,6 @@ function LiveSimulation() {
                     </div>
                   );
                 })}
-                <p className="text-[11px] text-[#64748b] mt-2 text-center">
-                  MSE: 0.0023 · BiLSTM 2×128 · MAE: 3.15
-                </p>
               </div>
             )}
 
@@ -408,9 +452,9 @@ function LiveSimulation() {
       {/* Live Charts */}
       <div className="grid lg:grid-cols-3 gap-6">
         {[
-          { key: "vehicles", label: "Vehicles",       unit: "count",        color: "#818cf8", id: "gV", fmt: v => [v, "Vehicles"] },
-          { key: "wait",     label: "Avg Wait Time",  unit: "seconds",      color: "#34d399", id: "gW", fmt: v => [`${v}s`, "Avg Wait"] },
-          { key: "co2",      label: "CO₂ Emissions",  unit: "×1000 mg",     color: "#fbbf24", id: "gC", fmt: v => [`${v}k mg`, "CO₂"] },
+          { key: "vehicles", label: "Vehicles",       unit: "count",    color: "#818cf8", id: "gV", fmt: v => [v, "Vehicles"]       },
+          { key: "wait",     label: "Avg Wait Time",  unit: "seconds",  color: "#34d399", id: "gW", fmt: v => [`${v}s`, "Avg Wait"] },
+          { key: "co2",      label: "CO₂ Emissions",  unit: "×1000 mg", color: "#fbbf24", id: "gC", fmt: v => [`${v}k mg`, "CO₂"]   },
         ].map(chart => (
           <div key={chart.key} className="card p-5">
             <div className="flex items-center justify-between mb-4">
