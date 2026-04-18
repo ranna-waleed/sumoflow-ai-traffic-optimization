@@ -1,29 +1,31 @@
-# lstm/prepare_data.py (Enhanced)
-# Parses FCD XML/CSV + summary XML → extracts direction counts + waiting times
+# lstm/prepare_data.py 
+# Parses FCD XML/CSV + summary XML , extracts direction counts + waiting times
 # Output: lstm/data/sequences.csv
 
 import os
 import csv
 import xml.etree.ElementTree as ET
-import numpy as np
 from collections import defaultdict
 
-BASE_DIR  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUTPUTS   = os.path.join(BASE_DIR, "simulation", "maps", "outputs")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUTS = os.path.join(BASE_DIR, "simulation", "maps", "outputs")
 LSTM_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 os.makedirs(LSTM_DATA, exist_ok=True)
 
 
-#  Direction from angle 
+# Direction from angle
 def angle_to_direction(angle: float) -> str:
     angle = float(angle) % 360
-    if angle < 45 or angle >= 315:  return "north"
-    if 45  <= angle < 135:          return "east"
-    if 135 <= angle < 225:          return "south"
+    if angle < 45 or angle >= 315:
+        return "north"
+    if 45 <= angle < 135:
+        return "east"
+    if 135 <= angle < 225:
+        return "south"
     return "west"
 
 
-#  Parse summary XML : waiting times per timestep 
+# Parse summary XML : waiting times per timestep
 def parse_summary_xml(filepath: str) -> dict:
     """Returns {timestep: avg_waiting_time}"""
     waiting = {}
@@ -34,14 +36,14 @@ def parse_summary_xml(filepath: str) -> dict:
         root = tree.getroot()
         for step in root.findall("step"):
             time = float(step.get("time", 0))
-            wt   = float(step.get("meanWaitingTime", 0))
+            wt = float(step.get("meanWaitingTime", 0))
             waiting[time] = wt
     except Exception as e:
         print(f"[prepare] summary parse error: {e}")
     return waiting
 
 
-#  Parse FCD XML 
+# Parse FCD XML
 def parse_fcd_xml(filepath: str, summary_path: str, profile: str) -> list:
     print(f"[prepare] Parsing {os.path.basename(filepath)}...")
     waiting_map = parse_summary_xml(summary_path)
@@ -51,10 +53,10 @@ def parse_fcd_xml(filepath: str, summary_path: str, profile: str) -> list:
     root = tree.getroot()
 
     for ts in root.findall("timestep"):
-        time     = float(ts.get("time", 0))
+        time = float(ts.get("time", 0))
         vehicles = ts.findall("vehicle")
-        counts   = {"north": 0, "south": 0, "east": 0, "west": 0}
-        speeds   = []
+        counts = {"north": 0, "south": 0, "east": 0, "west": 0}
+        speeds = []
 
         for v in vehicles:
             angle = v.get("angle")
@@ -62,8 +64,10 @@ def parse_fcd_xml(filepath: str, summary_path: str, profile: str) -> list:
             if angle is not None:
                 counts[angle_to_direction(angle)] += 1
             if speed is not None:
-                try: speeds.append(float(speed))
-                except: pass
+                try:
+                    speeds.append(float(speed))
+                except ValueError:
+                    pass
 
         rows.append({
             "timestep":    time,
@@ -81,35 +85,37 @@ def parse_fcd_xml(filepath: str, summary_path: str, profile: str) -> list:
     return rows
 
 
-#  Parse FCD CSV 
+# Parse FCD CSV
 def parse_fcd_csv(filepath: str, summary_path: str, profile: str) -> list:
     print(f"[prepare] Parsing {os.path.basename(filepath)}...")
-    waiting_map  = parse_summary_xml(summary_path)
+    waiting_map = parse_summary_xml(summary_path)
     timestep_data = {}
 
     with open(filepath, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter=";")
         for row in reader:
-            time  = row.get("timestep_time", "").strip()
+            time = row.get("timestep_time", "").strip()
             angle = row.get("vehicle_angle", "").strip()
             speed = row.get("vehicle_speed", "").strip()
             if not time or not angle:
                 continue
             try:
-                time  = float(time)
+                time = float(time)
                 angle = float(angle)
             except ValueError:
                 continue
             if time not in timestep_data:
-                timestep_data[time] = {"north":0,"south":0,"east":0,"west":0,"speeds":[]}
+                timestep_data[time] = {"north": 0, "south": 0, "east": 0, "west": 0, "speeds": []}
             timestep_data[time][angle_to_direction(angle)] += 1
             if speed:
-                try: timestep_data[time]["speeds"].append(float(speed))
-                except: pass
+                try: 
+                    timestep_data[time]["speeds"].append(float(speed))
+                except ValueError:
+                    pass
 
     rows = []
     for time in sorted(timestep_data.keys()):
-        d      = timestep_data[time]
+        d = timestep_data[time]
         speeds = d["speeds"]
         rows.append({
             "timestep":    time,
@@ -135,7 +141,7 @@ def normalize_timesteps(rows):
     return rows
 
 
-#  Main 
+# Main
 def prepare_all():
     all_rows = []
 
@@ -154,7 +160,7 @@ def prepare_all():
             rows = normalize_timesteps(rows)
             all_rows.extend(rows)
         else:
-            print(f"[prepare] ⚠ Not found: {fcd_path}")
+            print(f"[prepare] Not found: {fcd_path}")
 
     # Custom OD CSV
     csv_path = os.path.join(OUTPUTS, "fcd.csv")
@@ -164,9 +170,9 @@ def prepare_all():
         rows = normalize_timesteps(rows)
         all_rows.extend(rows)
 
-    out_path   = os.path.join(LSTM_DATA, "sequences.csv")
-    fieldnames = ["timestep","profile","north","south","east","west",
-                  "total","avg_speed","avg_waiting"]
+    out_path = os.path.join(LSTM_DATA, "sequences.csv")
+    fieldnames = ["timestep", "profile", "north", "south", "east", "west",
+                  "total", "avg_speed", "avg_waiting"]
 
     with open(out_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
