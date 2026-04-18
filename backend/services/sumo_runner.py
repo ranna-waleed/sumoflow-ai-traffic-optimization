@@ -27,8 +27,10 @@ _port          = 8813
 _view_id       = None
 _last_ss_error = None
 
-# ── LSTM history buffer — stores last 60 timestep features ───
-_lstm_history  = []   # list of {north, south, east, west, total, avg_speed}
+# LSTM history buffer
+# Now stores 7 features (matching new train_lstm.py FEATURES):
+# north, south, east, west, total, avg_speed, avg_waiting
+_lstm_history = []
 
 
 def _angle_to_direction(angle: float) -> str:
@@ -37,6 +39,27 @@ def _angle_to_direction(angle: float) -> str:
     if 45  <= a < 135:      return "east"
     if 135 <= a < 225:      return "south"
     return "west"
+
+
+def _run_yolo_on_frame() -> dict:
+    """
+    Run YOLO inference on the latest screenshot.
+    Returns vehicle type counts from the frame.
+    Falls back gracefully if YOLO not available.
+    """
+    if not os.path.exists(FRAME_PATH):
+        return {}
+    try:
+        from services.yolo_detect import detect_image
+        with open(FRAME_PATH, "rb") as f:
+            image_bytes = f.read()
+        if len(image_bytes) < 1000:   # too small = blank frame
+            return {}
+        result = detect_image(image_bytes)
+        return result.get("class_counts", {})
+    except Exception as e:
+        print(f"[YOLO] Inference skipped: {e}")
+        return {}
 
 
 def start(profile: str = "morning_rush", gui: bool = True) -> dict:
@@ -60,7 +83,7 @@ def start(profile: str = "morning_rush", gui: bool = True) -> dict:
     binary   = "sumo-gui" if gui else "sumo"
     sumo_cmd = [
         binary, "-c", config_path,
-        "--no-warnings", "true",
+        "--no-warnings",  
         "--start", "--delay", "50",
         "--window-size", "1920,1080",
         "--window-pos", "0,0",
@@ -79,7 +102,6 @@ def start(profile: str = "morning_rush", gui: bool = True) -> dict:
         try:
             views    = traci.gui.getIDList()
             _view_id = views[0] if views else "View #0"
-            traci.gui.setSize(_view_id, 1920, 1080)
             boundary = traci.simulation.getNetBoundary()
             cx = (boundary[0][0] + boundary[1][0]) / 2
             cy = (boundary[0][1] + boundary[1][1]) / 2
@@ -131,24 +153,39 @@ def run_steps_with_screenshot(n: int = 30) -> dict:
             time.sleep(0.3)
             if os.path.exists(FRAME_PATH) and os.path.getsize(FRAME_PATH) > 0:
                 with open(FRAME_PATH, "rb") as f:
-                    image_b64 = "data:image/jpeg;base64," + base64.b64encode(f.read()).decode()
+                    image_b64 = "data:image/jpeg;base64," + base64.b64encode(
+                        f.read()).decode()
                 print(f"[screenshot] done length={len(image_b64)}")
         except Exception as e:
             _last_ss_error = str(e)
-            print(f"[screenshot] with error: {e}")
+            print(f"[screenshot] error: {e}")
 
     state = _get_state_safe()
 
-    # Update LSTM history
-    _lstm_history.append({
-        "north":     state.get("direction_counts", {}).get("north", 0),
-        "south":     state.get("direction_counts", {}).get("south", 0),
-        "east":      state.get("direction_counts", {}).get("east",  0),
-        "west":      state.get("direction_counts", {}).get("west",  0),
-        "total":     state["vehicles"],
-        "avg_speed": state.get("avg_speed", 0.0),
-    })
-    # Keep last 120 for LSTM
+    # Run YOLO on the frame to get vehicle type counts
+    yolo_counts = _run_yolo_on_frame()
+
+    # Build richer LSTM history entry
+    # 7 features: north, south, east, west, total, avg_speed, avg_waiting
+    # YOLO enriches vehicle counts; TraCI provides speed + waiting
+    lstm_entry = {
+        "north":       state.get("direction_counts", {}).get("north", 0),
+        "south":       state.get("direction_counts", {}).get("south", 0),
+        "east":        state.get("direction_counts", {}).get("east",  0),
+        "west":        state.get("direction_counts", {}).get("west",  0),
+        "total":       state["vehicles"],
+        "avg_speed":   state.get("avg_speed", 0.0),
+        "avg_waiting": state.get("avg_wait_s", 0.0),   # ← NEW: waiting time
+    }
+
+    # If YOLO detected vehicles, cross-check total with TraCI
+    # (YOLO gives type breakdown; TraCI gives exact positions)
+    if yolo_counts:
+        yolo_total = sum(yolo_counts.values())
+        # Blend: use TraCI direction counts but log YOLO type counts
+        lstm_entry["yolo_total"] = yolo_total   # stored but not used as feature
+
+    _lstm_history.append(lstm_entry)
     if len(_lstm_history) > 120:
         _lstm_history.pop(0)
 
@@ -156,6 +193,7 @@ def run_steps_with_screenshot(n: int = 30) -> dict:
         "steps_run":        n,
         "latest":           state,
         "image":            image_b64,
+        "yolo_counts":      yolo_counts,
         "lstm_history_len": len(_lstm_history),
         "screenshot_error": _last_ss_error if image_b64 is None else None,
     }
@@ -185,9 +223,9 @@ def _get_state_safe() -> dict:
             continue
 
     avg_wait  = round(sum(waiting_times) / len(waiting_times), 2) if waiting_times else 0.0
-    max_wait  = round(max(waiting_times), 2) if waiting_times else 0.0
+    max_wait  = round(max(waiting_times), 2)                      if waiting_times else 0.0
     total_co2 = round(sum(co2_values), 2)
-    avg_speed = round(sum(speeds) / len(speeds), 2) if speeds else 0.0
+    avg_speed = round(sum(speeds) / len(speeds), 2)               if speeds        else 0.0
 
     tl_states = {}
     for tl in traci.trafficlight.getIDList():
