@@ -3,29 +3,19 @@ import zipfile
 import os
 import mlflow
 from ultralytics import YOLO, settings
+import torch
 
 #Configuration 
 NUM_EPOCHS   = 60
 BATCH_SIZE   = 8
 IMG_SIZE     = 640
-DATASET_YAML = '/content/dataset.yaml'
-SAVE_PATH    = "/content/drive/MyDrive/SUMO Grad Proj Output files/yolo_results"
+DATASET_YAML = 'detection/dataset/dataset.yaml'
+SAVE_PATH    = 'detection/yolo_results'
 
 # Setup Dataset
 def setup_dataset():
-    zip_path     = '/content/drive/MyDrive/SUMO Grad Proj Output files/dataset_v2.zip'
-    extract_path = '/content/dataset_v2'
-
-    if not os.path.exists(extract_path):
-        print("Unzipping dataset")
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_path)
-        print("Dataset unzipped!")
-    else:
-        print("Dataset already exists!")
-
     dataset_config = {
-        'path': '/content/dataset_v2',
+        'path': os.path.abspath('detection/dataset'),
         'train': 'images/train',
         'val':   'images/val',
         'test':  'images/test',
@@ -34,13 +24,14 @@ def setup_dataset():
                   'taxi', 'microbus', 'bicycle']
     }
 
-    with open('/content/dataset.yaml', 'w') as f:
+    yaml_path = 'detection/dataset/dataset.yaml'
+    with open(yaml_path, 'w') as f:
         yaml.dump(dataset_config, f)
 
-    print("dataset.yaml recreated!")
-    print(f"   Train: {len(os.listdir('/content/dataset_v2/images/train'))} images")
-    print(f"   Val:   {len(os.listdir('/content/dataset_v2/images/val'))} images")
-    print(f"   Test:  {len(os.listdir('/content/dataset_v2/images/test'))} images")
+    print("dataset.yaml created!")
+    print(f"   Train: {len(os.listdir('detection/dataset/images/train'))} images")
+    print(f"   Val:   {len(os.listdir('detection/dataset/images/val'))} images")
+    print(f"   Test:  {len(os.listdir('detection/dataset/images/test'))} images")
 
 # Training 
 def main():
@@ -52,7 +43,7 @@ def main():
     # Setup MLflow
     mlflow.end_run()
     mlflow.set_tracking_uri(
-        "sqlite:////content/drive/MyDrive/SUMO Grad Proj Output files/mlflow.db"
+        f"sqlite:///{os.path.abspath('mlflow.db')}"
     )
     mlflow.set_experiment("SumoFlowAI-Traffic-Detection")
 
@@ -72,15 +63,15 @@ def main():
             epochs     = NUM_EPOCHS,
             imgsz      = IMG_SIZE,
             batch      = BATCH_SIZE,
-            cls        = 2.0,
-            degrees    = 10.0,
-            mixup      = 0.1,
-            copy_paste = 0.1,
+            cls        = 2.0, # multiplies the classification loss by 2, making the model prioritize getting the class right over just finding the box
+            degrees    = 10.0, #randomly rotates images ±10° during training for augmentation.
+            mixup      = 0.1, # 10% of batches blend two images together as augmentation, forcing the model to handle overlapping objects.
+            copy_paste = 0.1, # randomly copies objects from one image and pastes them into another, for rare classes like bicycles/motorcycles
             name       = "tahrir_yolo_v3",
             project    = SAVE_PATH,
             save       = True,
             plots      = True,
-            device     = 0,
+            device = 0 if torch.cuda.is_available() else 'cpu',
             verbose    = True,
         )
 

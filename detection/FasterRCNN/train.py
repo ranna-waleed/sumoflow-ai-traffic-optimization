@@ -8,19 +8,19 @@ Part 2: Train Faster R-CNN
 
 import os
 import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 import time
 import copy
 import torch
 import mlflow
 import mlflow.pytorch
 from torch.utils.data import DataLoader, random_split
-from torchvision.models.detection import fasterrcnn_resnet50_fpn, FasterRCNN_ResNet50_FPN_Weights
+from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from detection.RetinaNet.dataloader import TahrirTrafficDataset, collate_fn
 
 # ── paths ────────────────────────────────────────────────────────────────────
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from dataloader import TahrirTrafficDataset, collate_fn
-
 IMGS_DIR   = "detection/dataset/images/train"
 XML_DIR    = "detection/dataset/annotations/train"
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "outputs")
@@ -30,10 +30,10 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 NUM_CLASSES  = 8          # 7 vehicle classes + 1 background
 NUM_EPOCHS   = 60
 BATCH_SIZE   = 2
-LR           = 0.001
+LR           = 0.005
 MOMENTUM     = 0.9
 WEIGHT_DECAY = 0.0005
-LR_STEP_SIZE = 20         # decay LR every N epochs
+LR_STEP_SIZE = 30         # decay LR every N epochs
 LR_GAMMA     = 0.1
 VAL_SPLIT    = 0.15       # 15% of training data used for validation
 BEST_WEIGHTS = os.path.join(OUTPUT_DIR, "best_faster_rcnn.pth")
@@ -41,15 +41,14 @@ BEST_WEIGHTS = os.path.join(OUTPUT_DIR, "best_faster_rcnn.pth")
 
 def build_model(num_classes: int, device: torch.device) -> torch.nn.Module:
     """Load pretrained Faster R-CNN and replace the classification head."""
-    weights = FasterRCNN_ResNet50_FPN_Weights.DEFAULT
-    model   = fasterrcnn_resnet50_fpn(weights=weights)
+    weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
+    model   = fasterrcnn_resnet50_fpn_v2(weights=weights)
 
     # Replace box predictor to match our class count
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
     return model.to(device)
-
 
 def train_one_epoch(model, optimizer, loader, device, epoch):
     model.train()
@@ -78,7 +77,6 @@ def train_one_epoch(model, optimizer, loader, device, epoch):
     print(f"  → Epoch {epoch+1:02d} avg loss: {avg_loss:.4f}  ({elapsed:.1f}s)")
     return avg_loss
 
-
 @torch.no_grad()
 def evaluate_loss(model, loader, device):
     """Compute average loss on a validation set (model stays in train mode for loss)."""
@@ -90,7 +88,6 @@ def evaluate_loss(model, loader, device):
         loss_dict = model(images, targets)
         total_loss += sum(loss for loss in loss_dict.values()).item()
     return total_loss / max(len(loader), 1)
-
 
 def main():
     # ── device ────────────────────────────────────────────────────────────────
@@ -124,7 +121,7 @@ def main():
     # ── MLflow run ────────────────────────────────────────────────────────────
     mlflow.set_experiment("FasterRCNN_TahrirTraffic")
 
-    with mlflow.start_run(run_name="fasterrcnn_resnet50_fpn"):
+    with mlflow.start_run(run_name="v2_backbone_lr0.005_lrstepsize"):
         # Log hyperparameters
         mlflow.log_params({
             "num_classes":  NUM_CLASSES,
@@ -178,7 +175,6 @@ def main():
         print(f"\nTraining complete!")
         print(f"Best val loss: {best_val_loss:.4f} at epoch {best_epoch}")
         print(f"Best weights saved to: {BEST_WEIGHTS}")
-
 
 if __name__ == "__main__":
     main()

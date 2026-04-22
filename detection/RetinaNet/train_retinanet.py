@@ -8,7 +8,7 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from dataloader import get_train_loader, get_val_loader
 
 # ─── 1. Configuration ──────────────────────────────────────────────────────────
-NUM_CLASSES    = 8
+NUM_CLASSES    = 7
 BATCH_SIZE     = 2
 NUM_EPOCHS     = 60
 LEARNING_RATE  = 0.001

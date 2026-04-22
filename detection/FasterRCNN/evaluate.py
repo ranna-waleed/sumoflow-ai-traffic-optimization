@@ -17,16 +17,16 @@ import mlflow
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from torch.utils.data import DataLoader
-from torchvision.models.detection import fasterrcnn_resnet50_fpn, FasterRCNN_ResNet50_FPN_Weights
+from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
+from ..RetinaNet.dataloader import TahrirTrafficDataset, collate_fn
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from dataloader import TahrirTrafficDataset, collate_fn
 
 BASE_DIR     = os.path.dirname(__file__)
-WEIGHTS_PATH = os.path.join(BASE_DIR, "outputs", "best_faster_rcnn.pth")
+WEIGHTS_PATH = os.path.join(BASE_DIR, "outputs", "best_faster_rcnn_run2.pth")
 OUTPUT_DIR   = os.path.join(BASE_DIR, "outputs")
 DETECTIONS_DIR = os.path.join(OUTPUT_DIR, "detection_images")
 os.makedirs(DETECTIONS_DIR, exist_ok=True)
@@ -54,7 +54,7 @@ COLORS = {
 
 
 def build_model(num_classes: int) -> torch.nn.Module:
-    model = fasterrcnn_resnet50_fpn(weights=FasterRCNN_ResNet50_FPN_Weights.DEFAULT)
+    model = fasterrcnn_resnet50_fpn_v2(weights= FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT)
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     return model
@@ -244,14 +244,14 @@ def run_evaluation():
         "per_class_ap":      per_class_ap,
         "num_test_images":   len(test_dataset),
     }
-    results_path = os.path.join(OUTPUT_DIR, "eval_results.json")
+    results_path = os.path.join(OUTPUT_DIR, "eval_results_run2.json")
     with open(results_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\nResults saved to {results_path}")
 
     # ── log to MLflow ──────────────────────────────────────────────────────────
     mlflow.set_experiment("FasterRCNN_TahrirTraffic")
-    with mlflow.start_run(run_name="evaluation"):
+    with mlflow.start_run(run_name="eval_run2_weighted_sampling_filtered"):
         mlflow.log_metrics({
             "mAP_50":            map50,
             "mAP_50_95":         map_val,

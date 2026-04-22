@@ -1,6 +1,5 @@
-
 # lstm/predict.py (BiLSTM)
-import os, json, pickle
+import os, json, pickle, threading
 import numpy as np
 import torch
 import torch.nn as nn
@@ -13,6 +12,8 @@ CONFIG_PATH = os.path.join(MODELS_DIR, "config.json")
 
 SEQ_LEN  = 60
 PRED_LEN = 30
+
+_load_lock = threading.Lock()
 
 
 class TrafficLSTM(nn.Module):
@@ -51,29 +52,38 @@ _features = None
 def _load():
     global _model, _scaler, _config, _features
 
-    for p in [MODEL_PATH, SCALER_PATH, CONFIG_PATH]:
-        if not os.path.exists(p):
-            raise FileNotFoundError(f"Missing: {p}\nRun: python lstm/train_lstm.py")
+    # FIX: guard against concurrent calls before model is initialised
+    with _load_lock:
+        if _model is not None:
+            return  # another thread already loaded while we waited
 
-    with open(CONFIG_PATH) as f:
-        _config = json.load(f)
-    _features = _config["features"]
+        for p in [MODEL_PATH, SCALER_PATH, CONFIG_PATH]:
+            if not os.path.exists(p):
+                raise FileNotFoundError(f"Missing: {p}\nRun: python lstm/train_lstm.py")
 
-    with open(SCALER_PATH, "rb") as f:
-        _scaler = pickle.load(f)
+        with open(CONFIG_PATH) as f:
+            _config = json.load(f)
 
-    _model = TrafficLSTM(
-        input_size    = _config["input_size"],
-        hidden_size   = _config["hidden_size"],
-        num_layers    = _config["num_layers"],
-        output_size   = _config["output_size"],
-        pred_len      = _config["pred_len"],
-        dropout       = _config["dropout"],
-        bidirectional = _config.get("bidirectional", True),
-    )
-    _model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
-    _model.eval()
-    print("[LSTM] BiLSTM model loaded ")
+        # FIX: always derive feature list from config — no hardcoded fallback
+        # The config is written by train_lstm.py and reflects whatever FEATURES
+        # was used at training time (currently 7: includes avg_waiting).
+        _features = _config["features"]
+
+        with open(SCALER_PATH, "rb") as f:
+            _scaler = pickle.load(f)
+
+        _model = TrafficLSTM(
+            input_size    = _config["input_size"],
+            hidden_size   = _config["hidden_size"],
+            num_layers    = _config["num_layers"],
+            output_size   = _config["output_size"],
+            pred_len      = _config["pred_len"],
+            dropout       = _config["dropout"],
+            bidirectional = _config.get("bidirectional", True),
+        )
+        _model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
+        _model.eval()
+        print(f"[LSTM] BiLSTM model loaded  (features={_features})")
 
 
 def is_ready() -> bool:
@@ -85,7 +95,8 @@ def predict(history: list) -> dict:
     if _model is None:
         _load()
 
-    features = _features or ["north", "south", "east", "west", "total", "avg_speed"]
+    # FIX: feature list comes entirely from config — no stale fallback
+    features = _features
     min_val  = _scaler["min_"]
     max_val  = _scaler["max_"]
     denom    = max_val - min_val

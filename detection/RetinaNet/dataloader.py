@@ -22,12 +22,16 @@ class TahrirTrafficDataset(Dataset):
         self.imgs_dir = imgs_dir
         self.xml_dir  = xml_dir
         self.augment  = augment
-        self.imgs     = list(sorted([f for f in os.listdir(imgs_dir) if f.endswith('.png')]))
+        self.imgs = list(sorted([
+            f for f in os.listdir(imgs_dir)
+            if f.lower().endswith(('.png', '.jpg', '.jpeg'))
+        ]))
 
     def __getitem__(self, idx):
         img_name = self.imgs[idx]
         img_path = os.path.join(self.imgs_dir, img_name)
-        xml_path = os.path.join(self.xml_dir, img_name.replace('.png', '.xml'))
+        stem     = os.path.splitext(img_name)[0]
+        xml_path = os.path.join(self.xml_dir, stem + '.xml')
 
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32)
@@ -151,8 +155,8 @@ def collate_fn(batch):
 
 def get_train_loader(batch_size=2):
     dataset = TahrirTrafficDataset(
-        imgs_dir="detection/dataset_v2/images/train",
-        xml_dir="detection/dataset_v2/annotations/train",
+        imgs_dir="detection/dataset/images/train",
+        xml_dir="detection/dataset/annotations/train",
         augment=True
     )
     return torch.utils.data.DataLoader(
@@ -169,8 +173,8 @@ def get_val_loader(batch_size=1):
     # FIX: Use the dedicated 'val/' split — NOT 'test/'
     # Test set must remain completely unseen until final evaluation.
     dataset = TahrirTrafficDataset(
-        imgs_dir="detection/dataset_v2/images/val",
-        xml_dir="detection/dataset_v2/annotations/val",
+        imgs_dir="detection/dataset/images/val",
+        xml_dir="detection/dataset/annotations/val",
         augment=False
     )
     return DataLoader(
@@ -186,8 +190,8 @@ def get_val_loader(batch_size=1):
 def get_test_loader(batch_size=1):
     """Completely held-out set — only call this in evaluate.py for final reporting."""
     dataset = TahrirTrafficDataset(
-        imgs_dir="detection/dataset_v2/images/test",
-        xml_dir="detection/dataset_v2/annotations/test",
+        imgs_dir="detection/dataset/images/test",
+        xml_dir="detection/dataset/annotations/test",
         augment=False
     )
     return DataLoader(
@@ -203,8 +207,8 @@ def get_test_loader(batch_size=1):
 if __name__ == "__main__":
     print("Testing PyTorch DataLoader...")
     dataset = TahrirTrafficDataset(
-        imgs_dir="detection/dataset_v2/images/train",
-        xml_dir="detection/dataset_v2/annotations/train"
+        imgs_dir="detection/dataset/images/train",
+        xml_dir="detection/dataset/annotations/train"
     )
     data_loader = DataLoader(dataset, batch_size=2, shuffle=True, collate_fn=collate_fn)
     images, targets = next(iter(data_loader))

@@ -1,4 +1,3 @@
-
 # lstm/train_lstm.py (BiLSTM)
 import os, csv, numpy as np, torch, torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
@@ -12,7 +11,7 @@ os.makedirs(MODELS_DIR, exist_ok=True)
 
 SEQ_LEN      = 60
 PRED_LEN     = 30
-FEATURES     = ["north", "south", "east", "west", "total", "avg_speed"]
+FEATURES     = ["north", "south", "east", "west", "total", "avg_speed", "avg_waiting"]  # FIX 1: added avg_waiting
 TARGETS      = ["north", "south", "east", "west"]
 HIDDEN       = 128
 LAYERS       = 2
@@ -72,43 +71,61 @@ def load_data():
     for r in rows:
         by_profile[r["profile"]].append(r)
 
-    all_X, all_y = [], []
+    # FIX 2: per-profile temporal split — last 20% of each profile's timeline = val
+    # This prevents temporal leakage that occurred when shuffling across all profiles
+    train_X, train_y = [], []
+    val_X,   val_y   = [], []
+
     for profile, data in by_profile.items():
         data.sort(key=lambda x: x["timestep"])
         arr = np.array([[r.get(f, 0.0) for f in FEATURES] for r in data], dtype=np.float32)
-        for i in range(len(arr) - SEQ_LEN - PRED_LEN + 1):
-            all_X.append(arr[i : i + SEQ_LEN])
-            all_y.append(arr[i + SEQ_LEN : i + SEQ_LEN + PRED_LEN, :4])
 
-    X = np.array(all_X)
-    y = np.array(all_y)
-    print(f"[train] Sequences: {len(X)}, X={X.shape}, y={y.shape}")
-    return X, y
+        seqs_X, seqs_y = [], []
+        for i in range(len(arr) - SEQ_LEN - PRED_LEN + 1):
+            seqs_X.append(arr[i : i + SEQ_LEN])
+            seqs_y.append(arr[i + SEQ_LEN : i + SEQ_LEN + PRED_LEN, :4])
+
+        split = int(len(seqs_X) * 0.8)
+        train_X.extend(seqs_X[:split])
+        train_y.extend(seqs_y[:split])
+        val_X.extend(seqs_X[split:])
+        val_y.extend(seqs_y[split:])
+
+    train_X = np.array(train_X)
+    train_y = np.array(train_y)
+    val_X   = np.array(val_X)
+    val_y   = np.array(val_y)
+
+    print(f"[train] Train sequences: {len(train_X)}, Val sequences: {len(val_X)}")
+    print(f"[train] X={train_X.shape}, y={train_y.shape}")
+    return train_X, train_y, val_X, val_y
 
 
 def train():
-    X, y = load_data()
+    train_X, train_y, val_X, val_y = load_data()
 
-    X_flat  = X.reshape(-1, len(FEATURES))
+    # FIX 3: fit scaler ONLY on training data to prevent data leakage into validation
+    X_flat  = train_X.reshape(-1, len(FEATURES))
     min_val = X_flat.min(axis=0)
     max_val = X_flat.max(axis=0)
     denom   = max_val - min_val
     denom[denom == 0] = 1
-    X_flat  = (X_flat - min_val) / denom
-    X       = X_flat.reshape(X.shape)
+
+    # Normalize train features
+    train_X = ((train_X.reshape(-1, len(FEATURES)) - min_val) / denom).reshape(train_X.shape)
+    # Normalize val features using train scaler
+    val_X   = ((val_X.reshape(-1, len(FEATURES)) - min_val) / denom).reshape(val_X.shape)
 
     min_t   = min_val[:4]
     max_t   = max_val[:4]
     denom_t = max_t - min_t
     denom_t[denom_t == 0] = 1
-    y       = ((y.reshape(-1, 4) - min_t) / denom_t).reshape(y.shape)
 
-    idx  = np.random.permutation(len(X))
-    X, y = X[idx], y[idx]
+    train_y = ((train_y.reshape(-1, 4) - min_t) / denom_t).reshape(train_y.shape)
+    val_y   = ((val_y.reshape(-1, 4) - min_t) / denom_t).reshape(val_y.shape)
 
-    split    = int(len(X) * 0.8)
-    train_dl = DataLoader(TrafficDataset(X[:split], y[:split]), BATCH_SIZE, shuffle=True, drop_last=True)
-    val_dl   = DataLoader(TrafficDataset(X[split:], y[split:]), BATCH_SIZE)
+    train_dl = DataLoader(TrafficDataset(train_X, train_y), BATCH_SIZE, shuffle=True, drop_last=True)
+    val_dl   = DataLoader(TrafficDataset(val_X, val_y), BATCH_SIZE)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model  = TrafficLSTM(
