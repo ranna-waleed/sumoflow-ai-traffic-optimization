@@ -78,6 +78,27 @@ class DQNAgent:
             q_values = self.policy_net(state_t)
         return q_values.argmax().item()
 
+    def act_with_q(self, state):
+        """
+        Same as act() but also returns all Q-values.
+        Used for logging and explainability —
+        shows WHY the agent chose this action.
+        Returns: (action: int, q_values: list[float])
+        """
+        state_t = torch.FloatTensor(state).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            q_values = self.policy_net(state_t).squeeze(0)
+        q_list = q_values.cpu().numpy().tolist()
+
+        # During inference epsilon=0 so always exploit
+        # During training still use epsilon-greedy
+        if random.random() < self.epsilon:
+            action = random.randrange(self.action_size)
+        else:
+            action = int(np.argmax(q_list))
+
+        return action, q_list
+
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 

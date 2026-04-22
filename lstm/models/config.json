@@ -1,5 +1,5 @@
 {
-  "input_size": 6,
+  "input_size": 7,
   "hidden_size": 128,
   "num_layers": 2,
   "output_size": 4,
@@ -12,6 +12,7 @@
     "east",
     "west",
     "total",
-    "avg_speed"
+    "avg_speed",
+    "avg_waiting"
   ]
 }

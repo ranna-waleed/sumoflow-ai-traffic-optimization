@@ -41,6 +41,8 @@ function BeforeAfter() {
   const [simMetrics,    setSimMetrics]     = useState(null);
   const [simFrame,      setSimFrame]       = useState(null);
   const [startingProfile, setStartingProfile] = useState(null);
+  const [qValues,       setQValues]        = useState(null);  
+  const [fallbackMode,  setFallbackMode]   = useState(false); 
 
   const frameRef    = useRef(null);
   const pollRef     = useRef(null);
@@ -60,7 +62,11 @@ function BeforeAfter() {
       setSimRunning(status.running);
       if (status.running) {
         setSimMetrics(status.metrics);
-        // Fetch screenshot
+        // extract Q-values and fallback mode
+        if (status.metrics?.q_values) {
+          setQValues(status.metrics.q_values);
+        }
+        setFallbackMode(status.metrics?.fallback_mode || false);
         const imgRes = await fetch(`${API}/api/dqn/sim/screenshot`);
         if (imgRes.ok) {
           const blob = await imgRes.blob();
@@ -345,6 +351,64 @@ function BeforeAfter() {
                   <div className="text-[10px] text-[#94a3b8] mb-0.5">Current Action</div>
                   <div className="font-mono text-indigo-300 text-[11px]">{simMetrics.current_action}</div>
                 </div>
+                {/* ── Q-Value Visualization — WHY DQN chose this action ── */}
+                {qValues && (
+                  <div className="px-3 py-3 rounded-lg bg-white/5 border border-white/5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="text-[10px] font-semibold text-[#94a3b8]">
+                        DQN Q-Values
+                      </div>
+                      <div className="text-[10px] text-[#64748b]">
+                        higher = preferred
+                      </div>
+                    </div>
+                    {Object.entries(qValues).map(([actionName, qVal]) => {
+                      const isChosen = actionName === simMetrics.current_action;
+                      // Normalize bars: shift all values so min=0
+                      const allVals  = Object.values(qValues);
+                      const minVal   = Math.min(...allVals);
+                      const maxVal   = Math.max(...allVals);
+                      const range    = maxVal - minVal || 1;
+                      const pct      = Math.round(((qVal - minVal) / range) * 100);
+                      return (
+                        <div key={actionName}>
+                          <div className="flex items-center justify-between text-[10px] mb-1">
+                            <span className={isChosen ? "text-indigo-300 font-semibold" : "text-[#94a3b8]"}>
+                              {isChosen ? "⚡ " : ""}{actionName}
+                            </span>
+                            <span className={`font-mono ${isChosen ? "text-indigo-300" : "text-[#64748b]"}`}>
+                              {qVal.toFixed(4)}
+                            </span>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{
+                                width:           `${pct}%`,
+                                backgroundColor: isChosen ? "#818cf8" : "#334155",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div className="text-[10px] text-[#64748b] pt-1 border-t border-white/5">
+                      DQN picks action with highest Q-value
+                    </div>
+                  </div>
+                )}
+
+                {/* Fallback mode warning */}
+                {fallbackMode && (
+                  <div className="px-3 py-2 rounded-lg bg-amber-500/15 border border-amber-500/30">
+                    <div className="text-[10px] text-amber-400 font-semibold">
+                      ⚠ Fallback Mode Active
+                    </div>
+                    <div className="text-[10px] text-[#94a3b8] mt-0.5">
+                      DQN inference failed — using fixed 39s timing
+                    </div>
+                  </div>
+                )}
               </>
             ) : simProfile && profileData[simProfile] ? (
               // Profile comparison results

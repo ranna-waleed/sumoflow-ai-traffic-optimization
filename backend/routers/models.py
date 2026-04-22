@@ -9,10 +9,9 @@ BASE_DIR        = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspat
 FASTER_RCNN_DIR = os.path.join(BASE_DIR, "detection", "FasterRCNN", "outputs")
 
 
-#  GET /api/models/comparison 
+#  GET /api/models/comparison
 @router.get("/comparison")
 def get_comparison():
-    # Try to load Faster RCNN from file, fallback to hardcoded real values
     rcnn_path = os.path.join(FASTER_RCNN_DIR, "eval_results_run2.json")
     rcnn_data = {}
     if os.path.exists(rcnn_path):
@@ -45,12 +44,12 @@ def get_comparison():
                 "name":         "Faster RCNN",
                 "status":       "complete",
                 "selected":     False,
-                "mAP50":        rcnn_data.get("mAP@0.5",        0.470),
-                "mAP50_95":     rcnn_data.get("mAP@0.5:0.95",   0.343),
-                "precision":    rcnn_data.get("precision",       0.937),
-                "recall":       rcnn_data.get("recall",          0.373),
-                "fps":          rcnn_data.get("fps",             7.08),
-                "inference_ms": rcnn_data.get("avg_inference_ms",141.2),
+                "mAP50":        rcnn_data.get("mAP@0.5",         0.470),
+                "mAP50_95":     rcnn_data.get("mAP@0.5:0.95",    0.343),
+                "precision":    rcnn_data.get("precision",        0.937),
+                "recall":       rcnn_data.get("recall",           0.373),
+                "fps":          rcnn_data.get("fps",              7.08),
+                "inference_ms": rcnn_data.get("avg_inference_ms", 141.2),
                 "per_class_ap": rcnn_data.get("per_class_ap", {
                     "car":        0.318,
                     "bus":        0.799,
@@ -67,11 +66,11 @@ def get_comparison():
                 "selected":     False,
                 "mAP50":        0.413,
                 "mAP50_95":     0.285,
-                "precision":    None,
+                "precision":    0,       # ← FIXED: was None, crashes frontend math
                 "recall":       0.334,
                 "fps":          9.38,
                 "inference_ms": 106.6,
-                "note":         None,
+                "note":         "Precision metric unavailable due to torchmetrics 1.8.2 bug",
                 "per_class_ap": {
                     "car":        0.238,
                     "bus":        0.725,
@@ -86,7 +85,7 @@ def get_comparison():
     }
 
 
-#  GET /api/models/yolo 
+#  GET /api/models/yolo
 @router.get("/yolo")
 def get_yolo():
     return {
@@ -113,13 +112,12 @@ def get_yolo():
     }
 
 
-#  GET /api/models/faster_rcnn 
+#  GET /api/models/faster_rcnn
 @router.get("/faster_rcnn")
 def get_faster_rcnn():
     rcnn_path = os.path.join(FASTER_RCNN_DIR, "eval_results_run2.json")
 
     if not os.path.exists(rcnn_path):
-        # Return hardcoded real values if file not found
         return {
             "name":         "Faster RCNN",
             "status":       "complete",
@@ -162,7 +160,7 @@ def get_faster_rcnn():
     }
 
 
-#  GET /api/models/retinanet 
+#  GET /api/models/retinanet
 @router.get("/retinanet")
 def get_retinanet():
     return {
@@ -173,15 +171,17 @@ def get_retinanet():
         "backbone":     "ResNet-50 + FPN",
         "mAP50":        0.413,
         "mAP50_95":     0.285,
+        "precision":    0,     
         "recall":       0.334,
         "fps":          9.38,
         "inference_ms": 106.6,
+        "note":         "Precision metric unavailable due to torchmetrics 1.8.2 bug",
         "per_class_ap": {
             "car":        0.238,
             "bus":        0.725,
             "truck":      0.488,
             "motorcycle": 0.031,
-            "taxi":       0.220,
+            "tai":        0.220,
             "microbus":   0.258,
             "bicycle":    0.036,
         }

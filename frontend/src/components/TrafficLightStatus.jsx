@@ -1,46 +1,70 @@
 import React from "react";
 import { Compass } from "lucide-react";
 
-
-
-// Determine overall phase from a SUMO signal string like "GGGGrrrrrr"
+// FIXED: proper direction parsing from signal string
+// SUMO signal strings like "GGGGrrrr" — G=green, y=yellow, r=red
 function parsePhase(signalStr) {
   if (!signalStr) return "red";
   const s = signalStr.toLowerCase();
   if (s.includes("y")) return "yellow";
-  if (s.includes("g")) return "green";   // any green = green
+  if (s.includes("g")) return "green";
   return "red";
 }
 
-// Static fallback when simulation is not running
+// FIXED: map TL IDs to directions based on known Tahrir Square TL positions
+// Instead of blindly mapping first 4 IDs, we use the known IDs from the project
+const TL_DIRECTION_MAP = {
+  "315744796":  "North",   // Main TL — north approach
+  "2031414903": "South",   // South approach
+  "96621100":   "East",    // East approach
+  "2031414899": "West",    // West approach
+  // Fallback for any other TLs
+  "6288771431": "North-East",
+  "96621068":   "South-East",
+  "271064234":  "South-West",
+  "315743335":  "North-West",
+  "6288771435": "Centre",
+};
+
+// Static fallback when simulation not running
 const STATIC = [
-  { id: "north", label: "North", phase: "red",   signal: "——" },
-  { id: "south", label: "South", phase: "red",   signal: "——" },
-  { id: "east",  label: "East",  phase: "red",   signal: "——" },
-  { id: "west",  label: "West",  phase: "red",   signal: "——" },
+  { id: "north", label: "North",     phase: "red", signal: "——" },
+  { id: "south", label: "South",     phase: "red", signal: "——" },
+  { id: "east",  label: "East",      phase: "red", signal: "——" },
+  { id: "west",  label: "West",      phase: "red", signal: "——" },
 ];
 
+// Show only the 4 main directions in the UI
+const MAIN_DIRECTIONS = ["North", "South", "East", "West"];
+
 function TrafficLightStatus({ trafficLights, typeCounts }) {
-  console.log("trafficLights received:", trafficLights);  
-  // Build display rows from real TraCI data
+  // FIXED: removed console.log that was left in production
+
   let rows;
-
   if (trafficLights && Object.keys(trafficLights).length > 0) {
-    const ids = Object.keys(trafficLights);
-    const labels = ["North", "South", "East", "West"];
+    // Build direction → signal map using known TL IDs
+    const directionMap = {};
+    for (const [tlId, signal] of Object.entries(trafficLights)) {
+      const direction = TL_DIRECTION_MAP[tlId];
+      if (direction && MAIN_DIRECTIONS.includes(direction)) {
+        directionMap[direction] = signal;
+      }
+    }
 
-    // Map first 4 traffic light IDs to cardinal directions
-    rows = labels.map((label, i) => {
-      const id     = ids[i] || ids[0];
-      const signal = trafficLights[id] || "rrrr";
-      const phase  = parsePhase(signal);
-      return { id, label, phase, signal };
+    // Build rows for the 4 cardinal directions
+    rows = MAIN_DIRECTIONS.map(label => {
+      const signal = directionMap[label] || "rrrr";
+      return {
+        id:     label.toLowerCase(),
+        label,
+        phase:  parsePhase(signal),
+        signal,
+      };
     });
   } else {
     rows = STATIC;
   }
 
-  // Vehicle counts per direction — approximate from type_counts total
   const totalVehicles = typeCounts
     ? Object.values(typeCounts).reduce((a, b) => a + b, 0)
     : null;
@@ -60,17 +84,17 @@ function TrafficLightStatus({ trafficLights, typeCounts }) {
       </div>
 
       <div className="space-y-3">
-        {rows.map((row) => {
+        {rows.map(row => {
           const isGreen  = row.phase === "green";
           const isYellow = row.phase === "yellow";
           const isRed    = row.phase === "red";
-
           return (
-            <div key={row.label}
+            <div
+              key={row.label}
               className={`flex items-center justify-between p-3 rounded-xl transition-colors ${
                 isGreen  ? "bg-emerald-500/10 border border-emerald-500/25" :
-                isYellow ? "bg-amber-500/10 border border-amber-500/25" :
-                           "bg-white/5 border border-white/5"
+                isYellow ? "bg-amber-500/10   border border-amber-500/25"  :
+                           "bg-white/5         border border-white/5"
               }`}
             >
               <div>
@@ -79,7 +103,6 @@ function TrafficLightStatus({ trafficLights, typeCounts }) {
                   {trafficLights ? row.signal : "No data"}
                 </div>
               </div>
-
               <div className="flex items-center gap-3">
                 <span className={`text-[11px] font-mono font-medium ${
                   isGreen ? "text-emerald-400" : isYellow ? "text-amber-400" : "text-red-400"
