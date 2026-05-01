@@ -1,3 +1,6 @@
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import torch
 import time
 import mlflow
@@ -5,11 +8,11 @@ import torchvision
 import argparse
 from torchvision.models.detection.retinanet import RetinaNetClassificationHead
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
-from dataloader import get_test_loader
+from detection.RetinaNet.dataloader import get_test_loader, CLASS_TO_IDX_RETINANET
 import os
 
 # ─── 1. Configuration ──────────────────────────────────────────
-NUM_CLASSES  = 8
+NUM_CLASSES  = 7
 BATCH_SIZE   = 1
 WEIGHTS_PATH = "detection/RetinaNet/retinanet_best.pth"
 
@@ -30,32 +33,10 @@ def get_retinanet_model(num_classes):
     )
     return model
 
-
-def remap_labels_to_zero_indexed(items):
-    """
-    torchmetrics MeanAveragePrecision expects 0-indexed class labels.
-    Our dataset uses 1-indexed labels (car=1 ... bicycle=7).
-    Subtract 1 from every label so the metric can match them correctly.
-
-    Also removed max_detection_thresholds from the metric constructor —
-    torchmetrics 1.8.2 has a bug where that parameter causes class_metrics
-    to return -1.0 for all classes regardless of predictions.
-    """
-    remapped = []
-    for item in items:
-        remapped.append({
-            **item,
-            "labels": item["labels"] - 1
-        })
-    return remapped
-
-
 # ─── 3. Evaluation Loop ────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="Evaluate RetinaNet and log to MLflow")
-    parser.add_argument("--run-id", type=str, required=True,
-                        help="The MLflow Run ID to attach metrics to")
-    args = parser.parse_args()
+   
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     print(f"Evaluating on device: {device}")
@@ -73,7 +54,7 @@ def main():
     model.to(device)
     model.eval()
 
-    test_loader = get_test_loader(BATCH_SIZE)
+    test_loader = get_test_loader(BATCH_SIZE, class_to_idx=CLASS_TO_IDX_RETINANET)
 
     # NOTE: max_detection_thresholds removed — breaks class_metrics in
     # torchmetrics 1.8.2, causing all per-class APs to return -1.0.
@@ -104,9 +85,7 @@ def main():
             targets = [{k: v.cpu() for k, v in t.items()} for t in targets]
             outputs = [{k: v.cpu() for k, v in o.items()} for o in outputs]
 
-            # Remap 1-indexed labels → 0-indexed for torchmetrics
-            targets = remap_labels_to_zero_indexed(targets)
-            outputs = remap_labels_to_zero_indexed(outputs)
+
 
             metric.update(outputs, targets)
 
@@ -144,7 +123,7 @@ def main():
     # ── Log to MLflow ─────────────────────────────────────────
     mlflow.set_experiment("SumoFlowAI-Traffic-Detection")
 
-    with mlflow.start_run(run_id=args.run_id):
+    with mlflow.start_run():
         mlflow.log_metrics({
             "test_FPS":                fps,
             "test_Inference_Time_sec": avg_inference_time,
@@ -157,8 +136,8 @@ def main():
             for idx, ap in enumerate(map_per_class):
                 class_name = IDX_TO_CLASS.get(idx, f"class_{idx}")
                 mlflow.log_metric(f"test_AP_{class_name}", ap.item())
-
-        print("✅ Evaluation metrics logged to MLflow run:", args.run_id)
+        run = mlflow.active_run()
+        print("✅ Evaluation metrics logged to MLflow run:", run.info.run_id)
 
 
 if __name__ == "__main__":

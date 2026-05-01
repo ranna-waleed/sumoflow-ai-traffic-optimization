@@ -7,7 +7,7 @@ import os
 import random
 
 # ─── 1. Configuration & Mapping ────────────────────────────────
-NUM_CLASSES = 8
+NUM_CLASSES = 7
 
 # ⚠️  VISUALIZATION ONLY — never use this threshold when computing mAP.
 # mAP metrics must receive ALL predictions (all confidence levels) so the
@@ -15,14 +15,13 @@ NUM_CLASSES = 8
 # gets drawn on screen.
 CONFIDENCE_THRESHOLD = 0.50
 WEIGHTS_PATH = "detection/RetinaNet/retinanet_best.pth"
-TEST_DIR = "detection/dataset_v2/images/test"
-
+TEST_DIR = "detection/dataset/images/test"
 
 
 # Map PyTorch integers back to your string labels
 IDX_TO_CLASS = {
-    1: 'car', 2: 'bus', 3: 'truck', 4: 'motorcycle', 
-    5: 'taxi', 6: 'microbus', 7: 'bicycle'
+    0: 'car', 1: 'bus', 2: 'truck', 3: 'motorcycle',
+    4: 'taxi', 5: 'microbus', 6: 'bicycle'
 }
 
 # Map classes to distinct BGR colors for OpenCV
@@ -72,7 +71,7 @@ def main():
     model.eval() # CRITICAL: Set model to evaluation mode!
 
     # Grab a random image from the test set
-    test_images = [f for f in os.listdir(TEST_DIR) if f.endswith('.png')]
+    test_images = [f for f in os.listdir(TEST_DIR) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
     if not test_images:
         print("No test images found!")
         return
