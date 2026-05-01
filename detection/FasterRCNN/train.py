@@ -8,7 +8,7 @@ Part 2: Train Faster R-CNN
 
 import os
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import time
 import copy
@@ -18,7 +18,9 @@ import mlflow.pytorch
 from torch.utils.data import DataLoader, random_split
 from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from detection.RetinaNet.dataloader import TahrirTrafficDataset, collate_fn
+from detection.RetinaNet.dataloader import (
+    get_train_loader, get_val_loader, CLASS_TO_IDX_FASTERRCNN
+)
 
 # ── paths ────────────────────────────────────────────────────────────────────
 IMGS_DIR   = "detection/dataset/images/train"
@@ -38,6 +40,8 @@ LR_GAMMA     = 0.1
 VAL_SPLIT    = 0.15       # 15% of training data used for validation
 BEST_WEIGHTS = os.path.join(OUTPUT_DIR, "best_faster_rcnn.pth")
 
+train_loader = get_train_loader(BATCH_SIZE, class_to_idx=CLASS_TO_IDX_FASTERRCNN)
+val_loader   = get_val_loader(batch_size=1, class_to_idx=CLASS_TO_IDX_FASTERRCNN)
 
 def build_model(num_classes: int, device: torch.device) -> torch.nn.Module:
     """Load pretrained Faster R-CNN and replace the classification head."""

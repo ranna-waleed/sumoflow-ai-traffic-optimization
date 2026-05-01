@@ -1,3 +1,6 @@
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import torch
 import torchvision
 from torchvision.models.detection import RetinaNet_ResNet50_FPN_Weights
@@ -5,7 +8,7 @@ from torchvision.models.detection.retinanet import RetinaNetClassificationHead
 import os
 import mlflow
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
-from dataloader import get_train_loader, get_val_loader
+from detection.RetinaNet.dataloader import get_train_loader, get_val_loader
 
 # ─── 1. Configuration ──────────────────────────────────────────────────────────
 NUM_CLASSES    = 7
@@ -14,16 +17,16 @@ NUM_EPOCHS     = 60
 LEARNING_RATE  = 0.001
 SAVE_PATH      = "detection/RetinaNet/retinanet_best.pth"
 # Backup outside the repo — safe from accidental !cp overwrites
-BACKUP_SAVE_PATH = "/kaggle/working/retinanet_best_BACKUP.pth"
+BACKUP_SAVE_PATH = "detection/RetinaNet/retinanet_best_BACKUP.pth"
 UNFREEZE_EPOCH = 15
 WARMUP_EPOCHS  = 5
 
 # ─── Resume config ─────────────────────────────────────────────────────────────
 # START_EPOCH = the last COMPLETED epoch number shown in training output.
 # "Epoch 30 done" → START_EPOCH = 30.   Fresh run → START_EPOCH = 0.
-RESUME_WEIGHTS  = "/kaggle/input/datasets/roaaraafat/sumoflowai-best-weights/retinanet_best.pth"
-START_EPOCH     = 30
-RESUME_BEST_MAP = 0.3874
+RESUME_WEIGHTS  = None
+START_EPOCH     = 0
+RESUME_BEST_MAP = 0.0
 
 # ─── Where cosine LR should be at START_EPOCH ─────────────────────────────────
 # lr(t) = eta_min + 0.5*(lr_max - eta_min)*(1 + cos(pi*t/T_max))
@@ -342,11 +345,6 @@ def main():
                         val_targets = [{k: v.cpu() for k, v in t.items()}
                                        for t in val_targets]
                         val_outputs = [{k: v.cpu() for k, v in o.items()}
-                                       for o in val_outputs]
-                        # Remap 1-indexed → 0-indexed for torchmetrics
-                        val_targets = [{**t, "labels": t["labels"] - 1}
-                                       for t in val_targets]
-                        val_outputs = [{**o, "labels": o["labels"] - 1}
                                        for o in val_outputs]
                         val_metric.update(val_outputs, val_targets)
 

@@ -8,6 +8,7 @@ Part 3: Evaluation & Inference
 
 import os
 import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import time
 import json
 import torch
@@ -20,13 +21,12 @@ from torch.utils.data import DataLoader
 from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
-from ..RetinaNet.dataloader import TahrirTrafficDataset, collate_fn
+from detection.RetinaNet.dataloader import TahrirTrafficDataset, collate_fn
 
 # ── paths ─────────────────────────────────────────────────────────────────────
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 BASE_DIR     = os.path.dirname(__file__)
-WEIGHTS_PATH = os.path.join(BASE_DIR, "outputs", "best_faster_rcnn_run2.pth")
+WEIGHTS_PATH = os.path.join(BASE_DIR, "outputs", "last_faster_rcnn.pth")
 OUTPUT_DIR   = os.path.join(BASE_DIR, "outputs")
 DETECTIONS_DIR = os.path.join(OUTPUT_DIR, "detection_images")
 os.makedirs(DETECTIONS_DIR, exist_ok=True)
@@ -244,7 +244,7 @@ def run_evaluation():
         "per_class_ap":      per_class_ap,
         "num_test_images":   len(test_dataset),
     }
-    results_path = os.path.join(OUTPUT_DIR, "eval_results_run2.json")
+    results_path = os.path.join(OUTPUT_DIR, "eval_results_run3.json")
     with open(results_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\nResults saved to {results_path}")

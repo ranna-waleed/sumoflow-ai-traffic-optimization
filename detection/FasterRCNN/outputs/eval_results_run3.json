@@ -1,0 +1,19 @@
+{
+  "mAP@0.5": 0.469683,
+  "mAP@0.5:0.95": 0.341592,
+  "precision": 0.945926,
+  "recall": 0.373519,
+  "avg_inference_ms": 109.332,
+  "std_inference_ms": 49.113,
+  "fps": 9.15,
+  "per_class_ap": {
+    "car": 0.3117,
+    "bus": 0.7966,
+    "truck": 0.4961,
+    "motorcycle": 0.1065,
+    "taxi": 0.3082,
+    "microbus": 0.2748,
+    "bicycle": 0.0973
+  },
+  "num_test_images": 180
+}
