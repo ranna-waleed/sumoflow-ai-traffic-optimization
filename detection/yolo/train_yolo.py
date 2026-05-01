@@ -10,7 +10,7 @@ NUM_EPOCHS   = 60
 BATCH_SIZE   = 8
 IMG_SIZE     = 640
 DATASET_YAML = 'detection/dataset/dataset.yaml'
-SAVE_PATH    = 'detection/yolo_results'
+SAVE_PATH = os.path.abspath('detection/yolo_results')
 
 # Setup Dataset
 def setup_dataset():
