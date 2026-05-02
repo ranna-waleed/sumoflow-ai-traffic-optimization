@@ -1,0 +1,34 @@
+import os
+
+os.makedirs('simulation/taksim/outputs', exist_ok=True)
+
+config = """<configuration>
+    <input>
+        <net-file value="taksim.net.xml"/>
+        <route-files value="taksim_routes.rou.xml"/>
+        <additional-files value="taksim.add.xml"/>
+    </input>
+    <time>
+        <begin value="28800"/>
+        <end value="36000"/>
+        <step-length value="1"/>
+    </time>
+    <processing>
+        <ignore-route-errors value="true"/>
+        <collision.action value="warn"/>
+        <time-to-teleport value="180"/>
+    </processing>
+    <output>
+        <fcd-output value="outputs/fcd_taksim.xml"/>
+        <summary-output value="outputs/summary_taksim.xml"/>
+    </output>
+    <report>
+        <verbose value="true"/>
+        <no-warnings value="true"/>
+    </report>
+</configuration>"""
+
+with open('simulation/taksim/config_taksim.sumocfg', 'w') as f:
+    f.write(config)
+
+print('Config created!')
