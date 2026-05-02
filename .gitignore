@@ -302,3 +302,9 @@ desktop.ini
 #Misc 
 folder_structure.txt
 *.log
+
+#lstm dataset
+lstm/data/
+
+# YOLO detection outputs
+detection/yolo_results/

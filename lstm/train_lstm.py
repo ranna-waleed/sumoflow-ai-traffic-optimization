@@ -123,11 +123,6 @@ def train():
     # Normalize val features using train scaler
     val_X   = ((val_X.reshape(-1, len(FEATURES)) - min_val) / denom).reshape(val_X.shape)
 
-
-    # Normalize inputs
-    X_train = ((X_train.reshape(-1, len(FEATURES)) - min_val) / denom).reshape(X_train.shape)
-    X_val   = ((X_val.reshape(-1, len(FEATURES))   - min_val) / denom).reshape(X_val.shape)
-
     # Normalize targets (first 4 features = N/S/E/W)
     min_t   = min_val[:4]
     max_t   = max_val[:4]

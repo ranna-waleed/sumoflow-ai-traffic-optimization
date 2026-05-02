@@ -44,7 +44,7 @@ def main():
     print("  Recording AFTER metrics (with DQN)")
 
     # Load trained agent
-    agent         = DQNAgent(state_size=6, action_size=4)
+    agent         = DQNAgent(state_size=14, action_size=4)
     agent.load()
     agent.epsilon = 0.0   # pure exploitation
 

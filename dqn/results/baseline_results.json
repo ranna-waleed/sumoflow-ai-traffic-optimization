@@ -3,43 +3,43 @@
   "profiles": {
     "morning_rush": {
       "profile": "morning_rush",
-      "avg_wait_s": 10.671107860726922,
-      "max_wait_s": 40.951219512195124,
-      "avg_co2_mg": 338.2636750889094,
-      "total_co2_mg": 1217749.230320074,
-      "peak_vehicles": 188,
+      "avg_wait_s": 41.51661057427054,
+      "max_wait_s": 113.75824175824175,
+      "avg_co2_mg": 306.95004937690635,
+      "total_co2_mg": 1105020.177756863,
+      "peak_vehicles": 302,
       "total_steps": 3600
     },
     "evening_rush": {
       "profile": "evening_rush",
-      "avg_wait_s": 10.720564624026277,
-      "max_wait_s": 24.923076923076923,
-      "avg_co2_mg": 275.62729621311445,
-      "total_co2_mg": 992258.266367212,
-      "peak_vehicles": 184,
+      "avg_wait_s": 47.028413777771746,
+      "max_wait_s": 129.49720670391062,
+      "avg_co2_mg": 261.3901923996369,
+      "total_co2_mg": 941004.6926386928,
+      "peak_vehicles": 263,
       "total_steps": 3600
     },
     "midday": {
       "profile": "midday",
-      "avg_wait_s": 10.707592097181175,
-      "max_wait_s": 27.802083333333332,
-      "avg_co2_mg": 269.97186188870023,
-      "total_co2_mg": 971898.7027993209,
-      "peak_vehicles": 126,
+      "avg_wait_s": 56.06377164897037,
+      "max_wait_s": 136.76344086021504,
+      "avg_co2_mg": 313.4865554409261,
+      "total_co2_mg": 1128551.599587334,
+      "peak_vehicles": 281,
       "total_steps": 3600
     },
     "night": {
       "profile": "night",
-      "avg_wait_s": 8.250254450136353,
-      "max_wait_s": 27.677419354838708,
-      "avg_co2_mg": 209.5030663068687,
-      "total_co2_mg": 754211.0387047273,
-      "peak_vehicles": 86,
+      "avg_wait_s": 8.25346817860505,
+      "max_wait_s": 97.42857142857143,
+      "avg_co2_mg": 84.50226885624961,
+      "total_co2_mg": 304208.1678824986,
+      "peak_vehicles": 26,
       "total_steps": 3600
     }
   },
   "overall": {
-    "avg_wait_s": 10.087379758017683,
-    "avg_co2_mg": 273.3414748743982
+    "avg_wait_s": 38.21556604490443,
+    "avg_co2_mg": 241.58226651842978
   }
 }
