@@ -13,7 +13,7 @@
 **Department of Data Science and Artificial Intelligence (DSAI)**  
 **Supervisor: Dr. Mohamed Maher Ata**
 
-[Rana Waleed (202201737)](https://github.com/ranna-waleed) · Roaa Raafat (202202079) · Mariam Alhaj (202200529)
+[Rana Waleed (202201737)](https://github.com/ranna-waleed) · [Roaa Raafat (202202079)](https://github.com/roaa-838) · Mariam Alhaj (202200529)
 
 </div>
 
