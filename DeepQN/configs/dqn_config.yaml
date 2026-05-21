@@ -1,0 +1,249 @@
+# SUMOFlow AI , DQN Configuration
+# Tahrir Square, Cairo  |  7 controllable TLS junctions
+
+#  Simulation 
+simulation:
+  net_file:   "simulation/maps/tahrirupdated.net.xml"
+  add_file:   "simulation/maps/tahrir.add.xml"
+  step_length: 1            # seconds per SUMO step (from sumocfg)
+  decision_interval: 10     # SUMO steps between DQN decisions
+  sumo_binary: "sumo"       # use "sumo-gui" for visual debugging
+  port: 8813                # TraCI port (incremented per parallel env)
+
+profiles:
+  morning_rush:
+    config:    "simulation/maps/config_morning_rush.sumocfg"
+    begin:     27000
+    end:       37800
+    label:     "morning"
+  midday:
+    config:    "simulation/maps/config_midday.sumocfg"
+    begin:     43200
+    end:       54000
+    label:     "midday"
+  evening_rush:
+    config:    "simulation/maps/config_evening_rush.sumocfg"
+    begin:     54000
+    end:       72000
+    label:     "evening"
+  night:
+    config:    "simulation/maps/config_night.sumocfg"
+    begin:     79200
+    end:       86400
+    label:     "night"
+
+#  Traffic Light Junctions 
+# Extracted from tahrirupdated.net.xml <tlLogic> + <junction> blocks.
+# green_phases : SUMO phase indices that are "green" (actionable).
+# green_to_yellow : {green_phase_idx -> its yellow phase idx}
+# yellow_to_next  : {yellow_phase_idx -> next green phase idx}
+# incoming_lanes  : from <junction incLanes="…"> in net.xml
+
+tls_junctions:
+
+  "315744796":
+    description: "N-trunk / E-highway split — highest volume entry"
+    green_phases:    [0, 2]
+    green_to_yellow: {"0": 1, "2": 3}
+    yellow_to_next:  {"1": 2, "3": 0}
+    yellow_duration: 6
+    min_green:       15
+    max_green:       60
+    incoming_lanes:
+      - "28718647#3_0"
+      - "28718647#3_1"
+      - "28718647#3_2"
+      - "28718647#3_3"
+      - "28718647#3_4"
+      - "690516091#0_0"
+      - "690516091#0_1"
+      - "690516091#0_2"
+      - "690516091#0_3"
+      - "690516091#0_4"
+
+  "96621100":
+    description: "Roundabout N-entry — trunk highway (690516091) meets ring"
+    green_phases:    [2]           # phase 0 = all-red hold, phase 2 = all-green
+    red_hold_phase:  0
+    green_to_yellow: {"2": 1}
+    yellow_to_next:  {"1": 0}      # green -> yellow -> red_hold
+    red_to_green_phase: 2          # when switching from hold, go to this phase
+    yellow_duration: 3
+    min_green:       20
+    max_green:       90
+    incoming_lanes:
+      - "690516091#1_0"
+      - "690516091#1_1"
+      - "690516091#1_2"
+      - "690516091#1_3"
+      - "690516091#1_4"
+      - "10873186#8_0"
+      - "10873186#8_1"
+      - "10873186#8_2"
+      - "10873186#8_3"
+      - "10873186#8_4"
+
+  "2031414903":
+    description: "Roundabout W-entry — Corniche (50211834) meets ring"
+    green_phases:    [0, 2]
+    green_to_yellow: {"0": 1, "2": 3}
+    yellow_to_next:  {"1": 2, "3": 0}
+    yellow_duration: 6
+    min_green:       15
+    max_green:       60
+    incoming_lanes:
+      - "50211834#1_0"
+      - "50211834#1_1"
+      - "50211834#1_2"
+      - "50211834#1_3"
+      - "10873186#5_0"
+      - "10873186#5_1"
+      - "10873186#5_2"
+      - "10873186#5_3"
+      - "10873186#5_4"
+
+  "2031414899":
+    description: "S-corridor exit gate (10873191 southbound)"
+    green_phases:    [0]
+    red_hold_phase:  2
+    green_to_yellow: {"0": 1}
+    yellow_to_next:  {"1": 2}
+    red_to_green_phase: 0
+    yellow_duration: 3
+    min_green:       20
+    max_green:       80
+    incoming_lanes:
+      - "10873191#3_0"
+      - "10873191#3_1"
+      - "10873191#3_2"
+      - "10873191#3_3"
+
+  "6288771431":
+    description: "S-corridor second gate"
+    green_phases:    [0]
+    red_hold_phase:  2
+    green_to_yellow: {"0": 1}
+    yellow_to_next:  {"1": 2}
+    red_to_green_phase: 0
+    yellow_duration: 3
+    min_green:       20
+    max_green:       80
+    incoming_lanes:
+      - "10873191#4_0"
+      - "10873191#4_1"
+      - "10873191#4_2"
+      - "10873191#4_3"
+
+  "271064234":
+    description: "E-tertiary exit (10873193)"
+    green_phases:    [0]
+    red_hold_phase:  2
+    green_to_yellow: {"0": 1}
+    yellow_to_next:  {"1": 2}
+    red_to_green_phase: 0
+    yellow_duration: 5
+    min_green:       20
+    max_green:       80
+    incoming_lanes:
+      - "10873193#1_0"
+      - "10873193#1_1"
+      - "10873193#1_2"
+      - "10873193#1_3"
+
+  "315743335":
+    description: "E-tertiary intermediate (28718874)"
+    green_phases:    [0]
+    red_hold_phase:  2
+    green_to_yellow: {"0": 1}
+    yellow_to_next:  {"1": 2}
+    red_to_green_phase: 0
+    yellow_duration: 5
+    min_green:       20
+    max_green:       80
+    incoming_lanes:
+      - "28718874#1_0"
+      - "28718874#1_1"
+      - "28718874#1_2"
+      - "28718874#1_3"
+      - "28718874#1_4"
+
+#  State Space 
+state:
+  max_lanes:         10      # pad all junctions to this many lanes
+  features_per_lane: 3       # [halt_count, wait_time, occupancy]
+  junction_features: 2       # [phase_idx_norm, phase_elapsed_norm]
+  global_features:   5       # [bilstm_N, bilstm_S, bilstm_E, bilstm_W, time_of_day]
+  # total state_dim = max_lanes*features_per_lane + junction_features + global_features = 37
+  state_dim: 37
+
+  # Normalisation caps
+  max_queue:     50.0        # vehicles
+  max_wait:      300.0       # seconds
+  max_occupancy: 1.0
+  max_phase_elapsed: 120.0   # seconds
+
+#  BiLSTM Integration 
+bilstm:
+  # Edges used as proxies for each cardinal direction
+  north_edges: ["690516091#0", "690516091#1"]
+  south_edges: ["10873191#3",  "10873191#4",  "10873191#5"]
+  east_edges:  ["28718647#1",  "28718647#2",  "28718647#3"]
+  west_edges:  ["50211834#0",  "50211834#1",  "192591565#0"]
+  max_flow_per_edge: 50      # for normalisation
+  # Set to true when actual BiLSTM weights are loaded
+  use_real_model: true
+  model_path: "detection/bilstm/bilstm_flow_predictor.pt"
+
+#  DQN Hyperparameters 
+dqn:
+  # Q-network architecture (Dueling DQN)
+  state_dim:   37
+  action_dim:  2             # 0=keep, 1=switch
+  hidden_dims: [256, 256]
+  dueling:     true
+  noisy_nets:  false
+
+  # Training
+  learning_rate:      0.0005
+  gamma:              0.95
+  batch_size:         64
+  replay_buffer_size: 50000
+  min_replay_size:    1000
+  target_update_freq: 200    # steps between hard target-net updates
+  tau:                0.005  # soft update coefficient (if using soft updates)
+
+  # Exploration
+  epsilon_start:  1.0
+  epsilon_end:    0.05
+  epsilon_decay:  0.99992    # per decision step
+  eval_epsilon:   0.0        # greedy during evaluation
+
+  # Gradient clipping
+  grad_clip: 10.0
+
+#  Training Loop 
+training:
+  num_episodes:         200
+  profiles_per_episode: ["morning_rush", "midday", "evening_rush", "night"]
+  profile_rotation:     "sequential"   # or "random"
+  checkpoint_dir:       "DeepQN/checkpoints"
+  checkpoint_freq:      10             # episodes
+  log_dir:              "DeepQN/logs"
+  seed:                 42
+
+#  Reward 
+reward:
+  wait_time_weight:  1.0
+  co2_weight:        0.001     # scale: CO2 in mg/s vs wait in seconds
+  throughput_weight: 0.5       # bonus per completed vehicle
+  pressure_weight:   0.0       # optional queue-balance pressure term
+  clip_min:         -200.0
+  clip_max:          10.0
+
+#  Evaluation
+evaluation:
+  num_eval_episodes:  3        # per profile
+  baseline_label:     "fixed_time"
+  dqn_label:          "dqn_adaptive"
+  output_dir:         "DeepQN/results"
+  metrics: ["avg_waiting_time", "total_co2", "throughput", "avg_speed"]
