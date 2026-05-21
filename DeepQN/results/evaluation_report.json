@@ -1,0 +1,142 @@
+{
+  "morning_rush": {
+    "baseline": {
+      "profile": "morning_rush",
+      "mode": "fixed_time",
+      "n_trips": 3482,
+      "avg_waiting_time_s": 626.6183228029868,
+      "avg_travel_time_s": 752.9557725445146,
+      "avg_time_loss_s": 715.4829465824239,
+      "total_co2_mg": 4581366000.900016,
+      "avg_co2_per_veh_mg": 1566.9893431689086,
+      "throughput": 3482,
+      "avg_speed_ms": 0.5506862381922578
+    },
+    "dqn": {
+      "profile": "morning_rush",
+      "mode": "dqn_adaptive",
+      "n_trips": 0,
+      "avg_waiting_time_s": 46.653378403731864,
+      "avg_travel_time_s": 0.0,
+      "avg_time_loss_s": 0.0,
+      "total_co2_mg": 444692841.8124003,
+      "avg_co2_per_veh_mg": 0.0,
+      "throughput": 3385,
+      "avg_speed_ms": 0.0
+    },
+    "improvements": {
+      "avg_wait_pct": 92.5547375960789,
+      "avg_travel_pct": 100.0,
+      "time_loss_pct": 100.0,
+      "total_co2_pct": 90.29344431933532,
+      "throughput_delta": -97
+    },
+    "kpi_wait_pass": true,
+    "kpi_co2_pass": true
+  },
+  "midday": {
+    "baseline": {
+      "profile": "midday",
+      "mode": "fixed_time",
+      "n_trips": 2937,
+      "avg_waiting_time_s": 629.0514130064691,
+      "avg_travel_time_s": 757.1287027579162,
+      "avg_time_loss_s": 719.3845318352061,
+      "total_co2_mg": 4109020468.259978,
+      "avg_co2_per_veh_mg": 1566.2689586631234,
+      "throughput": 2937,
+      "avg_speed_ms": 0.5261335071222419
+    },
+    "dqn": {
+      "profile": "midday",
+      "mode": "dqn_adaptive",
+      "n_trips": 0,
+      "avg_waiting_time_s": 59.182680475636154,
+      "avg_travel_time_s": 0.0,
+      "avg_time_loss_s": 0.0,
+      "total_co2_mg": 406217251.35380864,
+      "avg_co2_per_veh_mg": 0.0,
+      "throughput": 2876,
+      "avg_speed_ms": 0.0
+    },
+    "improvements": {
+      "avg_wait_pct": 90.59175780358234,
+      "avg_travel_pct": 99.99999999999999,
+      "time_loss_pct": 100.00000000000001,
+      "total_co2_pct": 90.11401246375813,
+      "throughput_delta": -61
+    },
+    "kpi_wait_pass": true,
+    "kpi_co2_pass": true
+  },
+  "evening_rush": {
+    "baseline": {
+      "profile": "evening_rush",
+      "mode": "fixed_time",
+      "n_trips": 5711,
+      "avg_waiting_time_s": 632.0607599369638,
+      "avg_travel_time_s": 759.251269479951,
+      "avg_time_loss_s": 720.9040710908773,
+      "total_co2_mg": 7460325091.02063,
+      "avg_co2_per_veh_mg": 1564.1799716154865,
+      "throughput": 5711,
+      "avg_speed_ms": 0.5088189808633734
+    },
+    "dqn": {
+      "profile": "evening_rush",
+      "mode": "dqn_adaptive",
+      "n_trips": 0,
+      "avg_waiting_time_s": 46.13998396413272,
+      "avg_travel_time_s": 0.0,
+      "avg_time_loss_s": 0.0,
+      "total_co2_mg": 745919095.4682884,
+      "avg_co2_per_veh_mg": 0.0,
+      "throughput": 5849,
+      "avg_speed_ms": 0.0
+    },
+    "improvements": {
+      "avg_wait_pct": 92.70007143478827,
+      "avg_travel_pct": 100.0,
+      "time_loss_pct": 99.99999999999999,
+      "total_co2_pct": 90.00152022374884,
+      "throughput_delta": 138
+    },
+    "kpi_wait_pass": true,
+    "kpi_co2_pass": true
+  },
+  "night": {
+    "baseline": {
+      "profile": "night",
+      "mode": "fixed_time",
+      "n_trips": 882,
+      "avg_waiting_time_s": 24.281179138321995,
+      "avg_travel_time_s": 71.00226757369614,
+      "avg_time_loss_s": 36.16571428571429,
+      "total_co2_mg": 135595522.79000086,
+      "avg_co2_per_veh_mg": 2165.2325432741577,
+      "throughput": 882,
+      "avg_speed_ms": 5.984779574468085
+    },
+    "dqn": {
+      "profile": "night",
+      "mode": "dqn_adaptive",
+      "n_trips": 0,
+      "avg_waiting_time_s": 10.230308855267111,
+      "avg_travel_time_s": 0.0,
+      "avg_time_loss_s": 0.0,
+      "total_co2_mg": 11672550.381971762,
+      "avg_co2_per_veh_mg": 0.0,
+      "throughput": 882,
+      "avg_speed_ms": 0.0
+    },
+    "improvements": {
+      "avg_wait_pct": 57.867330919193165,
+      "avg_travel_pct": 100.0,
+      "time_loss_pct": 100.0,
+      "total_co2_pct": 91.3916402682047,
+      "throughput_delta": 0
+    },
+    "kpi_wait_pass": true,
+    "kpi_co2_pass": true
+  }
+}
