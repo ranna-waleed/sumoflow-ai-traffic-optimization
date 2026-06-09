@@ -327,19 +327,19 @@ react-router-dom 6.0+
 
 **Dashboard**
 
-<!-- dashboard screenshot -->
+![Dashboard](docs/screenshots/dashboard page.png)
 
 **Live Simulation**
 
-<!-- live simulation screenshot -->
+![Live Simulation](docs/screenshots/live simulation page.png)
 
 **Model Comparison**
 
-<!-- model comparison screenshot -->
+![Model Comparison](docs/screenshots/Model comparison page.png)
 
 **Before vs After**
 
-<!-- before vs after screenshot -->
+![Before vs After](docs/screenshots/Before and After page.png)
 
 ---
 
