@@ -8,9 +8,9 @@ Live demo: https://inquisitive-swan-9ffbe5.netlify.app
 
 | Name | Student ID | Program |
 |---|---|---|
-| Rana Waleed | 202201737 | DSAI — Computer Science |
-| Roaa Raafat | 202202079 | DSAI — Computer Science |
-| Mariam Alhaj | 202200529 | DSAI — Computer Science |
+| Rana Waleed | 202201737 | DSAI |
+| Roaa Raafat | 202202079 | DSAI |
+| Mariam Alhaj | 202200529 | DSAI|
 
 **Supervisor:** Dr. Mohamed Maher Ata  
 **University:** Zewail City of Science, Technology and Innovation
@@ -19,7 +19,7 @@ Live demo: https://inquisitive-swan-9ffbe5.netlify.app
 
 ## Problem Statement
 
-El-Tahrir Square in Cairo is one of the most congested intersections in the city. The current traffic signals run on fixed timing plans that do not respond to real traffic conditions — meaning vehicles wait just as long at 3 AM as they do during morning rush hour. During peak times, average waiting times exceed 600 seconds per vehicle, which wastes fuel, increases CO2 emissions, and adds significant delays for commuters every single day.
+El-Tahrir Square in Cairo is one of the most congested intersections in the city. The current traffic signals run on fixed timing plans that do not respond to real traffic conditions, meaning vehicles wait just as long at 3 AM as they do during morning rush hour. During peak times, average waiting times exceed 600 seconds per vehicle, which wastes fuel, increases CO2 emissions, and adds significant delays for commuters every single day.
 
 We built SUMOFlow AI to tackle this. The idea is to replace the fixed signal plans with a system that actually watches the traffic, predicts what is coming, and adjusts the signals in real time to reduce waiting as much as possible.
 
@@ -27,14 +27,14 @@ We built SUMOFlow AI to tackle this. The idea is to replace the fixed signal pla
 
 ## Features
 
-- Vehicle detection using three models: YOLOv8s, Faster R-CNN, and RetinaNet — detecting 7 vehicle types (car, taxi, bus, microbus, truck, motorcycle, bicycle)
+- Vehicle detection using three models: YOLOv8s, Faster R-CNN, and RetinaNet , detecting 7 vehicle types (car, taxi, bus, microbus, truck, motorcycle, bicycle)
 - BiLSTM model that predicts vehicle flow per direction (North, South, East, West) 30 seconds into the future
 - Multi-agent Deep Q-Network (DQN) with 7 independent agents controlling 7 junctions simultaneously
 - SUMO microscopic traffic simulation of El-Tahrir Square with 4 daily traffic profiles
 - FastAPI backend connecting the simulation, AI models, and frontend
 - React dashboard showing live simulation, detection results, and before/after comparison
 - Monitoring and explainability modules covering AI governance requirements
-- Successfully tested on a second city — Taksim Square in Istanbul — with no code changes
+- Successfully tested on a second city, Taksim Square in Istanbul, with no code changes
 
 ---
 
@@ -79,10 +79,10 @@ The frontend has two modes: live mode when the backend is running locally, and v
 
 **AI and ML**
 - YOLOv8s (Ultralytics) — primary detection model, 71.2% mAP@0.5
-- Faster R-CNN (PyTorch) — 68.1% mAP@0.5, compared
-- RetinaNet (PyTorch) — 65.8% mAP@0.5, compared
-- BiLSTM (PyTorch) — 2 layers, 128 hidden units per direction
-- Dueling Double DQN (PyTorch) — 7 agents, 37-feature state, 350 training episodes
+- Faster R-CNN (PyTorch): 68.1% mAP@0.5, compared
+- RetinaNet (PyTorch): 65.8% mAP@0.5, compared
+- BiLSTM (PyTorch): 2 layers, 128 hidden units per direction
+- Dueling Double DQN (PyTorch): 7 agents, 37-feature state, 350 training episodes
 
 **Simulation**
 - Eclipse SUMO 1.24
@@ -136,7 +136,7 @@ sumoflow-ai-traffic-optimization/
 - Python 3.12
 - Conda (Anaconda or Miniconda)
 - Node.js 18 or higher
-- Eclipse SUMO 1.24 — download from https://sumo.dlr.de
+- Eclipse SUMO 1.24: download from https://sumo.dlr.de
 - Git
 
 ### Step 1 — Clone the repository
@@ -216,15 +216,15 @@ The `frontend/build/` folder is the production build. Drag it to Netlify to depl
 
 ## Usage Guide
 
-**Dashboard** — Start here. Pick a traffic profile and click Start to launch the SUMO simulation. You will see the live feed from SUMO-GUI alongside real-time metrics for vehicle count, average wait time, and CO2 emissions.
+**Dashboard**: Start here. Pick a traffic profile and click Start to launch the SUMO simulation. You will see the live feed from SUMO-GUI alongside real-time metrics for vehicle count, average wait time, and CO2 emissions.
 
-**Live Simulation** — Same simulation with a focus on directional flow. The BiLSTM panel shows predicted vehicle arrivals per direction for the next 30 seconds. The vehicle mix panel breaks down what types of vehicles are currently in the network.
+**Live Simulation**: Same simulation with a focus on directional flow. The BiLSTM panel shows predicted vehicle arrivals per direction for the next 30 seconds. The vehicle mix panel breaks down what types of vehicles are currently in the network.
 
-**Model Comparison** — Shows the detection results for all three models side by side. Each model's mAP, precision, recall, and FPS are listed, along with per-class AP for all 7 vehicle types. YOLOv8s was selected as the primary model.
+**Model Comparison**: Shows the detection results for all three models side by side. Each model's mAP, precision, recall, and FPS are listed, along with per-class AP for all 7 vehicle types. YOLOv8s was selected as the primary model.
 
-**Before vs After** — This is the main results page. The top section shows overall KPIs across all profiles. Clicking any profile launches the DQN simulation and shows junction decisions updating in real time. The charts at the bottom compare waiting time, CO2, and the DQN learning curve over 350 training episodes.
+**Before vs After**: This is the main results page. The top section shows overall KPIs across all profiles. Clicking any profile launches the DQN simulation and shows junction decisions updating in real time. The charts at the bottom compare waiting time, CO2, and the DQN learning curve over 350 training episodes.
 
-**About** — Project overview, team information, pipeline steps, and technology stack.
+**About**: Project overview, team information, pipeline steps, and technology stack.
 
 ---
 
@@ -344,11 +344,11 @@ react-router-dom 6.0+
 
 This project does not use a traditional database. All persistent data is stored as flat files:
 
-- `DeepQN/checkpoints/*.pt` — trained model weights per junction per episode
-- `DeepQN/results/evaluation_report.json` — full evaluation results
-- `DeepQN/logs/training_*.csv` — episode reward and metrics during training
-- `logs/dqn_decisions_*.csv` — per-step decision log during live simulation (step, junction actions, avg wait, CO2, BiLSTM predictions, YOLO counts)
-- `simulation/maps/baseline_outputs/*.xml` — SUMO tripinfo and emission XML files used as baseline
+- `DeepQN/checkpoints/*.pt`: trained model weights per junction per episode
+- `DeepQN/results/evaluation_report.json`: full evaluation results
+- `DeepQN/logs/training_*.csv`: episode reward and metrics during training
+- `logs/dqn_decisions_*.csv`: per-step decision log during live simulation (step, junction actions, avg wait, CO2, BiLSTM predictions, YOLO counts)
+- `simulation/maps/baseline_outputs/*.xml`: SUMO tripinfo and emission XML files used as baseline
 
 ---
 
