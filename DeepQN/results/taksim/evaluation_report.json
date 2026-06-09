@@ -16,20 +16,20 @@
       "profile": "taksim_morning",
       "mode": "dqn_adaptive",
       "n_trips": 0,
-      "avg_waiting_time_s": 105.09080525414049,
+      "avg_waiting_time_s": 99.18207762557077,
       "avg_travel_time_s": 0.0,
       "avg_time_loss_s": 0.0,
-      "total_co2_mg": 440028637.42587733,
+      "total_co2_mg": 436433020.8836123,
       "avg_co2_per_veh_mg": 0.0,
-      "throughput": 121,
+      "throughput": 116,
       "avg_speed_ms": 0.0
     },
     "improvements": {
-      "avg_wait_pct": 92.03810522403245,
+      "avg_wait_pct": 92.48576253834034,
       "avg_travel_pct": 100.0,
       "time_loss_pct": 99.99999999999999,
-      "total_co2_pct": 90.07567408303098,
-      "throughput_delta": -1085
+      "total_co2_pct": 90.15676896505192,
+      "throughput_delta": -1090
     },
     "kpi_wait_pass": true,
     "kpi_co2_pass": true,

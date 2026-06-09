@@ -1,132 +1,66 @@
 import React from "react";
-import { Compass } from "lucide-react";
 
-// FIXED: proper direction parsing from signal string
-// SUMO signal strings like "GGGGrrrr" — G=green, y=yellow, r=red
-function parsePhase(signalStr) {
-  if (!signalStr) return "red";
-  const s = signalStr.toLowerCase();
-  if (s.includes("y")) return "yellow";
-  if (s.includes("g")) return "green";
-  return "red";
-}
-
-// FIXED: map TL IDs to directions based on known Tahrir Square TL positions
-// Instead of blindly mapping first 4 IDs, we use the known IDs from the project
-const TL_DIRECTION_MAP = {
-  "315744796":  "North",   // Main TL — north approach
-  "2031414903": "South",   // South approach
-  "96621100":   "East",    // East approach
-  "2031414899": "West",    // West approach
-  // Fallback for any other TLs
-  "6288771431": "North-East",
-  "96621068":   "South-East",
-  "271064234":  "South-West",
-  "315743335":  "North-West",
-  "6288771435": "Centre",
+const NAMES = {
+  "315744796":"N-Trunk Entry","96621100":"Ring N-Entry",
+  "2031414903":"Ring W-Entry","2031414899":"S-Gate 1",
+  "6288771431":"S-Gate 2","271064234":"E-Exit 1","315743335":"E-Exit 2",
 };
 
-// Static fallback when simulation not running
-const STATIC = [
-  { id: "north", label: "North",     phase: "red", signal: "——" },
-  { id: "south", label: "South",     phase: "red", signal: "——" },
-  { id: "east",  label: "East",      phase: "red", signal: "——" },
-  { id: "west",  label: "West",      phase: "red", signal: "——" },
-];
+function phaseInfo(state=""){
+  const s = state.toLowerCase();
+  if(s.includes("g")) return {bg:"#dcfce7",color:"#15803d",label:"Green"};
+  if(s.includes("y")) return {bg:"#fef3c7",color:"#b45309",label:"Yellow"};
+  return {bg:"#fee2e2",color:"#dc2626",label:"Red"};
+}
 
-// Show only the 4 main directions in the UI
-const MAIN_DIRECTIONS = ["North", "South", "East", "West"];
+const card = {background:"#fff",border:"1px solid #e2e8f0",borderRadius:"6px",boxShadow:"0 1px 3px rgba(0,0,0,.04)"};
+const slabel = {fontSize:"11px",fontWeight:600,letterSpacing:"0.06em",textTransform:"uppercase",color:"#64748b"};
 
-function TrafficLightStatus({ trafficLights, typeCounts }) {
-  // FIXED: removed console.log that was left in production
-
-  let rows;
-  if (trafficLights && Object.keys(trafficLights).length > 0) {
-    // Build direction → signal map using known TL IDs
-    const directionMap = {};
-    for (const [tlId, signal] of Object.entries(trafficLights)) {
-      const direction = TL_DIRECTION_MAP[tlId];
-      if (direction && MAIN_DIRECTIONS.includes(direction)) {
-        directionMap[direction] = signal;
+export default function TrafficLightStatus({trafficLights,typeCounts}){
+  const hasTL = trafficLights && Object.keys(trafficLights).length>0;
+  return(
+    <div style={card}>
+      <div style={{padding:"12px 16px",borderBottom:"1px solid #f1f5f9"}}>
+        <span style={slabel}>Traffic Signal Status</span>
+      </div>
+      {!hasTL
+        ? <div style={{padding:"24px 16px",textAlign:"center",color:"#94a3b8",fontSize:"13px"}}>No live data — start simulation</div>
+        : <table style={{width:"100%",borderCollapse:"collapse"}}>
+            <thead>
+              <tr style={{background:"#f8fafc"}}>
+                {["Junction","Phase","State"].map(h=>(
+                  <th key={h} style={{padding:"8px 12px",textAlign:h==="State"?"right":"left",fontSize:"11px",fontWeight:600,color:"#64748b",borderBottom:"1px solid #e2e8f0"}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(trafficLights).map(([id,state])=>{
+                const {bg,color,label}=phaseInfo(state);
+                return(
+                  <tr key={id} style={{borderBottom:"1px solid #f1f5f9"}}>
+                    <td style={{padding:"8px 12px",fontSize:"12px",fontWeight:600,color:"#1e293b"}}>{NAMES[id]||id}</td>
+                    <td style={{padding:"8px 12px",fontSize:"11px",fontFamily:"monospace",color:"#64748b"}}>{state?.slice(0,8)||"—"}</td>
+                    <td style={{padding:"8px 12px",textAlign:"right"}}>
+                      <span style={{background:bg,color,padding:"2px 8px",borderRadius:"3px",fontSize:"11px",fontWeight:600}}>{label}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
       }
-    }
-
-    // Build rows for the 4 cardinal directions
-    rows = MAIN_DIRECTIONS.map(label => {
-      const signal = directionMap[label] || "rrrr";
-      return {
-        id:     label.toLowerCase(),
-        label,
-        phase:  parsePhase(signal),
-        signal,
-      };
-    });
-  } else {
-    rows = STATIC;
-  }
-
-  const totalVehicles = typeCounts
-    ? Object.values(typeCounts).reduce((a, b) => a + b, 0)
-    : null;
-
-  return (
-    <div className="card p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Compass className="w-4 h-4 text-indigo-400" />
-          <h3 className="text-sm font-semibold text-white">Traffic Light Status</h3>
+      {typeCounts && Object.keys(typeCounts).length>0 && (
+        <div style={{borderTop:"1px solid #f1f5f9",padding:"12px 16px"}}>
+          <div style={{...slabel,marginBottom:"8px"}}>Vehicle Mix</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:"6px"}}>
+            {Object.entries(typeCounts).map(([t,c])=>(
+              <span key={t} style={{background:"#f1f5f9",border:"1px solid #e2e8f0",padding:"3px 8px",borderRadius:"3px",fontSize:"12px",color:"#374151",fontWeight:500}}>
+                {t}: <strong style={{color:"#1d4ed8"}}>{c}</strong>
+              </span>
+            ))}
+          </div>
         </div>
-        {totalVehicles !== null && (
-          <span className="text-[11px] font-mono text-[#64748b]">
-            {totalVehicles} total
-          </span>
-        )}
-      </div>
-
-      <div className="space-y-3">
-        {rows.map(row => {
-          const isGreen  = row.phase === "green";
-          const isYellow = row.phase === "yellow";
-          const isRed    = row.phase === "red";
-          return (
-            <div
-              key={row.label}
-              className={`flex items-center justify-between p-3 rounded-xl transition-colors ${
-                isGreen  ? "bg-emerald-500/10 border border-emerald-500/25" :
-                isYellow ? "bg-amber-500/10   border border-amber-500/25"  :
-                           "bg-white/5         border border-white/5"
-              }`}
-            >
-              <div>
-                <div className="text-xs font-medium text-white">{row.label}</div>
-                <div className="text-[11px] font-mono text-[#94a3b8] truncate max-w-[80px]">
-                  {trafficLights ? row.signal : "No data"}
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className={`text-[11px] font-mono font-medium ${
-                  isGreen ? "text-emerald-400" : isYellow ? "text-amber-400" : "text-red-400"
-                }`}>
-                  {isGreen ? "GREEN" : isYellow ? "YELLOW" : "RED"}
-                </span>
-                <div className="traffic-light">
-                  <span className={`traffic-light-dot red    ${isRed    ? "active" : ""}`} />
-                  <span className={`traffic-light-dot yellow ${isYellow ? "active" : ""}`} />
-                  <span className={`traffic-light-dot green  ${isGreen  ? "active" : ""}`} />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {!trafficLights && (
-        <p className="mt-3 text-[11px] text-[#64748b] text-center">
-          Start simulation to see live signal states
-        </p>
       )}
     </div>
   );
 }
-
-export default TrafficLightStatus;

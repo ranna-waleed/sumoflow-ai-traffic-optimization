@@ -24,7 +24,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-#  Metric containers 
+# ── Metric containers ─────────────────────────────────────────────────────────
 
 @dataclass
 class EpisodeMetrics:
@@ -62,7 +62,7 @@ class EpisodeMetrics:
         return asdict(self)
 
 
-#  XML parsers 
+# ── XML parsers ───────────────────────────────────────────────────────────────
 
 def parse_tripinfo(xml_path: str | Path, profile: str, mode: str) -> EpisodeMetrics:
     """
@@ -158,7 +158,7 @@ def parse_summary(xml_path: str | Path, metrics: EpisodeMetrics) -> EpisodeMetri
     return metrics
 
 
-#  Convenience loader 
+# ── Convenience loader ────────────────────────────────────────────────────────
 
 def load_metrics_from_outputs(
     output_dir:      str | Path | None,

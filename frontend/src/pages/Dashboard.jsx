@@ -1,453 +1,326 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import {
-  ResponsiveContainer, LineChart, Line,
-  XAxis, YAxis, Tooltip, CartesianGrid,
-  BarChart, Bar,
-} from "recharts";
-import { Brain, Play, Square, Zap, Pause, Gauge, Maximize2 } from "lucide-react";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { Play, Square, Pause, Maximize2 } from "lucide-react";
 import MetricCard from "../components/MetricCard";
 import TrafficLightStatus from "../components/TrafficLightStatus";
+import { useSimMode, VIDEO_MAP, API, STATIC_METRICS, STATIC_SIGNALS, STATIC_DIRECTIONS } from "../hooks/useSimMode";
+import { useIsMobile, useIsTablet, gridCols } from "../hooks/useIsMobile";
 
-const API = "http://127.0.0.1:8000";
+const TT   = { backgroundColor:"#fff", border:"1px solid #e2e8f0", borderRadius:"4px", fontSize:"12px", color:"#1e293b" };
+const TICK = { fill:"#94a3b8", fontSize:11 };
+const card   = { background:"#fff", border:"1px solid #e2e8f0", borderRadius:"6px", boxShadow:"0 1px 3px rgba(0,0,0,.04)" };
+const slabel = { fontSize:"11px", fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", color:"#64748b" };
+const btnS   = (v, dis) => ({
+  display:"inline-flex", alignItems:"center", gap:"6px",
+  padding:"6px 14px", fontSize:"13px", fontWeight:500,
+  borderRadius:"4px", border:"1px solid",
+  cursor: dis?"not-allowed":"pointer", opacity: dis?0.45:1, transition:"all 0.15s",
+  ...(v==="primary" ? { background:"#1d4ed8", color:"#fff", borderColor:"#1d4ed8" }
+    : v==="danger"  ? { background:"#fff", color:"#dc2626", borderColor:"#fca5a5" }
+    :                 { background:"#fff", color:"#374151", borderColor:"#d1d5db" }),
+});
 
-const chartStyle = {
-  tooltip: {
-    backgroundColor: "#161c24",
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: "10px",
-    fontSize: "12px",
-  },
-};
+const PROFILES = ["morning_rush","evening_rush","midday","night"];
+const PLABELS  = { morning_rush:"Morning Rush", evening_rush:"Evening Rush", midday:"Midday", night:"Night" };
 
-const PROFILES = ["morning_rush", "evening_rush", "midday", "night"];
-const PROFILE_LABELS = {
-  morning_rush: "Morning Rush",
-  evening_rush: "Evening Rush",
-  midday:       "Midday",
-  night:        "Night",
-};
+export default function Dashboard() {
+  const mode = useSimMode();
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  const [sel,      setSel]      = useState("morning_rush");
+  const [met,      setMet]      = useState(null);
+  const [ts,       setTs]       = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [err,      setErr]      = useState(null);
 
-function Dashboard() {
-  const [selectedProfile, setSelectedProfile] = useState("morning_rush");
-  const [metrics,    setMetrics]    = useState(null);
-  const [timeseries, setTimeseries] = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState(null);
+  // Live mode state
+  const [run,      setRun]      = useState(false);
+  const [paused,   setPaused]   = useState(false);
+  const [step,     setStep]     = useState(0);
+  const [live,     setLive]     = useState(null);
+  const [chart,    setChart]    = useState([]);
+  const [simErr,   setSimErr]   = useState(null);
+  const [simState, setSimState] = useState("idle");
+  const [frame,    setFrame]    = useState(null);
+  const [full,     setFull]     = useState(false);
 
-  const [simRunning,  setSimRunning]  = useState(false);
-  const [simPaused,   setSimPaused]   = useState(false);
-  const [simStep,     setSimStep]     = useState(0);
-  const [liveData,    setLiveData]    = useState(null);
-  const [liveChart,   setLiveChart]   = useState([]);
-  const [simError,    setSimError]    = useState(null);
-  const [simLoading,  setSimLoading]  = useState(false);
-  const [frame,       setFrame]       = useState(null);
-  const [fullscreen,  setFullscreen]  = useState(false);
+  const poll = useRef(null);
 
-  // FIXED: fetch real DQN status instead of hardcoding "In Development"
-  const [dqnStatus, setDqnStatus] = useState(null);
-
-  const pollRef      = useRef(null);
-  const simRunningRef = useRef(simRunning);  // FIXED: ref to avoid stale closure
-
-  // Keep ref in sync with state
-  useEffect(() => {
-    simRunningRef.current = simRunning;
-  }, [simRunning]);
-
-  // Load CSV metrics
   useEffect(() => {
     setLoading(true);
-    fetch(`${API}/api/simulation/metrics/${selectedProfile}`)
+    if (mode === "video") {
+      const d = STATIC_METRICS[sel];
+      setMet(d);
+      setTs(d.timeseries.filter((_,i)=>i%10===0).map(d=>({
+        t:d.step, co2:Math.round(d.co2/1000), wait:d.avg_wait, vehicles:d.vehicles,
+      })));
+      setLoading(false);
+      return;
+    }
+    fetch(`${API}/api/simulation/metrics/${sel}`)
       .then(r => r.json())
-      .then(data => {
-        setMetrics(data);
-        const sampled = data.timeseries.filter((_, i) => i % 10 === 0);
-        setTimeseries(sampled.map(d => ({
-          t: d.step, co2: Math.round(d.co2 / 1000),
-          wait: d.avg_wait, vehicles: d.vehicles,
+      .then(d => {
+        setMet(d);
+        setTs(d.timeseries.filter((_,i) => i%10===0).map(d => ({
+          t:d.step, co2:Math.round(d.co2/1000), wait:d.avg_wait, vehicles:d.vehicles,
         })));
         setLoading(false);
       })
-      .catch(() => { setError("Failed to connect to backend"); setLoading(false); });
-  }, [selectedProfile]);
+      .catch(() => {
+        const d = STATIC_METRICS[sel];
+        setMet(d);
+        setTs(d.timeseries.filter((_,i)=>i%10===0).map(d=>({
+          t:d.step, co2:Math.round(d.co2/1000), wait:d.avg_wait, vehicles:d.vehicles,
+        })));
+        setLoading(false);
+      });
+  }, [sel, mode]);
 
-  // Fetch real DQN status on mount
-  useEffect(() => {
-    fetch(`${API}/api/dqn/status`)
-      .then(r => r.json())
-      .then(data => setDqnStatus(data))
-      .catch(() => setDqnStatus(null));
-  }, []);
-
-  // FIXED: handleStop defined with useCallback so it's stable across renders
   const handleStop = useCallback(async () => {
-    clearInterval(pollRef.current);
-    setSimRunning(false);
-    setSimPaused(false);
-    setLiveData(null);
-    setFrame(null);
-    try { await fetch(`${API}/api/sumo/stop`, { method: "POST" }); } catch {}
+    clearInterval(poll.current);
+    setRun(false); setPaused(false); setLive(null);
+    setFrame(null); setSimState("idle");
+    try { await fetch(`${API}/api/sumo/stop`, { method:"POST" }); } catch {}
   }, []);
 
-  // FIXED: handleStop in dependency array — no more stale closure
   useEffect(() => {
-    if (simRunning && !simPaused) {
-      pollRef.current = setInterval(async () => {
+    if (run && !paused) {
+      poll.current = setInterval(async () => {
         try {
           const res  = await fetch(`${API}/api/sumo/step`, {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ steps: 30 }),
+            method:"POST", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({ steps:30 }),
           });
           const data = await res.json();
           if (data.latest) {
             const s = data.latest;
-            setSimStep(s.step);
-            setLiveData(s);
-            setLiveChart(prev => [...prev, {
-              t: s.step,
-              co2: Math.round(s.total_co2_mg / 1000),
-              wait: s.avg_wait_s,
-              vehicles: s.vehicles,
-            }].slice(-30));
+            setStep(s.step); setLive(s);
+            setChart(p => [...p, {
+              t:s.step, co2:Math.round(s.total_co2_mg/1000),
+              wait:s.avg_wait_s, vehicles:s.vehicles,
+            }].slice(-40));
             if (s.simulation_done) handleStop();
           }
           if (data.image) setFrame(data.image);
-        } catch {
-          setSimError("Lost connection to simulation");
-          handleStop();
-        }
+        } catch { setSimErr("Lost connection"); handleStop(); }
       }, 2000);
     }
-    return () => clearInterval(pollRef.current);
-  }, [simRunning, simPaused, handleStop]);  // FIXED: handleStop in deps
+    return () => clearInterval(poll.current);
+  }, [run, paused, handleStop]);
 
   const handleStart = async () => {
-    setSimError(null);
-    setSimLoading(true);
-    setLiveChart([]);
-    setFrame(null);
+    setSimErr(null); setSimState("starting");
+    setChart([]); setFrame(null); setLive(null);
     try {
       const res  = await fetch(`${API}/api/sumo/start`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ profile: selectedProfile, gui: true }),
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ profile:sel, gui:true }),
       });
       const data = await res.json();
-      if (data.status === "started" || data.status === "already_running") {
-        setSimRunning(true);
-        setSimPaused(false);
-        setSimStep(0);
-      } else {
-        setSimError(data.detail || "Failed to start");
-      }
-    } catch {
-      setSimError("Cannot reach backend — is it running?");
-    }
-    setSimLoading(false);
+      if (data.status==="started"||data.status==="already_running") {
+        setRun(true); setPaused(false); setStep(0); setSimState("running");
+        try {
+          const fr = await fetch(`${API}/api/sumo/step`, {
+            method:"POST", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({ steps:1 }),
+          }).then(r=>r.json());
+          if (fr.image) setFrame(fr.image);
+        } catch {}
+      } else { setSimErr(data.detail||"Failed"); setSimState("idle"); }
+    } catch { setSimErr("Cannot reach backend"); setSimState("idle"); }
   };
 
-  const handlePause = () => setSimPaused(p => !p);
-  const chartData = simRunning && liveChart.length > 0 ? liveChart : timeseries;
+  const chartData = run && chart.length>0 ? chart : ts;
 
-  // DQN status display values
-  const dqnStatusLabel = dqnStatus?.trained
-    ? `Trained (${dqnStatus.episodes_trained} eps)`
-    : dqnStatus
-    ? "Not Trained"
-    : "Loading...";
-  const dqnStatusCls = dqnStatus?.trained
-    ? "bg-emerald-500/15 text-emerald-300 rounded px-2 py-0.5"
-    : "bg-amber-500/15 text-amber-300 rounded px-2 py-0.5";
-  const dqnImprovementLabel = dqnStatus?.improvement_pct
-    ? `↓${dqnStatus.improvement_pct.toFixed(1)}% wait`
-    : "—";
+  // ── Video mode viewport ──────────────────────────────────────
+  const VideoViewport = () => (
+    <div style={{ margin:"12px", height:isMobile?"200px":"320px", background:"#0f172a", borderRadius:"4px", overflow:"hidden", position:"relative" }}>
+      <video
+        key={sel}
+        src={VIDEO_MAP[sel]}
+        autoPlay loop muted playsInline
+        style={{ width:"100%", height:"100%", objectFit:"cover" }}
+      />
+      <div style={{ position:"absolute", top:"10px", left:"10px", display:"flex", gap:"6px" }}>
+        <span style={{ padding:"3px 8px", borderRadius:"3px", fontSize:"11px", fontWeight:600, fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#4ade80" }}>● SIMULATION</span>
+        <span style={{ padding:"3px 8px", borderRadius:"3px", fontSize:"11px", fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#93c5fd" }}>{PLABELS[sel]}</span>
+      </div>
+    </div>
+  );
+
+  // ── Live mode viewport ───────────────────────────────────────
+  const LiveViewport = () => (
+    <div style={{ margin:"12px", height:isMobile?"200px":"320px", background:"#0f172a", borderRadius:"4px", border:"1px solid #e2e8f0", overflow:"hidden", position:"relative" }}>
+      {frame ? (
+        <>
+          <img src={frame} alt="SUMO" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
+          <div style={{ position:"absolute", top:"10px", left:"10px", display:"flex", gap:"6px" }}>
+            <span style={{ padding:"3px 8px", borderRadius:"3px", fontSize:"11px", fontWeight:600, fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:paused?"#fbbf24":"#4ade80" }}>
+              {paused?"⏸ PAUSED":"● LIVE"}
+            </span>
+            <span style={{ padding:"3px 8px", borderRadius:"3px", fontSize:"11px", fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#93c5fd" }}>Step {step.toLocaleString()}</span>
+          </div>
+          {live && (
+            <div style={{ position:"absolute", bottom:"10px", left:"10px", right:"10px", display:"flex", justifyContent:"space-between" }}>
+              {[`🚗 ${live.vehicles}`,`⏱ ${live.avg_wait_s}s`,`💨 ${(live.total_co2_mg/1000).toFixed(0)}k mg CO₂`].map(t => (
+                <span key={t} style={{ padding:"3px 8px", borderRadius:"3px", fontSize:"11px", fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#fff" }}>{t}</span>
+              ))}
+            </div>
+          )}
+          {frame && <button style={{ position:"absolute", top:"10px", right:"10px", padding:"4px 8px", background:"rgba(0,0,0,0.6)", color:"#fff", border:"none", borderRadius:"3px", cursor:"pointer" }} onClick={()=>setFull(true)}><Maximize2 size={12}/></button>}
+        </>
+      ) : (
+        <div style={{ height:"100%", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:"8px" }}>
+          {simState==="starting"
+            ? <><div style={{ width:"28px", height:"28px", border:"2px solid #3b82f6", borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.8s linear infinite" }}/><span style={{ color:"#60a5fa", fontSize:"13px" }}>Opening SUMO-GUI...</span></>
+            : <><span style={{ fontSize:"28px" }}>🗺️</span><span style={{ color:"#64748b", fontSize:"13px" }}>Select a profile and press <strong style={{ color:"#1d4ed8" }}>Start</strong></span></>
+          }
+        </div>
+      )}
+    </div>
+  );
+
+  if (mode === "checking") return (
+    <div style={{ paddingTop:"48px", textAlign:"center", color:"#64748b", fontSize:"14px" }}>
+      <div style={{ width:"24px", height:"24px", border:"2px solid #3b82f6", borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.8s linear infinite", margin:"0 auto 12px" }}/>
+      Connecting...
+    </div>
+  );
 
   return (
-    <div className="space-y-6 pt-4">
+    <div style={{ paddingTop:"24px" }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div style={{ paddingBottom:"16px", borderBottom:"1px solid #e2e8f0", marginBottom:"24px", display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
         <div>
-          <h1 className="text-xl font-semibold text-white">Dashboard</h1>
-          <p className="text-sm text-[#94a3b8] mt-0.5">El-Tahrir Square — Cairo, EG</p>
+          <h1 style={{ margin:0, fontSize:"20px", fontWeight:700, color:"#0f172a" }}>Dashboard</h1>
+          <p style={{ margin:"4px 0 0", fontSize:"13px", color:"#64748b" }}>El-Tahrir Square — Cairo, Egypt</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border ${
-            simRunning
-              ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-              : "bg-white/5 border-white/10 text-[#94a3b8]"}`}>
-            <span className={`w-2 h-2 rounded-full ${simRunning ? "bg-emerald-400 animate-pulse" : "bg-[#64748b]"}`} />
-            {simRunning ? (simPaused ? "Paused" : "Simulation Running") : "Stopped"}
+        <div style={{ display:"flex", gap:"8px", alignItems:"center" }}>
+          <span style={{ padding:"4px 10px", borderRadius:"4px", fontSize:"12px", fontWeight:500,
+            background: mode==="live" ? "#dbeafe" : "#f1f5f9",
+            color: mode==="live" ? "#1d4ed8" : "#64748b",
+            border: `1px solid ${mode==="live"?"#bfdbfe":"#e2e8f0"}` }}>
+            {mode==="live" ? "⚡ Live Mode" : "▶ Video Mode"}
           </span>
-          {simRunning && (
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-mono">
-              Step: {simStep.toLocaleString()}
-            </span>
-          )}
+          {mode==="live" && run && <span style={{ padding:"4px 10px", borderRadius:"4px", fontSize:"12px", fontFamily:"monospace", background:"#dbeafe", border:"1px solid #bfdbfe", color:"#1d4ed8" }}>Step {step.toLocaleString()}</span>}
         </div>
       </div>
 
       {/* Profile selector */}
-      <div className="flex flex-wrap gap-2 items-center">
+      <div style={{ display:"flex", gap:"6px", marginBottom:"20px", flexWrap:"wrap", alignItems:"center" }}>
+        <span style={{ ...slabel, marginRight:"4px" }}>Profile:</span>
         {PROFILES.map(p => (
           <button key={p}
-            onClick={() => { if (!simRunning) setSelectedProfile(p); }}
-            disabled={simRunning}
-            className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
-              selectedProfile === p
-                ? "bg-indigo-500 border-indigo-400 text-white"
-                : simRunning
-                ? "bg-white/5 border-white/10 text-[#64748b] cursor-not-allowed"
-                : "bg-white/5 border-white/10 text-[#94a3b8] hover:bg-white/10"}`}>
-            {PROFILE_LABELS[p]}
+            onClick={() => { if(mode==="video"||(!run&&simState==="idle")) setSel(p); }}
+            disabled={mode==="live"&&(run||simState==="starting")}
+            style={{ padding:"5px 14px", fontSize:"13px", fontWeight:500, borderRadius:"4px", border:"1px solid",
+              cursor: mode==="live"&&(run||simState==="starting") ? "not-allowed" : "pointer",
+              background:sel===p?"#1d4ed8":"#fff", color:sel===p?"#fff":"#374151",
+              borderColor:sel===p?"#1d4ed8":"#d1d5db" }}>
+            {PLABELS[p]}
           </button>
         ))}
-        {simRunning && <span className="text-xs text-[#64748b]">← Stop to change profile</span>}
       </div>
 
-      {error    && <div className="px-4 py-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-300 text-sm">⚠ {error}</div>}
-      {simError && <div className="px-4 py-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-300 text-sm">⚠ {simError}</div>}
+      {simErr && <div style={{ padding:"8px 12px", background:"#fee2e2", border:"1px solid #fca5a5", borderRadius:"4px", color:"#dc2626", fontSize:"13px", marginBottom:"16px" }}>⚠ {simErr}</div>}
 
-      {/* Metric cards */}
-      {!loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard label="Vehicles"
-            value={simRunning && liveData ? String(liveData.vehicles) : String(metrics?.peak_vehicles ?? "—")}
-            unit={simRunning ? "live" : "peak"} color="#818cf8"
-            data={timeseries.slice(-7).map(d => d.vehicles)} />
-          <MetricCard label="Avg Wait"
-            value={simRunning && liveData ? String(liveData.avg_wait_s) : String(metrics?.avg_wait_s ?? "—")}
-            unit="seconds" color="#34d399"
-            data={timeseries.slice(-7).map(d => d.wait)} />
-          <MetricCard label="CO₂ Emissions"
-            value={simRunning && liveData
-              ? (liveData.total_co2_mg / 1000).toFixed(0)
-              : metrics ? (metrics.peak_co2_mg / 1000).toFixed(0) : "—"}
-            unit="k mg/step" color="#fbbf24"
-            data={timeseries.slice(-7).map(d => d.co2)} />
-          <MetricCard label="Max Wait"
-            value={simRunning && liveData ? String(liveData.max_wait_s) : String(metrics?.max_wait_s ?? "—")}
-            unit="seconds" color="#a78bfa"
-            data={timeseries.slice(-7).map(d => d.wait)} />
+      {/* KPI cards */}
+      {!loading && met && (
+        <div style={{ display:"grid", gridTemplateColumns:gridCols(4,2,2,isMobile,isTablet), gap:"12px", marginBottom:"20px" }}>
+          <MetricCard label="Vehicles"      value={run&&live?live.vehicles:met.peak_vehicles}                              unit={run?"live count":"peak count"} accent="#1d4ed8"/>
+          <MetricCard label="Avg Wait Time" value={run&&live?live.avg_wait_s:met.avg_wait_s}                               unit="seconds"                      accent="#15803d"/>
+          <MetricCard label="CO₂ Emissions" value={run&&live?(live.total_co2_mg/1000).toFixed(0):(met.peak_co2_mg/1000).toFixed(0)} unit="×1,000 mg/step"    accent="#b45309"/>
+          <MetricCard label="Max Wait Time" value={run&&live?live.max_wait_s:met.max_wait_s}                               unit="seconds"                      accent="#7c3aed"/>
         </div>
       )}
 
-      {/* Main content */}
-      <div className="grid lg:grid-cols-[1fr_340px] gap-6">
-        <div className="card p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Gauge className="w-5 h-5 text-indigo-400" />
-              <h2 className="text-sm font-semibold text-white">Live Simulation Feed</h2>
-            </div>
-            <div className="flex items-center gap-2">
-              {frame && (
-                <button onClick={() => setFullscreen(true)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[#94a3b8] border border-white/10 text-xs">
-                  <Maximize2 className="w-3.5 h-3.5" /> Fullscreen
+      {/* Main grid */}
+      <div style={{ display:"grid", gridTemplateColumns:isMobile||isTablet?"1fr":"1fr 300px", gap:"16px", marginBottom:"20px" }}>
+        <div style={card}>
+          <div style={{ padding:"12px 16px", borderBottom:"1px solid #f1f5f9", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+            <span style={slabel}>
+              {mode==="video" ? "Simulation Recording" : "Live Simulation Feed"}
+            </span>
+            {mode==="live" && (
+              <div style={{ display:"flex", gap:"6px" }}>
+                <button style={btnS("primary", run||simState==="starting")} onClick={handleStart} disabled={run||simState==="starting"}>
+                  <Play size={13} strokeWidth={2.5}/>{simState==="starting"?"Starting...":"Start"}
                 </button>
-              )}
-              <span className="text-xs font-mono text-[#64748b]">SUMO + TraCI</span>
-            </div>
-          </div>
-
-          {/* Controls */}
-          <div className="flex gap-2">
-            <button onClick={handleStart} disabled={simRunning || simLoading}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                simRunning || simLoading
-                  ? "bg-indigo-500/30 text-indigo-300 cursor-not-allowed"
-                  : "bg-indigo-500 hover:bg-indigo-400 text-white"}`}>
-              <Play className="w-4 h-4" strokeWidth={2.5} />
-              {simLoading ? "Starting..." : "Start"}
-            </button>
-            <button onClick={handleStop} disabled={!simRunning}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                !simRunning
-                  ? "bg-red-500/10 text-red-300/40 border-red-500/20 cursor-not-allowed"
-                  : "bg-red-500/20 hover:bg-red-500/30 text-red-400 border-red-500/40"}`}>
-              <Square className="w-4 h-4" strokeWidth={2.5} /> Stop
-            </button>
-            <button onClick={handlePause} disabled={!simRunning}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                !simRunning
-                  ? "bg-white/5 text-[#94a3b8]/40 border-white/10 cursor-not-allowed"
-                  : simPaused
-                  ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                  : "bg-white/5 hover:bg-white/10 text-[#94a3b8] border-white/10"}`}>
-              <Pause className="w-4 h-4" strokeWidth={2.5} />
-              {simPaused ? "Resume" : "Pause"}
-            </button>
-          </div>
-
-          {/* Viewport */}
-          <div className="relative h-72 md:h-80 rounded-xl overflow-hidden bg-[#0a0f16]">
-            {frame ? (
-              <>
-                <img src={frame} alt="SUMO simulation" className="w-full h-full object-cover" />
-                <div className="absolute top-3 left-3 flex gap-2 z-10">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/70 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    {simPaused ? "PAUSED" : "LIVE"}
-                  </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-black/70 border border-indigo-500/30 text-indigo-300 text-[11px] font-mono">
-                    Step {simStep.toLocaleString()}
-                  </span>
-                </div>
-                {liveData && (
-                  <div className="absolute bottom-3 left-3 right-3 z-10 flex justify-between">
-                    <span className="px-2.5 py-1 rounded-lg bg-black/70 text-[11px] font-mono text-white">
-                      🚗 {liveData.vehicles} vehicles
-                    </span>
-                    <span className="px-2.5 py-1 rounded-lg bg-black/70 text-[11px] font-mono text-white">
-                      ⏱ {liveData.avg_wait_s}s avg wait
-                    </span>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="scanline h-full flex items-center justify-center">
-                <div className="text-center px-6">
-                  {simRunning ? (
-                    <>
-                      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                      <p className="text-sm text-indigo-300">Loading SUMO-GUI...</p>
-                      <p className="text-xs text-[#64748b] mt-1">First frame incoming</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-base font-semibold text-indigo-300 mb-1">SUMO Simulation</p>
-                      <p className="text-sm text-[#94a3b8] mb-3">El-Tahrir Square — Cairo</p>
-                      <p className="text-xs text-[#64748b]">
-                        Select a profile and press <span className="text-indigo-400">Start</span>
-                      </p>
-                    </>
-                  )}
-                </div>
+                <button style={btnS("danger", !run)} onClick={handleStop} disabled={!run}>
+                  <Square size={13} strokeWidth={2.5}/> Stop
+                </button>
+                <button style={btnS("neutral", !run)} onClick={()=>setPaused(p=>!p)} disabled={!run}>
+                  <Pause size={13} strokeWidth={2.5}/>{paused?"Resume":"Pause"}
+                </button>
               </div>
             )}
           </div>
 
-          {/* Stats bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-[#94a3b8]">
-            <span>Profile: <span className="text-indigo-400">{PROFILE_LABELS[selectedProfile]}</span></span>
-            {simRunning && liveData ? (
-              <>
-                <span>Vehicles: <span className="text-indigo-400">{liveData.vehicles}</span></span>
-                <span>CO₂: <span className="text-indigo-400">{(liveData.total_co2_mg / 1000).toFixed(0)}k mg</span></span>
-                <span>Step: <span className="text-indigo-400">{simStep.toLocaleString()}</span></span>
-              </>
-            ) : metrics && (
-              <>
-                <span>Avg Vehicles: <span className="text-indigo-400">{metrics.avg_vehicles}</span></span>
-                <span>Steps: <span className="text-indigo-400">{metrics.total_steps}</span></span>
-                <span>Period: <span className="text-indigo-400">{metrics.time_period}</span></span>
-              </>
-            )}
+          {mode==="video" ? <VideoViewport/> : <LiveViewport/>}
+
+          <div style={{ padding:"8px 16px", borderTop:"1px solid #f1f5f9", display:"flex", gap:"16px", fontSize:"12px", color:"#64748b" }}>
+            <span>Profile: <strong style={{ color:"#1d4ed8" }}>{PLABELS[sel]}</strong></span>
+            {met && <><span>Avg vehicles: <strong>{met.avg_vehicles}</strong></span><span>Steps: <strong>{met.total_steps}</strong></span></>}
           </div>
         </div>
 
         {/* Right column */}
-        <div className="space-y-4">
-          <TrafficLightStatus
-            trafficLights={liveData?.traffic_lights}
-            typeCounts={liveData?.type_counts}
-          />
-
-          {/* FIXED: DQN card shows real status from API */}
-          <div className="card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Brain className="w-4 h-4 text-indigo-400" />
-              <h3 className="text-sm font-semibold text-white">DQN Optimizer</h3>
-            </div>
-            <div className="space-y-3 text-sm">
-              {[
-                {
-                  label: "Status",
-                  value: dqnStatusLabel,
-                  cls:   dqnStatusCls,
-                },
-                {
-                  label: "Model",
-                  value: "Deep Q-Network (2×128)",
-                  cls:   "text-indigo-400",
-                },
-                {
-                  label: "Environment",
-                  value: "SUMO + TraCI",
-                  cls:   "text-indigo-400",
-                },
-                {
-                  label: "Wait Improvement",
-                  value: dqnImprovementLabel,
-                  cls:   dqnStatus?.improvement_pct > 0
-                    ? "text-emerald-400 font-mono"
-                    : "text-[#94a3b8] font-mono",
-                },
-                {
-                  label: "CO₂ Improvement",
-                  value: dqnStatus?.co2_improvement_pct
-                    ? `↓${dqnStatus.co2_improvement_pct.toFixed(1)}%`
-                    : "—",
-                  cls:   dqnStatus?.co2_improvement_pct > 0
-                    ? "text-emerald-400 font-mono"
-                    : "text-[#94a3b8] font-mono",
-                },
-              ].map(row => (
-                <div key={row.label} className="flex items-center justify-between">
-                  <span className="text-[#94a3b8]">{row.label}</span>
-                  <span className={`text-xs ${row.cls}`}>{row.value}</span>
-                </div>
-              ))}
-            </div>
+        <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
+          <TrafficLightStatus trafficLights={mode==="video" ? STATIC_SIGNALS : live?.traffic_lights} typeCounts={mode==="video" ? {"car":280,"taxi":76,"microbus":61,"bus":40,"truck":25,"motorcycle":20,"bicycle":5} : live?.type_counts}/>
+          <div style={{ ...card, padding:"16px" }}>
+            <div style={{ ...slabel, marginBottom:"12px" }}>Profile Summary</div>
+            {met && [
+              { label:"Time period",   value: met.time_period },
+              { label:"Avg vehicles",  value: met.avg_vehicles },
+              { label:"Peak vehicles", value: met.peak_vehicles },
+              { label:"Avg wait",      value: `${met.avg_wait_s}s` },
+              { label:"Max wait",      value: `${met.max_wait_s}s` },
+            ].map(row => (
+              <div key={row.label} style={{ display:"flex", justifyContent:"space-between", padding:"7px 0", borderBottom:"1px solid #f1f5f9" }}>
+                <span style={{ fontSize:"13px", color:"#64748b" }}>{row.label}</span>
+                <span style={{ fontSize:"13px", fontWeight:500, color:"#1e293b" }}>{row.value}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Charts */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1fr", gap:"16px" }}>
         {[
-          { key: "co2",  label: "CO₂ Emissions",       unit: "×1000 mg/step", color: "#fbbf24", fmt: v => [`${v}k mg`, "CO₂"]      },
-          { key: "wait", label: "Average Waiting Time", unit: "seconds",       color: "#34d399", fmt: v => [`${v}s`, "Avg Wait"] },
-        ].map(chart => (
-          <div key={chart.key} className="card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-white">{chart.label}</h3>
-              <span className="text-xs font-mono text-[#64748b]">
-                {simRunning ? "● Live · " : ""}{chart.unit}
-              </span>
+          { key:"co2",  label:"CO₂ Emissions",       unit:"×1,000 mg/step", color:"#b45309" },
+          { key:"wait", label:"Average Waiting Time", unit:"seconds",        color:"#15803d" },
+        ].map(c => (
+          <div key={c.key} style={{ ...card, padding:"16px" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", marginBottom:"14px" }}>
+              <span style={{ fontSize:"14px", fontWeight:600, color:"#0f172a" }}>{c.label}</span>
+              <span style={{ fontSize:"11px", color:"#94a3b8", fontFamily:"monospace" }}>{c.unit}</span>
             </div>
-            <div className="h-56">
-              {loading ? (
-                <div className="h-full flex items-center justify-center text-sm text-[#64748b] animate-pulse">Loading...</div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData} margin={{ left: -20, right: 8, top: 5, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.06)" />
-                    <XAxis dataKey="t" tick={{ fill: "#64748b", fontSize: 10 }} tickLine={false} tickMargin={8} />
-                    <YAxis tick={{ fill: "#64748b", fontSize: 10 }} tickLine={false} tickMargin={8} />
-                    <Tooltip contentStyle={chartStyle.tooltip} formatter={chart.fmt} />
-                    <Line type="monotone" dataKey={chart.key} stroke={chart.color} strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
+            <div style={{ height:"200px" }}>
+              {loading
+                ? <div style={{ height:"100%", display:"flex", alignItems:"center", justifyContent:"center", color:"#94a3b8" }}>Loading...</div>
+                : <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ left:-20, right:8, top:4, bottom:0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+                      <XAxis dataKey="t" tick={TICK} tickLine={false}/>
+                      <YAxis tick={TICK} tickLine={false}/>
+                      <Tooltip contentStyle={TT} formatter={v=>[c.key==="co2"?`${v}k mg`:`${v}s`,c.label]}/>
+                      <Line type="monotone" dataKey={c.key} stroke={c.color} strokeWidth={2} dot={false} activeDot={{r:3}}/>
+                    </LineChart>
+                  </ResponsiveContainer>
+              }
             </div>
           </div>
         ))}
       </div>
 
-      {/* Fullscreen overlay */}
-      {fullscreen && frame && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
-          onClick={() => setFullscreen(false)}>
-          <img src={frame} alt="SUMO fullscreen" className="max-w-full max-h-full rounded-xl" />
-          <button className="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20"
-            onClick={() => setFullscreen(false)}>✕ Close</button>
+      {full && frame && (
+        <div style={{ position:"fixed", inset:0, zIndex:100, background:"rgba(0,0,0,0.95)", display:"flex", alignItems:"center", justifyContent:"center" }} onClick={()=>setFull(false)}>
+          <img src={frame} alt="fs" style={{ maxWidth:"100%", maxHeight:"100%" }}/>
+          <button style={{ position:"absolute", top:"16px", right:"16px", padding:"6px 12px", background:"rgba(255,255,255,0.15)", color:"#fff", border:"none", borderRadius:"4px", cursor:"pointer" }} onClick={()=>setFull(false)}>✕ Close</button>
         </div>
       )}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
-
-export default Dashboard;
