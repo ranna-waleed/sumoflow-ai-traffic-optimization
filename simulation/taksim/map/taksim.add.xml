@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<additional>
+    <!-- Lane area detectors — pos="0" covers entire lane regardless of length -->
+
+    <!-- 2333203943 -->
+    <laneAreaDetector id="det_2333203943_0" lane="-1119115695#1_0" pos="0" length="0.1" freq="10" file="outputs/det_2333203943.xml"/>
+    <laneAreaDetector id="det_2333203943_1" lane="1119115695#0_0"  pos="0" length="0.1" freq="10" file="outputs/det_2333203943.xml"/>
+    <laneAreaDetector id="det_2333203943_2" lane="224500908_0"     pos="0" length="0.1" freq="10" file="outputs/det_2333203943.xml"/>
+
+    <!-- 278335467 -->
+    <laneAreaDetector id="det_278335467_0" lane="24806854#1_0"  pos="0" length="0.1" freq="10" file="outputs/det_278335467.xml"/>
+    <laneAreaDetector id="det_278335467_1" lane="37282390#1_0"  pos="0" length="0.1" freq="10" file="outputs/det_278335467.xml"/>
+
+    <!-- 34156851 -->
+    <laneAreaDetector id="det_34156851_0" lane="228979748#2_0" pos="0" length="0.1" freq="10" file="outputs/det_34156851.xml"/>
+    <laneAreaDetector id="det_34156851_1" lane="24805912#0_0"  pos="0" length="0.1" freq="10" file="outputs/det_34156851.xml"/>
+
+    <!-- 539369578 -->
+    <laneAreaDetector id="det_539369578_0" lane="-1498970029#0_0" pos="0" length="0.1" freq="10" file="outputs/det_539369578.xml"/>
+    <laneAreaDetector id="det_539369578_1" lane="-4471924#1_0"    pos="0" length="0.1" freq="10" file="outputs/det_539369578.xml"/>
+    <laneAreaDetector id="det_539369578_2" lane="1498970029#4_0"  pos="0" length="0.1" freq="10" file="outputs/det_539369578.xml"/>
+
+    <!-- joinedG_1450800222... -->
+    <laneAreaDetector id="det_joined1_0" lane="-183827665_0"   pos="0" length="0.1" freq="10" file="outputs/det_joined1.xml"/>
+    <laneAreaDetector id="det_joined1_1" lane="-24806974#3_0"  pos="0" length="0.1" freq="10" file="outputs/det_joined1.xml"/>
+    <laneAreaDetector id="det_joined1_2" lane="-24806974#5_0"  pos="0" length="0.1" freq="10" file="outputs/det_joined1.xml"/>
+    <laneAreaDetector id="det_joined1_3" lane="217075241_0"    pos="0" length="0.1" freq="10" file="outputs/det_joined1.xml"/>
+    <laneAreaDetector id="det_joined1_4" lane="24806974#2_0"   pos="0" length="0.1" freq="10" file="outputs/det_joined1.xml"/>
+    <laneAreaDetector id="det_joined1_5" lane="24806974#4_0"   pos="0" length="0.1" freq="10" file="outputs/det_joined1.xml"/>
+    <laneAreaDetector id="det_joined1_6" lane="24806974#5_0"   pos="0" length="0.1" freq="10" file="outputs/det_joined1.xml"/>
+    <laneAreaDetector id="det_joined1_7" lane="25562607_0"     pos="0" length="0.1" freq="10" file="outputs/det_joined1.xml"/>
+    <laneAreaDetector id="det_joined1_8" lane="25562615_0"     pos="0" length="0.1" freq="10" file="outputs/det_joined1.xml"/>
+
+    <!-- joinedG_269500161_434340903 -->
+    <laneAreaDetector id="det_joined2_0" lane="131881144_0"   pos="0" length="0.1" freq="10" file="outputs/det_joined2.xml"/>
+    <laneAreaDetector id="det_joined2_1" lane="24805591#1_0"  pos="0" length="0.1" freq="10" file="outputs/det_joined2.xml"/>
+</additional>
