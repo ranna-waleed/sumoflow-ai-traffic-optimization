@@ -1,6 +1,6 @@
 # Reducing Traffic Congestion and Estimations at Urban Intersections Through Deep Reinforcement Learning and Computer Vision
 
-Live demo: https://inquisitive-swan-9ffbe5.netlify.app
+Live demo: https://prismatic-taffy-9c78b9.netlify.app/
 
 ---
 
