@@ -378,6 +378,20 @@ Full documentation is in `AI_GOVERNANCE.md`. Summary:
 
 ---
 
+## Output Files
+
+The following files are too large to store in the repository and are available on Google Drive:
+
+https://drive.google.com/drive/u/0/folders/1ULhxaaJfYKngSDmra5949AVY5koPnaeH
+
+The Drive folder contains:
+- Detection model outputs — YOLOv8s, Faster R-CNN, and RetinaNet training results, weights, and evaluation metrics
+- DQN checkpoints — trained model weights for all 7 junctions across 350 training episodes
+- DQN training logs — reward per episode, epsilon decay, and step-level decision logs
+- SUMO baseline outputs — tripinfo and emission XML files for all 4 Tahrir Square profiles
+- Taksim Square outputs — baseline simulation outputs and pipeline test results
+- Detector output XMLs — lane area detector data from the simulation runs
+  
 ## Links
 
 GitHub: https://github.com/ranna-waleed/sumoflow-ai-traffic-optimization  
