@@ -324,19 +324,19 @@ react-router-dom 6.0+
 ## Screenshots
 
 **Dashboard**
-![Dashboard](docs/screenshots/dashboard.png)
+![Dashboard](docs/screenshots/dashboard.JPG)
 
 **Live Simulation**
-![Live Simulation](docs/screenshots/live_simulation.png)
+![Live Simulation](docs/screenshots/live_simulation.JPG)
 
 **Model Comparison**
-![Model Comparison](docs/screenshots/model_comparison.png)
+![Model Comparison](docs/screenshots/model_comparison.JPG)
 
 **Before vs After**
-![Before vs After](docs/screenshots/before_after.png)
+![Before vs After](docs/screenshots/before_after.JPG)
 
 **About**
-![About](docs/screenshots/about.png)
+![About](docs/screenshots/about.JPG)
 
 ---
 
