@@ -1,0 +1,147 @@
+#  SUMOFlow AI : DQN Configuration for Taksim Square, Istanbul
+#  8 controllable TLS agents (out of 12 total junctions)
+
+simulation:
+  net_file:     simulation/taksim/map/taksim.net.xml
+  step_length:  1
+  decision_interval: 10      # DQN decides every 10 sim steps
+
+# Traffic profiles 
+profiles:
+  taksim_morning:
+    config:    simulation/taksim/map/config_taksim.sumocfg
+    begin:     28800          # 08:00
+    end:       36000          # 10:00
+    port:      8814           # different port from Tahrir (8813)
+
+#  8 Controlled TLS junctions 
+# Skipped (always-green / no transitions):
+#   278558186, 8974792339,
+#   joinedG_269515490_434343816, joinedG_278615578_278615579
+
+tls_junctions:
+
+  "105404369":
+    incoming_lanes: []       # single-approach, no lane data from parser
+    green_phases:   [0]
+    green_to_yellow: {"0": 1}
+    yellow_to_green: {"1": 0}
+
+  "2263863893":
+    incoming_lanes: []       # single-approach
+    green_phases:   [0, 2]
+    green_to_yellow: {"0": 1, "2": 3}
+    yellow_to_green: {"1": 2, "3": 0}
+
+  "2333203943":
+    incoming_lanes:
+      - "-1119115695#1_0"
+      - "1119115695#0_0"
+      - "224500908_0"
+    green_phases:   [0, 2]
+    green_to_yellow: {"0": 1, "2": 3}
+    yellow_to_green: {"1": 2, "3": 0}
+
+  "278335467":
+    incoming_lanes:
+      - "24806854#1_0"
+      - "37282390#1_0"
+    green_phases:   [0, 2]
+    green_to_yellow: {"0": 1, "2": 3}
+    yellow_to_green: {"1": 2, "3": 0}
+
+  "34156851":
+    incoming_lanes:
+      - "228979748#2_0"
+      - "24805912#0_0"
+    green_phases:   [0, 2]
+    green_to_yellow: {"0": 1, "2": 3}
+    yellow_to_green: {"1": 2, "3": 0}
+
+  "539369578":
+    incoming_lanes:
+      - "-1498970029#0_0"
+      - "-4471924#1_0"
+      - "1498970029#4_0"
+    green_phases:   [0]
+    green_to_yellow: {"0": 1}
+    yellow_to_green: {"1": 0}
+
+  "joinedG_1450800222_2263863897_278615585_cluster_1450800225_269500433":
+    incoming_lanes:
+      - "-183827665_0"
+      - "-24806974#3_0"
+      - "-24806974#5_0"
+      - "217075241_0"
+      - "24806974#2_0"
+      - "24806974#4_0"
+      - "24806974#5_0"
+      - "25562607_0"
+      - "25562615_0"
+    green_phases:   [0, 2, 4, 6, 7, 8, 9, 10, 11, 12]
+    green_to_yellow: {"0": 1, "2": 3, "4": 5, "12": 13}
+    yellow_to_green: {"1": 2, "3": 4, "5": 6, "13": 0}
+
+  "joinedG_269500161_434340903":
+    incoming_lanes:
+      - "131881144_0"
+      - "24805591#1_0"
+    green_phases:   [0, 2]
+    green_to_yellow: {"0": 1, "2": 3}
+    yellow_to_green: {"1": 2, "3": 0}
+
+#  State vector
+state:
+  max_lanes:        10
+  features_per_lane: 3       # halting count, wait time, occupancy
+  global_features:   5       # lstm N/S/E/W + time_of_day
+  # Total = 10×3 + 2 (junction) + 5 (global) = 37 — same as Tahrir
+
+#  Reward function 
+reward:
+  wait_weight:       -1.0
+  co2_weight:        -0.001
+  throughput_weight:  0.5
+  clip_min:          -200.0
+  clip_max:           10.0
+
+# DQN hyperparameters (same as Tahrir — proven settings) 
+dqn:
+  state_size:        37
+  action_size:       2
+  hidden_size:       256
+  learning_rate:     0.0005
+  gamma:             0.95
+  epsilon_start:     1.0
+  epsilon_end:       0.05
+  epsilon_decay:     0.9995
+  buffer_size:       50000
+  batch_size:        64
+  target_update:     10
+  checkpoint_every:  10
+
+#  BiLSTM adapter
+bilstm:
+  features:
+    - north
+    - south
+    - east
+    - west
+    - total
+    - avg_speed
+    - avg_waiting
+  scaler_max:
+    north: 91.0
+    south: 43.0
+    east:  116.0
+    west:  136.0
+  history_len: 60
+
+# Evaluation paths 
+evaluation:
+  baseline_output_dir: simulation/taksim/map/baseline_outputs
+  results_dir:         DeepQN/results/taksim
+
+# suffix map for baseline XML files
+baseline_suffix_map:
+  taksim_morning: taksim

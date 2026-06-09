@@ -161,30 +161,31 @@ def parse_summary(xml_path: str | Path, metrics: EpisodeMetrics) -> EpisodeMetri
 #  Convenience loader 
 
 def load_metrics_from_outputs(
-    output_dir: str | Path | None,
-    profile:    str,
-    mode:       str,
+    output_dir:      str | Path | None,
+    profile:         str,
+    mode:            str,
+    suffix_override: str | None = None,
 ) -> EpisodeMetrics:
     """
     Load baseline metrics from SUMO XML output files.
+    Works for any map — pass suffix_override to use a custom filename suffix.
 
-    Confirmed output directory: simulation/maps/baseline_outputs/
-    File naming confirmed by user:
-      tripinfo_morning.xml  tripinfo_midday.xml
-      tripinfo_evening.xml  tripinfo_night.xml
-      emission_morning.xml  summary_morning.xml  etc.
+    Tahrir:  tripinfo_morning.xml, tripinfo_evening.xml, etc.
+    Taksim:  tripinfo_taksim.xml  (suffix_override="taksim")
     """
-    suffix_map = {
-        "morning_rush": "morning",
-        "midday":       "midday",
-        "evening_rush": "evening",
-        "night":        "night",
-    }
-    file_sfx = suffix_map.get(profile, profile)
+    if suffix_override:
+        file_sfx = suffix_override
+    else:
+        suffix_map = {
+            "morning_rush": "morning",
+            "midday":       "midday",
+            "evening_rush": "evening",
+            "night":        "night",
+        }
+        file_sfx = suffix_map.get(profile, profile)
 
-    # Use confirmed path; output_dir parameter overrides if provided
     if output_dir is None:
-        odir = Path("simulation") / "maps" / "outputs"
+        odir = Path("simulation") / "maps" / "baseline_outputs"
     else:
         odir = Path(output_dir)
 
@@ -192,7 +193,7 @@ def load_metrics_from_outputs(
     emixml  = odir / f"emission_{file_sfx}.xml"
     sumxml  = odir / f"summary_{file_sfx}.xml"
 
-    logger.info("Reading %s metrics from: %s", mode, odir)
+    logger.info("Reading %s metrics from: %s  (suffix: %s)", mode, odir, file_sfx)
     m = parse_tripinfo(tripxml, profile, mode)
     m = parse_emission(emixml, m)
     m = parse_summary(sumxml, m)
