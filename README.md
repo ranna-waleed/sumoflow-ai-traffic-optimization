@@ -323,23 +323,20 @@ react-router-dom 6.0+
 
 ## Screenshots
 
-> Screenshots will be added here.
-
 **Dashboard**
-
-<!-- dashboard screenshot -->
+![Dashboard](docs/screenshots/dashboard.png)
 
 **Live Simulation**
-
-<!-- live simulation screenshot -->
+![Live Simulation](docs/screenshots/live_simulation.png)
 
 **Model Comparison**
-
-<!-- model comparison screenshot -->
+![Model Comparison](docs/screenshots/model_comparison.png)
 
 **Before vs After**
+![Before vs After](docs/screenshots/before_after.png)
 
-<!-- before vs after screenshot -->
+**About**
+![About](docs/screenshots/about.png)
 
 ---
 
