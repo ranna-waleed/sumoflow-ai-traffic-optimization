@@ -46,7 +46,7 @@ export default function ModelComparison(){
         </div>
         <div style={{display:"flex",gap:"6px"}}>
           {[["3 Models","#dbeafe","#1d4ed8"],["7 Classes","#f1f5f9","#374151"]].map(([t,bg,c])=>(
-            <span key={t} style={{padding:"4px 10px",borderRadius:"4px",fontSize:"12px",fontWeight:500,background:bg,color:c}}>{t}</span>
+            <span key={t} style={{padding:"4px 10px",borderRadius:"99px",fontSize:"12px",fontWeight:500,background:bg,color:c}}>{t}</span>
           ))}
         </div>
       </div>
@@ -64,11 +64,8 @@ export default function ModelComparison(){
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"16px"}}>
                     <div>
                       <div style={{fontSize:"17px",fontWeight:700,color}}>{m.name}</div>
-                      {isPrimary&&<span style={{display:"inline-block",marginTop:"4px",padding:"2px 8px",borderRadius:"3px",fontSize:"11px",fontWeight:600,background:"#dbeafe",color:"#1d4ed8"}}>★ Selected</span>}
+                      {isPrimary&&<span style={{display:"inline-block",marginTop:"4px",padding:"2px 8px",borderRadius:"99px",fontSize:"11px",fontWeight:600,background:"#dbeafe",color:"#1d4ed8"}}> Selected</span>}
                     </div>
-                    <span style={{padding:"3px 8px",borderRadius:"3px",fontSize:"12px",fontWeight:500,background:m.status==="complete"?"#dcfce7":"#fef3c7",color:m.status==="complete"?"#15803d":"#b45309"}}>
-                      {m.status==="complete"?"Complete":"Pending"}
-                    </span>
                   </div>
                   {[
                     ["mAP@0.5",      pct(m.mAP50)],

@@ -142,8 +142,8 @@ export default function Dashboard() {
         style={{ width:"100%", height:"100%", objectFit:"cover" }}
       />
       <div style={{ position:"absolute", top:"10px", left:"10px", display:"flex", gap:"6px" }}>
-        <span style={{ padding:"3px 8px", borderRadius:"3px", fontSize:"11px", fontWeight:600, fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#4ade80" }}>● SIMULATION</span>
-        <span style={{ padding:"3px 8px", borderRadius:"3px", fontSize:"11px", fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#93c5fd" }}>{PLABELS[sel]}</span>
+        <span style={{ padding:"3px 8px", borderRadius:"99px", fontSize:"11px", fontWeight:600, fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#4ade80" }}>● SIMULATION</span>
+        <span style={{ padding:"3px 8px", borderRadius:"99px", fontSize:"11px", fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#93c5fd" }}>{PLABELS[sel]}</span>
       </div>
     </div>
   );
@@ -155,25 +155,25 @@ export default function Dashboard() {
         <>
           <img src={frame} alt="SUMO" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
           <div style={{ position:"absolute", top:"10px", left:"10px", display:"flex", gap:"6px" }}>
-            <span style={{ padding:"3px 8px", borderRadius:"3px", fontSize:"11px", fontWeight:600, fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:paused?"#fbbf24":"#4ade80" }}>
+            <span style={{ padding:"3px 8px", borderRadius:"99px", fontSize:"11px", fontWeight:600, fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:paused?"#fbbf24":"#4ade80" }}>
               {paused?"⏸ PAUSED":"● LIVE"}
             </span>
-            <span style={{ padding:"3px 8px", borderRadius:"3px", fontSize:"11px", fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#93c5fd" }}>Step {step.toLocaleString()}</span>
+            <span style={{ padding:"3px 8px", borderRadius:"99px", fontSize:"11px", fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#93c5fd" }}>Step {step.toLocaleString()}</span>
           </div>
           {live && (
             <div style={{ position:"absolute", bottom:"10px", left:"10px", right:"10px", display:"flex", justifyContent:"space-between" }}>
               {[`🚗 ${live.vehicles}`,`⏱ ${live.avg_wait_s}s`,`💨 ${(live.total_co2_mg/1000).toFixed(0)}k mg CO₂`].map(t => (
-                <span key={t} style={{ padding:"3px 8px", borderRadius:"3px", fontSize:"11px", fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#fff" }}>{t}</span>
+                <span key={t} style={{ padding:"3px 8px", borderRadius:"99px", fontSize:"11px", fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#fff" }}>{t}</span>
               ))}
             </div>
           )}
-          {frame && <button style={{ position:"absolute", top:"10px", right:"10px", padding:"4px 8px", background:"rgba(0,0,0,0.6)", color:"#fff", border:"none", borderRadius:"3px", cursor:"pointer" }} onClick={()=>setFull(true)}><Maximize2 size={12}/></button>}
+          {frame && <button style={{ position:"absolute", top:"10px", right:"10px", padding:"4px 8px", background:"rgba(0,0,0,0.6)", color:"#fff", border:"none", borderRadius:"99px", cursor:"pointer" }} onClick={()=>setFull(true)}><Maximize2 size={12}/></button>}
         </>
       ) : (
         <div style={{ height:"100%", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:"8px" }}>
           {simState==="starting"
             ? <><div style={{ width:"28px", height:"28px", border:"2px solid #3b82f6", borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.8s linear infinite" }}/><span style={{ color:"#60a5fa", fontSize:"13px" }}>Opening SUMO-GUI...</span></>
-            : <><span style={{ fontSize:"28px" }}>🗺️</span><span style={{ color:"#64748b", fontSize:"13px" }}>Select a profile and press <strong style={{ color:"#1d4ed8" }}>Start</strong></span></>
+            : <><span style={{ fontSize:"28px" }}></span><span style={{ color:"#64748b", fontSize:"13px" }}>Select a profile and press <strong style={{ color:"#1d4ed8" }}>Start</strong></span></>
           }
         </div>
       )}
@@ -200,7 +200,7 @@ export default function Dashboard() {
             background: mode==="live" ? "#dbeafe" : "#f1f5f9",
             color: mode==="live" ? "#1d4ed8" : "#64748b",
             border: `1px solid ${mode==="live"?"#bfdbfe":"#e2e8f0"}` }}>
-            {mode==="live" ? "⚡ Live Mode" : "▶ Video Mode"}
+            {mode==="live" ? " Live Mode" : "▶ Video Mode"}
           </span>
           {mode==="live" && run && <span style={{ padding:"4px 10px", borderRadius:"4px", fontSize:"12px", fontFamily:"monospace", background:"#dbeafe", border:"1px solid #bfdbfe", color:"#1d4ed8" }}>Step {step.toLocaleString()}</span>}
         </div>

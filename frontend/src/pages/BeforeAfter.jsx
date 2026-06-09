@@ -119,8 +119,8 @@ export default function BeforeAfter(){
           <p style={{margin:"4px 0 0",fontSize:"13px",color:"#64748b"}}>Fixed-time baseline compared to DQN adaptive control — El-Tahrir Square</p>
         </div>
         <div style={{display:"flex",gap:"6px"}}>
-          {results&&<><span style={{padding:"4px 10px",borderRadius:"4px",fontSize:"12px",fontWeight:500,background:"#dbeafe",color:"#1d4ed8"}}>{results.episodes} episodes trained</span><span style={{padding:"4px 10px",borderRadius:"4px",fontSize:"12px",fontWeight:500,background:"#dcfce7",color:"#15803d"}}>All KPIs met</span></>}
-          <span style={{padding:"4px 10px",borderRadius:"4px",fontSize:"12px",fontWeight:500,background:mode==="live"?"#dbeafe":"#f1f5f9",color:mode==="live"?"#1d4ed8":"#64748b",border:`1px solid ${mode==="live"?"#bfdbfe":"#e2e8f0"}`}}>{mode==="live"?"⚡ Live":"▶ Video"}</span>
+          {results&&<><span style={{padding:"4px 10px",borderRadius:"99px",fontSize:"12px",fontWeight:500,background:"#dbeafe",color:"#1d4ed8"}}>{results.episodes} episodes trained</span><span style={{padding:"4px 10px",borderRadius:"99px",fontSize:"12px",fontWeight:500,background:"#dcfce7",color:"#15803d"}}>All KPIs met</span></>}
+          <span style={{padding:"4px 10px",borderRadius:"99px",fontSize:"12px",fontWeight:500,background:mode==="live"?"#dbeafe":"#f1f5f9",color:mode==="live"?"#1d4ed8":"#64748b",border:`1px solid ${mode==="live"?"#bfdbfe":"#e2e8f0"}`}}>{mode==="live"?" Live":"▶ Video"}</span>
         </div>
       </div>
 
@@ -130,8 +130,8 @@ export default function BeforeAfter(){
       {results&&(
         <div style={{display:"grid",gridTemplateColumns:gridCols(4,2,1,isMobile,isTablet),gap:"12px",marginBottom:"20px"}}>
           {[
-            {label:"Avg Wait — Baseline",value:`${waitBefore.toFixed(1)}s`,sub:"fixed-time signals",accent:"#dc2626"},
-            {label:"Avg Wait — DQN",     value:`${waitAfter.toFixed(1)}s`, sub:"adaptive control", accent:"#15803d"},
+            {label:"Avg Wait: Baseline",value:`${waitBefore.toFixed(1)}s`,sub:"fixed-time signals",accent:"#dc2626"},
+            {label:"Avg Wait: DQN",     value:`${waitAfter.toFixed(1)}s`, sub:"adaptive control", accent:"#15803d"},
             {label:"Wait Time Reduction",value:`↓${waitImprovement.toFixed(1)}%`,sub:"across all profiles",accent:"#15803d"},
             {label:"CO₂ Reduction",      value:`↓${co2Improvement.toFixed(1)}%`, sub:"total emissions",   accent:"#15803d"},
           ].map(c=>(
@@ -150,8 +150,8 @@ export default function BeforeAfter(){
           <div style={{padding:"12px 16px",borderBottom:"1px solid #f1f5f9",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <span style={slabel}>Per-Profile KPI Results</span>
             <div style={{display:"flex",gap:"16px",fontSize:"12px"}}>
-              <span style={{color:"#dc2626"}}>■ Baseline (fixed-time)</span>
-              <span style={{color:"#15803d"}}>■ DQN (adaptive)</span>
+              <span style={{color:"#dc2626"}}> Baseline (fixed-time)</span>
+              <span style={{color:"#15803d"}}> DQN (adaptive)</span>
             </div>
           </div>
           <div style={{overflowX:"auto"}}>
@@ -177,8 +177,8 @@ export default function BeforeAfter(){
                       <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",fontWeight:700,color:"#15803d"}}>↓{d.co2_improvement?.toFixed(1)}%</td>
                       <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",color:d.throughput_delta>=0?"#15803d":"#64748b"}}>{d.throughput_delta>=0?"+":""}{d.throughput_delta}</td>
                       <td style={{padding:"10px 14px"}}>
-                        <span style={{padding:"3px 8px",borderRadius:"3px",fontSize:"11px",fontWeight:600,background:d.kpi_wait_pass&&d.kpi_co2_pass?"#dcfce7":"#fee2e2",color:d.kpi_wait_pass&&d.kpi_co2_pass?"#15803d":"#dc2626"}}>
-                          {d.kpi_wait_pass&&d.kpi_co2_pass?"✓ Pass":"✗ Fail"}
+                        <span style={{padding:"3px 8px",borderRadius:"99px",fontSize:"11px",fontWeight:600,background:d.kpi_wait_pass&&d.kpi_co2_pass?"#dcfce7":"#fee2e2",color:d.kpi_wait_pass&&d.kpi_co2_pass?"#15803d":"#dc2626"}}>
+                          {d.kpi_wait_pass&&d.kpi_co2_pass?" Pass":" Fail"}
                         </span>
                       </td>
                     </tr>
@@ -193,7 +193,7 @@ export default function BeforeAfter(){
       {/* DQN Simulation panel */}
       <div style={{...card,marginBottom:"16px"}}>
         <div style={{padding:"12px 16px",borderBottom:"1px solid #f1f5f9",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={slabel}>DQN Adaptive Control — {mode==="video"?"Recorded Simulation":"Live Simulation"}</span>
+          <span style={slabel}>DQN Adaptive Control: {mode==="video"?"Recorded Simulation":"Live Simulation"}</span>
           {simRunning&&<button style={btn("danger")} onClick={handleStop}><Square size={13} strokeWidth={2}/> Stop</button>}
         </div>
 
@@ -216,8 +216,8 @@ export default function BeforeAfter(){
                 <div style={{fontSize:"11px",color:isActive?"rgba(255,255,255,0.7)":"#94a3b8"}}>{p.time}</div>
                 {pd&&(
                   <div style={{display:"flex",gap:"6px",marginTop:"6px"}}>
-                    <span style={{padding:"2px 6px",borderRadius:"3px",fontSize:"11px",fontWeight:500,background:isActive?"rgba(255,255,255,0.2)":"#dcfce7",color:isActive?"#fff":"#15803d"}}>↓{pd.wait_improvement?.toFixed(0)}% wait</span>
-                    <span style={{padding:"2px 6px",borderRadius:"3px",fontSize:"11px",fontWeight:500,background:isActive?"rgba(255,255,255,0.2)":"#dcfce7",color:isActive?"#fff":"#15803d"}}>↓{pd.co2_improvement?.toFixed(0)}% CO₂</span>
+                    <span style={{padding:"2px 6px",borderRadius:"99px",fontSize:"11px",fontWeight:500,background:isActive?"rgba(255,255,255,0.2)":"#dcfce7",color:isActive?"#fff":"#15803d"}}>↓{pd.wait_improvement?.toFixed(0)}% wait</span>
+                    <span style={{padding:"2px 6px",borderRadius:"99px",fontSize:"11px",fontWeight:500,background:isActive?"rgba(255,255,255,0.2)":"#dcfce7",color:isActive?"#fff":"#15803d"}}>↓{pd.co2_improvement?.toFixed(0)}% CO₂</span>
                   </div>
                 )}
                 {!isActive&&!starting&&<div style={{fontSize:"11px",color:"#1d4ed8",marginTop:"4px",display:"flex",alignItems:"center",gap:"4px"}}><Play size={10}/> {mode==="video"?"Watch DQN":"Run DQN"}</div>}
@@ -237,25 +237,25 @@ export default function BeforeAfter(){
                   <video key={simProfile} src={DQN_VIDEO_MAP[simProfile]} autoPlay loop muted playsInline
                     style={{width:"100%",height:"100%",objectFit:"cover"}}/>
                   <div style={{position:"absolute",top:"10px",left:"10px",display:"flex",gap:"6px"}}>
-                    <span style={{padding:"3px 8px",borderRadius:"3px",fontSize:"11px",fontWeight:600,fontFamily:"monospace",background:"rgba(0,0,0,0.75)",color:"#4ade80"}}>● DQN ACTIVE</span>
-                    <span style={{padding:"3px 8px",borderRadius:"3px",fontSize:"11px",fontFamily:"monospace",background:"rgba(29,78,216,0.85)",color:"#fff"}}>⚡ Adaptive Control</span>
+                    <span style={{padding:"3px 8px",borderRadius:"99px",fontSize:"11px",fontWeight:600,fontFamily:"monospace",background:"rgba(0,0,0,0.75)",color:"#4ade80"}}>● DQN ACTIVE</span>
+                    <span style={{padding:"3px 8px",borderRadius:"99px",fontSize:"11px",fontFamily:"monospace",background:"rgba(29,78,216,0.85)",color:"#fff"}}>⚡ Adaptive Control</span>
                   </div>
                 </>
               ) : mode==="live" && simFrame && simRunning ? (
                 <>
                   <img src={simFrame} alt="DQN" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
                   <div style={{position:"absolute",top:"10px",left:"10px"}}>
-                    <span style={{padding:"3px 8px",borderRadius:"3px",fontSize:"11px",fontWeight:600,fontFamily:"monospace",background:"rgba(0,0,0,0.75)",color:"#4ade80"}}>● DQN ACTIVE</span>
+                    <span style={{padding:"3px 8px",borderRadius:"99px",fontSize:"11px",fontWeight:600,fontFamily:"monospace",background:"rgba(0,0,0,0.75)",color:"#4ade80"}}>● DQN ACTIVE</span>
                   </div>
                   {simMetrics?.current_action&&(
                     <div style={{position:"absolute",bottom:"10px",left:"10px"}}>
-                      <span style={{padding:"3px 8px",borderRadius:"3px",fontSize:"11px",fontFamily:"monospace",background:"rgba(29,78,216,0.85)",color:"#fff"}}>⚡ {simMetrics.current_action}</span>
+                      <span style={{padding:"3px 8px",borderRadius:"99px",fontSize:"11px",fontFamily:"monospace",background:"rgba(29,78,216,0.85)",color:"#fff"}}>⚡ {simMetrics.current_action}</span>
                     </div>
                   )}
                 </>
               ) : (
                 <div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:"8px"}}>
-                  <span style={{fontSize:"24px"}}>🧠</span>
+                  <span style={{fontSize:"24px"}}></span>
                   <span style={{color:"#94a3b8",fontSize:"13px"}}>{simRunning?"Loading...":"Select a profile to watch DQN"}</span>
                 </div>
               )}
@@ -265,7 +265,7 @@ export default function BeforeAfter(){
           {/* Metrics */}
           <div style={{padding:"16px"}}>
             <div style={{...slabel,marginBottom:"12px"}}>{simRunning&&mode==="live"?"Live Metrics":"Profile Results"}</div>
-            {simRunning&&mode==="live"&&simMetrics?(
+            {simRunning&&mode==="live"&&simMetrics?( 
               <>
                 {[
                   {label:"Vehicles", value:simMetrics.vehicles},
@@ -289,7 +289,7 @@ export default function BeforeAfter(){
                         <div key={junc} style={{marginBottom:"7px"}}>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px"}}>
                             <span style={{fontSize:"12px",color:"#374151",fontWeight:500}}>{junc}</span>
-                            <span style={{padding:"2px 7px",borderRadius:"3px",fontSize:"11px",fontWeight:600,background:switched?"#dbeafe":"#f1f5f9",color:switched?"#1d4ed8":"#64748b"}}>{switched?"SWITCH":"KEEP"}</span>
+                            <span style={{padding:"2px 7px",borderRadius:"99px",fontSize:"11px",fontWeight:600,background:switched?"#dbeafe":"#f1f5f9",color:switched?"#1d4ed8":"#64748b"}}>{switched?"SWITCH":"KEEP"}</span>
                           </div>
                           <div style={{height:"4px",background:"#f1f5f9",borderRadius:"99px",overflow:"hidden"}}>
                             <div style={{height:"100%",borderRadius:"99px",width:`${val*100}%`,background:switched?"#1d4ed8":"#94a3b8",transition:"width 0.4s"}}/>

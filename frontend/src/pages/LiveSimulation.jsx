@@ -167,7 +167,7 @@ export default function LiveSimulation() {
           background: mode==="live"?"#dbeafe":"#f1f5f9",
           color: mode==="live"?"#1d4ed8":"#64748b",
           border:`1px solid ${mode==="live"?"#bfdbfe":"#e2e8f0"}` }}>
-          {mode==="live" ? "⚡ Live Mode" : "▶ Video Mode"}
+          {mode==="live" ? " Live Mode" : "▶ Video Mode"}
         </span>
       </div>
 
@@ -251,13 +251,13 @@ export default function LiveSimulation() {
                     </div>
                   </div>
                 )}
-                <button style={{ position:"absolute", top:"12px", right:"12px", padding:"4px 8px", background:"rgba(0,0,0,0.6)", color:"#fff", border:"none", borderRadius:"3px", cursor:"pointer" }} onClick={()=>setFull(true)}><Maximize2 size={12}/></button>
+                <button style={{ position:"absolute", top:"12px", right:"12px", padding:"4px 8px", background:"rgba(0,0,0,0.6)", color:"#fff", border:"none", borderRadius:"99px", cursor:"pointer" }} onClick={()=>setFull(true)}><Maximize2 size={12}/></button>
               </>
             ) : (
               <div style={{ height:"100%", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:"10px" }}>
                 {simState==="starting"
                   ? <><div style={{ width:"32px", height:"32px", border:"2px solid #3b82f6", borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.8s linear infinite" }}/><span style={{ color:"#60a5fa", fontSize:"14px" }}>Opening SUMO-GUI...</span></>
-                  : <><span style={{ fontSize:"36px" }}>🗺️</span><span style={{ color:"#64748b", fontSize:"14px" }}>Select a profile and press <strong style={{ color:"#1d4ed8" }}>Start</strong></span></>
+                  : <><span style={{ fontSize:"36px" }}></span><span style={{ color:"#64748b", fontSize:"14px" }}>Select a profile and press <strong style={{ color:"#1d4ed8" }}>Start</strong></span></>
                 }
               </div>
             )
@@ -274,8 +274,8 @@ export default function LiveSimulation() {
             <span style={slabel}>Traffic Flow by Direction</span>
             {mode==="live" && (
               <div style={{ display:"flex", gap:"10px", fontSize:"11px" }}>
-                <span style={{ display:"flex", alignItems:"center", gap:"4px" }}><div style={{ width:"20px", height:"6px", borderRadius:"3px", background:"#3b82f6" }}/> Now</span>
-                <span style={{ display:"flex", alignItems:"center", gap:"4px" }}><div style={{ width:"20px", height:"3px", borderRadius:"3px", background:"#94a3b8" }}/> +30s</span>
+                <span style={{ display:"flex", alignItems:"center", gap:"4px" }}><div style={{ width:"20px", height:"6px", borderRadius:"99px", background:"#3b82f6" }}/> Now</span>
+                <span style={{ display:"flex", alignItems:"center", gap:"4px" }}><div style={{ width:"20px", height:"3px", borderRadius:"99px", background:"#94a3b8" }}/> +30s</span>
               </div>
             )}
           </div>
@@ -297,10 +297,10 @@ export default function LiveSimulation() {
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"14px" }}>
             <span style={slabel}>BiLSTM Flow Forecast</span>
             {mode==="live" && (
-              <span style={{ fontSize:"11px", fontWeight:600, padding:"3px 8px", borderRadius:"3px",
+              <span style={{ fontSize:"11px", fontWeight:600, padding:"3px 8px", borderRadius:"99px",
                 background:lst==="ready"?"#dcfce7":lst==="collecting"?"#fef3c7":"#f1f5f9",
                 color:lst==="ready"?"#15803d":lst==="collecting"?"#b45309":"#64748b" }}>
-                {lst==="ready"?"● Live":lst==="collecting"?`${lhlen}/60 steps`:lst==="error"?"Error":"Waiting"}
+                {lst==="ready"?" Live":lst==="collecting"?`${lhlen}/60 steps`:lst==="error"?"Error":"Waiting"}
               </span>
             )}
           </div>

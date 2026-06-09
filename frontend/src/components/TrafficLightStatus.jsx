@@ -41,7 +41,7 @@ export default function TrafficLightStatus({trafficLights,typeCounts}){
                     <td style={{padding:"8px 12px",fontSize:"12px",fontWeight:600,color:"#1e293b"}}>{NAMES[id]||id}</td>
                     <td style={{padding:"8px 12px",fontSize:"11px",fontFamily:"monospace",color:"#64748b"}}>{state?.slice(0,8)||"—"}</td>
                     <td style={{padding:"8px 12px",textAlign:"right"}}>
-                      <span style={{background:bg,color,padding:"2px 8px",borderRadius:"3px",fontSize:"11px",fontWeight:600}}>{label}</span>
+                      <span style={{background:bg,color,padding:"2px 8px",borderRadius:"99px",fontSize:"11px",fontWeight:600}}>{label}</span>
                     </td>
                   </tr>
                 );
@@ -54,7 +54,7 @@ export default function TrafficLightStatus({trafficLights,typeCounts}){
           <div style={{...slabel,marginBottom:"8px"}}>Vehicle Mix</div>
           <div style={{display:"flex",flexWrap:"wrap",gap:"6px"}}>
             {Object.entries(typeCounts).map(([t,c])=>(
-              <span key={t} style={{background:"#f1f5f9",border:"1px solid #e2e8f0",padding:"3px 8px",borderRadius:"3px",fontSize:"12px",color:"#374151",fontWeight:500}}>
+              <span key={t} style={{background:"#f1f5f9",border:"1px solid #e2e8f0",padding:"3px 8px",borderRadius:"99px",fontSize:"12px",color:"#374151",fontWeight:500}}>
                 {t}: <strong style={{color:"#1d4ed8"}}>{c}</strong>
               </span>
             ))}
