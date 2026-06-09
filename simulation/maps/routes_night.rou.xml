@@ -47,80 +47,80 @@
     <flow id="flow_17" type="passenger" route="route_17" begin="79200" end="79800" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_18" type="passenger" route="route_18" begin="79200" end="79800" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_19" type="passenger" route="route_19" begin="79200" end="79800" number="4" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_20" type="microbus" depart="79203" departLane="best" departSpeed="random">
+    <vehicle id="microbus_20" type="type_car" depart="79203" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="10873193#0_0" startPos="13.0" endPos="23.0" duration="15" parking="false" />
         <stop lane="10873193#1_0" startPos="6.4" endPos="16.4" duration="38" parking="false" />
     </vehicle>
-    <vehicle id="microbus_21" type="microbus" depart="79249" departLane="best" departSpeed="random">
+    <vehicle id="microbus_21" type="type_car" depart="79249" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop lane="28718874#0_0" startPos="11.6" endPos="21.6" duration="12" parking="false" />
         <stop lane="10873193#0_0" startPos="9.2" endPos="19.2" duration="45" parking="false" />
         <stop lane="10873193#1_0" startPos="12.3" endPos="22.3" duration="55" parking="false" />
     </vehicle>
-    <vehicle id="microbus_22" type="microbus" depart="79290" departLane="best" departSpeed="random">
+    <vehicle id="microbus_22" type="type_car" depart="79290" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop lane="28718874#0_0" startPos="5.6" endPos="15.6" duration="27" parking="false" />
         <stop lane="10873193#1_0" startPos="8.6" endPos="18.6" duration="14" parking="false" />
     </vehicle>
-    <vehicle id="microbus_23" type="microbus" depart="79305" departLane="best" departSpeed="random">
+    <vehicle id="microbus_23" type="type_bus" depart="79305" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
-    <vehicle id="microbus_24" type="microbus" depart="79360" departLane="best" departSpeed="random">
+    <vehicle id="microbus_24" type="type_microbus" depart="79360" departLane="best" departSpeed="random">
         <route edges="690516091#1 10873186#9 10873186#0 10873186#1 10873186#2 10873186#3 10873186#4 10873186#5 10873186#6 305873958#0 305873958#1 305873958#2 305873958#3-AddedOnRampEdge" />
     </vehicle>
-    <vehicle id="microbus_25" type="microbus" depart="79379" departLane="best" departSpeed="random">
+    <vehicle id="microbus_25" type="type_car" depart="79379" departLane="best" departSpeed="random">
         <route edges="50211834#0 50211834#1 10873186#6 305873958#0" />
         <stop lane="50211834#0_0" startPos="13.7" endPos="23.7" duration="35" parking="false" />
         <stop lane="50211834#1_0" startPos="5.4" endPos="15.4" duration="29" parking="false" />
     </vehicle>
-    <vehicle id="microbus_26" type="microbus" depart="79425" departLane="best" departSpeed="random">
+    <vehicle id="microbus_26" type="type_car" depart="79425" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0 10873191#1 10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_27" type="microbus" depart="79449" departLane="best" departSpeed="random">
+    <vehicle id="microbus_27" type="type_taxi" depart="79449" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="28718874#0_0" startPos="12.4" endPos="22.4" duration="60" parking="false" />
         <stop lane="10873193#0_0" startPos="5.5" endPos="15.5" duration="21" parking="false" />
         <stop lane="10873193#1_0" startPos="8.7" endPos="18.7" duration="50" parking="false" />
     </vehicle>
-    <vehicle id="microbus_28" type="microbus" depart="79471" departLane="best" departSpeed="random">
+    <vehicle id="microbus_28" type="type_bus" depart="79471" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 28718874#1 28718874#2" />
         <stop lane="28718874#0_0" startPos="13.1" endPos="23.1" duration="42" parking="false" />
         <stop lane="28718874#1_0" startPos="12.3" endPos="22.3" duration="60" parking="false" />
     </vehicle>
-    <vehicle id="microbus_29" type="microbus" depart="79519" departLane="best" departSpeed="random">
+    <vehicle id="microbus_29" type="type_car" depart="79519" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="9.5" endPos="19.5" duration="56" parking="false" />
         <stop lane="192591565#1_0" startPos="8.4" endPos="18.4" duration="45" parking="false" />
     </vehicle>
-    <vehicle id="microbus_30" type="microbus" depart="79532" departLane="best" departSpeed="random">
+    <vehicle id="microbus_30" type="type_car" depart="79532" departLane="best" departSpeed="random">
         <route edges="690516091#0 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0 10873191#1 10873191#2" />
     </vehicle>
-    <vehicle id="microbus_31" type="microbus" depart="79591" departLane="best" departSpeed="random">
+    <vehicle id="microbus_31" type="type_bus" depart="79591" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_32" type="microbus" depart="79617" departLane="best" departSpeed="random">
+    <vehicle id="microbus_32" type="type_taxi" depart="79617" departLane="best" departSpeed="random">
         <route edges="690516091#1 10873186#9 10873186#0 10873186#1 10873186#2 10873186#3 10873186#4 10873186#5 10873186#6 305873958#0 305873958#1 305873958#2 305873958#3-AddedOnRampEdge" />
     </vehicle>
-    <vehicle id="microbus_33" type="microbus" depart="79633" departLane="best" departSpeed="random">
+    <vehicle id="microbus_33" type="type_car" depart="79633" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="6.3" endPos="16.3" duration="18" parking="false" />
         <stop lane="192591565#1_0" startPos="8.2" endPos="18.2" duration="35" parking="false" />
     </vehicle>
-    <vehicle id="microbus_34" type="microbus" depart="79688" departLane="best" departSpeed="random">
+    <vehicle id="microbus_34" type="type_car" depart="79688" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 28718874#1" />
         <stop lane="28718874#0_0" startPos="6.8" endPos="16.8" duration="45" parking="false" />
         <stop lane="28718874#1_0" startPos="9.5" endPos="19.5" duration="20" parking="false" />
     </vehicle>
-    <vehicle id="microbus_35" type="microbus" depart="79699" departLane="best" departSpeed="random">
+    <vehicle id="microbus_35" type="type_car" depart="79699" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
-    <vehicle id="microbus_36" type="microbus" depart="79728" departLane="best" departSpeed="random">
+    <vehicle id="microbus_36" type="type_car" depart="79728" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="7.0" endPos="17.0" duration="39" parking="false" />
         <stop lane="10873193#0_0" startPos="8.1" endPos="18.1" duration="13" parking="false" />
     </vehicle>
-    <vehicle id="microbus_37" type="microbus" depart="79762" departLane="best" departSpeed="random">
+    <vehicle id="microbus_37" type="type_car" depart="79762" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
     <flow id="flow_38" type="taxi" route="route_0" begin="79200" end="79800" number="2" departLane="best" departSpeed="random" />
@@ -143,15 +143,15 @@
     <flow id="flow_55" type="taxi" route="route_17" begin="79200" end="79800" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_56" type="taxi" route="route_18" begin="79200" end="79800" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_57" type="taxi" route="route_19" begin="79200" end="79800" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_58" type="bus" depart="79356" departLane="best" departSpeed="random">
+    <vehicle id="bus_58" type="type_car" depart="79356" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop busStop="bs_3" duration="41" />
     </vehicle>
-    <vehicle id="bus_59" type="bus" depart="79525" departLane="best" departSpeed="random">
+    <vehicle id="bus_59" type="type_motorcycle" depart="79525" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 28718874#1" />
         <stop busStop="bs_9" duration="22" />
     </vehicle>
-    <vehicle id="bus_60" type="bus" depart="79724" departLane="best" departSpeed="random">
+    <vehicle id="bus_60" type="type_car" depart="79724" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop busStop="bs_3" duration="40" />
     </vehicle>
@@ -215,78 +215,78 @@
     <flow id="flow_118" type="passenger" route="route_17" begin="79800" end="80400" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_119" type="passenger" route="route_18" begin="79800" end="80400" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_120" type="passenger" route="route_19" begin="79800" end="80400" number="4" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_121" type="microbus" depart="79831" departLane="best" departSpeed="random">
+    <vehicle id="microbus_121" type="type_car" depart="79831" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_122" type="microbus" depart="79850" departLane="best" departSpeed="random">
+    <vehicle id="microbus_122" type="type_microbus" depart="79850" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="6.8" endPos="16.8" duration="30" parking="false" />
         <stop lane="10873193#0_0" startPos="9.4" endPos="19.4" duration="51" parking="false" />
     </vehicle>
-    <vehicle id="microbus_123" type="microbus" depart="79893" departLane="best" departSpeed="random">
+    <vehicle id="microbus_123" type="type_taxi" depart="79893" departLane="best" departSpeed="random">
         <route edges="690516091#0 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0 10873191#1 10873191#2" />
     </vehicle>
-    <vehicle id="microbus_124" type="microbus" depart="79926" departLane="best" departSpeed="random">
+    <vehicle id="microbus_124" type="type_car" depart="79926" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="11.7" endPos="21.7" duration="50" parking="false" />
         <stop lane="192591565#1_0" startPos="12.4" endPos="22.4" duration="14" parking="false" />
     </vehicle>
-    <vehicle id="microbus_125" type="microbus" depart="79932" departLane="best" departSpeed="random">
+    <vehicle id="microbus_125" type="type_car" depart="79932" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="11.9" endPos="21.9" duration="47" parking="false" />
         <stop lane="10873193#0_0" startPos="9.7" endPos="19.7" duration="13" parking="false" />
     </vehicle>
-    <vehicle id="microbus_126" type="microbus" depart="79971" departLane="best" departSpeed="random">
+    <vehicle id="microbus_126" type="type_car" depart="79971" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_127" type="microbus" depart="80001" departLane="best" departSpeed="random">
+    <vehicle id="microbus_127" type="type_microbus" depart="80001" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="9.6" endPos="19.6" duration="17" parking="false" />
         <stop lane="10873193#0_0" startPos="7.3" endPos="17.3" duration="18" parking="false" />
     </vehicle>
-    <vehicle id="microbus_128" type="microbus" depart="80033" departLane="best" departSpeed="random">
+    <vehicle id="microbus_128" type="type_truck" depart="80033" departLane="best" departSpeed="random">
         <route edges="50211834#0 50211834#1 10873186#6 305873958#0" />
         <stop lane="50211834#0_0" startPos="9.1" endPos="19.1" duration="34" parking="false" />
         <stop lane="50211834#1_0" startPos="10.0" endPos="20.0" duration="28" parking="false" />
     </vehicle>
-    <vehicle id="microbus_129" type="microbus" depart="80085" departLane="best" departSpeed="random">
+    <vehicle id="microbus_129" type="type_motorcycle" depart="80085" departLane="best" departSpeed="random">
         <route edges="29181613#1 29181613#2 961982432#0 961982432#1" />
         <stop lane="29181613#1_0" startPos="12.2" endPos="22.2" duration="59" parking="false" />
     </vehicle>
-    <vehicle id="microbus_130" type="microbus" depart="80113" departLane="best" departSpeed="random">
+    <vehicle id="microbus_130" type="type_car" depart="80113" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="9.1" endPos="19.1" duration="41" parking="false" />
         <stop lane="10873193#0_0" startPos="11.3" endPos="21.3" duration="33" parking="false" />
     </vehicle>
-    <vehicle id="microbus_131" type="microbus" depart="80130" departLane="best" departSpeed="random">
+    <vehicle id="microbus_131" type="type_car" depart="80130" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
-    <vehicle id="microbus_132" type="microbus" depart="80195" departLane="best" departSpeed="random">
+    <vehicle id="microbus_132" type="type_car" depart="80195" departLane="best" departSpeed="random">
         <route edges="29181613#1 29181613#2 961982432#0 961982432#1" />
         <stop lane="29181613#1_0" startPos="5.5" endPos="15.5" duration="17" parking="false" />
     </vehicle>
-    <vehicle id="microbus_133" type="microbus" depart="80204" departLane="best" departSpeed="random">
+    <vehicle id="microbus_133" type="type_bus" depart="80204" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 28718874#1 28718874#2" />
         <stop lane="28718874#0_0" startPos="12.6" endPos="22.6" duration="40" parking="false" />
         <stop lane="28718874#1_0" startPos="14.1" endPos="24.1" duration="11" parking="false" />
     </vehicle>
-    <vehicle id="microbus_134" type="microbus" depart="80249" departLane="best" departSpeed="random">
+    <vehicle id="microbus_134" type="type_car" depart="80249" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="7.6" endPos="17.6" duration="40" parking="false" />
         <stop lane="192591565#1_0" startPos="8.8" endPos="18.8" duration="14" parking="false" />
     </vehicle>
-    <vehicle id="microbus_135" type="microbus" depart="80266" departLane="best" departSpeed="random">
+    <vehicle id="microbus_135" type="type_car" depart="80266" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
-    <vehicle id="microbus_136" type="microbus" depart="80327" departLane="best" departSpeed="random">
+    <vehicle id="microbus_136" type="type_car" depart="80327" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_137" type="microbus" depart="80328" departLane="best" departSpeed="random">
+    <vehicle id="microbus_137" type="type_microbus" depart="80328" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="8.0" endPos="18.0" duration="31" parking="false" />
         <stop lane="10873193#0_0" startPos="13.2" endPos="23.2" duration="59" parking="false" />
     </vehicle>
-    <vehicle id="microbus_138" type="microbus" depart="80370" departLane="best" departSpeed="random">
+    <vehicle id="microbus_138" type="type_car" depart="80370" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 305873957#0" />
         <stop lane="28718874#0_0" startPos="7.3" endPos="17.3" duration="39" parking="false" />
         <stop lane="10873193#0_0" startPos="13.0" endPos="23.0" duration="44" parking="false" />
@@ -311,18 +311,18 @@
     <flow id="flow_156" type="taxi" route="route_17" begin="79800" end="80400" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_157" type="taxi" route="route_18" begin="79800" end="80400" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_158" type="taxi" route="route_19" begin="79800" end="80400" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_159" type="bus" depart="79830" departLane="best" departSpeed="random">
+    <vehicle id="bus_159" type="type_car" depart="79830" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop busStop="bs_2" duration="37" />
     </vehicle>
-    <vehicle id="bus_160" type="bus" depart="80010" departLane="best" departSpeed="random">
+    <vehicle id="bus_160" type="type_bus" depart="80010" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 28718874#1 28718874#2" />
         <stop busStop="bs_3" duration="22" />
         <stop busStop="bs_5" duration="33" />
         <stop busStop="bs_7" duration="41" />
         <stop busStop="bs_9" duration="26" />
     </vehicle>
-    <vehicle id="bus_161" type="bus" depart="80327" departLane="best" departSpeed="random">
+    <vehicle id="bus_161" type="type_taxi" depart="80327" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop busStop="bs_3" duration="43" />
         <stop busStop="bs_5" duration="42" />
@@ -388,75 +388,75 @@
     <flow id="flow_219" type="passenger" route="route_17" begin="80400" end="81000" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_220" type="passenger" route="route_18" begin="80400" end="81000" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_221" type="passenger" route="route_19" begin="80400" end="81000" number="4" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_222" type="microbus" depart="80419" departLane="best" departSpeed="random">
+    <vehicle id="microbus_222" type="type_car" depart="80419" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 138136500#0 138136500#1" />
     </vehicle>
-    <vehicle id="microbus_223" type="microbus" depart="80455" departLane="best" departSpeed="random">
+    <vehicle id="microbus_223" type="type_car" depart="80455" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 28718874#1 28718874#2" />
         <stop lane="28718874#0_0" startPos="11.7" endPos="21.7" duration="26" parking="false" />
         <stop lane="28718874#1_0" startPos="10.6" endPos="20.6" duration="16" parking="false" />
     </vehicle>
-    <vehicle id="microbus_224" type="microbus" depart="80498" departLane="best" departSpeed="random">
+    <vehicle id="microbus_224" type="type_car" depart="80498" departLane="best" departSpeed="random">
         <route edges="50211834#0 50211834#1 10873186#6 305873958#0" />
         <stop lane="50211834#0_0" startPos="12.0" endPos="22.0" duration="29" parking="false" />
         <stop lane="50211834#1_0" startPos="13.9" endPos="23.9" duration="31" parking="false" />
     </vehicle>
-    <vehicle id="microbus_225" type="microbus" depart="80530" departLane="best" departSpeed="random">
+    <vehicle id="microbus_225" type="type_car" depart="80530" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="9.5" endPos="19.5" duration="11" parking="false" />
         <stop lane="10873193#0_0" startPos="12.7" endPos="22.7" duration="37" parking="false" />
     </vehicle>
-    <vehicle id="microbus_226" type="microbus" depart="80563" departLane="best" departSpeed="random">
+    <vehicle id="microbus_226" type="type_microbus" depart="80563" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_227" type="microbus" depart="80568" departLane="best" departSpeed="random">
+    <vehicle id="microbus_227" type="type_car" depart="80568" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_228" type="microbus" depart="80624" departLane="best" departSpeed="random">
+    <vehicle id="microbus_228" type="type_car" depart="80624" departLane="best" departSpeed="random">
         <route edges="29181613#1 29181613#2 961982432#0 961982432#1" />
         <stop lane="29181613#1_0" startPos="14.6" endPos="24.6" duration="33" parking="false" />
     </vehicle>
-    <vehicle id="microbus_229" type="microbus" depart="80652" departLane="best" departSpeed="random">
+    <vehicle id="microbus_229" type="type_car" depart="80652" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="7.4" endPos="17.4" duration="41" parking="false" />
         <stop lane="10873193#0_0" startPos="10.8" endPos="20.8" duration="38" parking="false" />
     </vehicle>
-    <vehicle id="microbus_230" type="microbus" depart="80681" departLane="best" departSpeed="random">
+    <vehicle id="microbus_230" type="type_car" depart="80681" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_231" type="microbus" depart="80697" departLane="best" departSpeed="random">
+    <vehicle id="microbus_231" type="type_car" depart="80697" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
-    <vehicle id="microbus_232" type="microbus" depart="80746" departLane="best" departSpeed="random">
+    <vehicle id="microbus_232" type="type_car" depart="80746" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="6.5" endPos="16.5" duration="17" parking="false" />
         <stop lane="192591565#1_0" startPos="9.1" endPos="19.1" duration="57" parking="false" />
     </vehicle>
-    <vehicle id="microbus_233" type="microbus" depart="80779" departLane="best" departSpeed="random">
+    <vehicle id="microbus_233" type="type_car" depart="80779" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop lane="28718874#0_0" startPos="8.4" endPos="18.4" duration="19" parking="false" />
         <stop lane="10873193#0_0" startPos="5.1" endPos="15.1" duration="42" parking="false" />
     </vehicle>
-    <vehicle id="microbus_234" type="microbus" depart="80803" departLane="best" departSpeed="random">
+    <vehicle id="microbus_234" type="type_bus" depart="80803" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_235" type="microbus" depart="80856" departLane="best" departSpeed="random">
+    <vehicle id="microbus_235" type="type_car" depart="80856" departLane="best" departSpeed="random">
         <route edges="690516091#1 10873186#9 10873186#0 10873186#1 10873186#2 10873186#3 10873186#4 10873186#5 10873186#6 305873958#0 305873958#1 305873958#2 305873958#3-AddedOnRampEdge" />
     </vehicle>
-    <vehicle id="microbus_236" type="microbus" depart="80881" departLane="best" departSpeed="random">
+    <vehicle id="microbus_236" type="type_taxi" depart="80881" departLane="best" departSpeed="random">
         <route edges="50211834#0 50211834#1 10873186#6 305873958#0" />
         <stop lane="50211834#0_0" startPos="11.8" endPos="21.8" duration="21" parking="false" />
         <stop lane="50211834#1_0" startPos="12.9" endPos="22.9" duration="49" parking="false" />
     </vehicle>
-    <vehicle id="microbus_237" type="microbus" depart="80908" departLane="best" departSpeed="random">
+    <vehicle id="microbus_237" type="type_car" depart="80908" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_238" type="microbus" depart="80952" departLane="best" departSpeed="random">
+    <vehicle id="microbus_238" type="type_car" depart="80952" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 305873957#0" />
         <stop lane="28718874#0_0" startPos="12.9" endPos="22.9" duration="58" parking="false" />
         <stop lane="10873193#0_0" startPos="6.7" endPos="16.7" duration="37" parking="false" />
     </vehicle>
-    <vehicle id="microbus_239" type="microbus" depart="80992" departLane="best" departSpeed="random">
+    <vehicle id="microbus_239" type="type_bicycle" depart="80992" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop lane="192591565#0_0" startPos="11.0" endPos="21.0" duration="49" parking="false" />
         <stop lane="192591565#1_0" startPos="13.2" endPos="23.2" duration="46" parking="false" />
@@ -481,17 +481,17 @@
     <flow id="flow_257" type="taxi" route="route_17" begin="80400" end="81000" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_258" type="taxi" route="route_18" begin="80400" end="81000" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_259" type="taxi" route="route_19" begin="80400" end="81000" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_260" type="bus" depart="80567" departLane="best" departSpeed="random">
+    <vehicle id="bus_260" type="type_car" depart="80567" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop busStop="bs_3" duration="44" />
         <stop busStop="bs_5" duration="43" />
         <stop busStop="bs_11" duration="21" />
     </vehicle>
-    <vehicle id="bus_261" type="bus" depart="80742" departLane="best" departSpeed="random">
+    <vehicle id="bus_261" type="type_car" depart="80742" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop busStop="bs_2" duration="27" />
     </vehicle>
-    <vehicle id="bus_262" type="bus" depart="80878" departLane="best" departSpeed="random">
+    <vehicle id="bus_262" type="type_microbus" depart="80878" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 305873957#0" />
         <stop busStop="bs_3" duration="25" />
     </vehicle>
@@ -555,85 +555,85 @@
     <flow id="flow_320" type="passenger" route="route_17" begin="81000" end="81600" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_321" type="passenger" route="route_18" begin="81000" end="81600" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_322" type="passenger" route="route_19" begin="81000" end="81600" number="4" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_323" type="microbus" depart="81004" departLane="best" departSpeed="random">
+    <vehicle id="microbus_323" type="type_truck" depart="81004" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop lane="28718874#0_0" startPos="13.1" endPos="23.1" duration="29" parking="false" />
         <stop lane="10873193#0_0" startPos="10.0" endPos="20.0" duration="11" parking="false" />
         <stop lane="10873193#1_0" startPos="12.4" endPos="22.4" duration="24" parking="false" />
     </vehicle>
-    <vehicle id="microbus_324" type="microbus" depart="81055" departLane="best" departSpeed="random">
+    <vehicle id="microbus_324" type="type_microbus" depart="81055" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_325" type="microbus" depart="81092" departLane="best" departSpeed="random">
+    <vehicle id="microbus_325" type="type_bus" depart="81092" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_326" type="microbus" depart="81116" departLane="best" departSpeed="random">
+    <vehicle id="microbus_326" type="type_car" depart="81116" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_327" type="microbus" depart="81137" departLane="best" departSpeed="random">
+    <vehicle id="microbus_327" type="type_taxi" depart="81137" departLane="best" departSpeed="random">
         <route edges="50211834#1 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="28718874#0_0" startPos="13.5" endPos="23.5" duration="52" parking="false" />
         <stop lane="10873193#0_0" startPos="10.0" endPos="20.0" duration="13" parking="false" />
         <stop lane="10873193#1_0" startPos="13.0" endPos="23.0" duration="52" parking="false" />
     </vehicle>
-    <vehicle id="microbus_328" type="microbus" depart="81172" departLane="best" departSpeed="random">
+    <vehicle id="microbus_328" type="type_car" depart="81172" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 305873957#0" />
         <stop lane="28718874#0_0" startPos="14.8" endPos="24.8" duration="10" parking="false" />
         <stop lane="10873193#0_0" startPos="8.3" endPos="18.3" duration="37" parking="false" />
     </vehicle>
-    <vehicle id="microbus_329" type="microbus" depart="81217" departLane="best" departSpeed="random">
+    <vehicle id="microbus_329" type="type_car" depart="81217" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop lane="28718874#0_0" startPos="10.1" endPos="20.1" duration="51" parking="false" />
         <stop lane="10873193#1_0" startPos="7.8" endPos="17.8" duration="53" parking="false" />
     </vehicle>
-    <vehicle id="microbus_330" type="microbus" depart="81250" departLane="best" departSpeed="random">
+    <vehicle id="microbus_330" type="type_taxi" depart="81250" departLane="best" departSpeed="random">
         <route edges="50211834#1 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="28718874#0_0" startPos="14.4" endPos="24.4" duration="56" parking="false" />
         <stop lane="10873193#0_0" startPos="6.9" endPos="16.9" duration="29" parking="false" />
         <stop lane="10873193#1_0" startPos="11.7" endPos="21.7" duration="58" parking="false" />
     </vehicle>
-    <vehicle id="microbus_331" type="microbus" depart="81282" departLane="best" departSpeed="random">
+    <vehicle id="microbus_331" type="type_motorcycle" depart="81282" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 28718874#1" />
         <stop lane="28718874#0_0" startPos="8.5" endPos="18.5" duration="51" parking="false" />
         <stop lane="28718874#1_0" startPos="9.2" endPos="19.2" duration="38" parking="false" />
     </vehicle>
-    <vehicle id="microbus_332" type="microbus" depart="81327" departLane="best" departSpeed="random">
+    <vehicle id="microbus_332" type="type_car" depart="81327" departLane="best" departSpeed="random">
         <route edges="29181613#1 29181613#2 961982432#0 961982432#1" />
         <stop lane="29181613#1_0" startPos="7.7" endPos="17.7" duration="31" parking="false" />
     </vehicle>
-    <vehicle id="microbus_333" type="microbus" depart="81335" departLane="best" departSpeed="random">
+    <vehicle id="microbus_333" type="type_car" depart="81335" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_334" type="microbus" depart="81382" departLane="best" departSpeed="random">
+    <vehicle id="microbus_334" type="type_car" depart="81382" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_335" type="microbus" depart="81412" departLane="best" departSpeed="random">
+    <vehicle id="microbus_335" type="type_car" depart="81412" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="10.5" endPos="20.5" duration="58" parking="false" />
         <stop lane="192591565#1_0" startPos="12.4" endPos="22.4" duration="23" parking="false" />
     </vehicle>
-    <vehicle id="microbus_336" type="microbus" depart="81455" departLane="best" departSpeed="random">
+    <vehicle id="microbus_336" type="type_motorcycle" depart="81455" departLane="best" departSpeed="random">
         <route edges="29181613#1 29181613#2 961982432#0 961982432#1" />
         <stop lane="29181613#1_0" startPos="7.4" endPos="17.4" duration="30" parking="false" />
     </vehicle>
-    <vehicle id="microbus_337" type="microbus" depart="81484" departLane="best" departSpeed="random">
+    <vehicle id="microbus_337" type="type_car" depart="81484" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="10.9" endPos="20.9" duration="34" parking="false" />
         <stop lane="192591565#1_0" startPos="11.2" endPos="21.2" duration="37" parking="false" />
     </vehicle>
-    <vehicle id="microbus_338" type="microbus" depart="81506" departLane="best" departSpeed="random">
+    <vehicle id="microbus_338" type="type_car" depart="81506" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 28718874#1 28718874#2" />
         <stop lane="28718874#0_0" startPos="12.7" endPos="22.7" duration="38" parking="false" />
         <stop lane="28718874#1_0" startPos="11.0" endPos="21.0" duration="43" parking="false" />
     </vehicle>
-    <vehicle id="microbus_339" type="microbus" depart="81556" departLane="best" departSpeed="random">
+    <vehicle id="microbus_339" type="type_microbus" depart="81556" departLane="best" departSpeed="random">
         <route edges="50211834#1 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="50211834#1_0" startPos="7.4" endPos="17.4" duration="25" parking="false" />
         <stop lane="28718874#0_0" startPos="10.7" endPos="20.7" duration="37" parking="false" />
         <stop lane="10873193#0_0" startPos="11.3" endPos="21.3" duration="36" parking="false" />
         <stop lane="10873193#1_0" startPos="8.2" endPos="18.2" duration="43" parking="false" />
     </vehicle>
-    <vehicle id="microbus_340" type="microbus" depart="81591" departLane="best" departSpeed="random">
+    <vehicle id="microbus_340" type="type_microbus" depart="81591" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 138136500#0 138136500#1" />
     </vehicle>
     <flow id="flow_341" type="taxi" route="route_0" begin="81000" end="81600" number="2" departLane="best" departSpeed="random" />
@@ -656,19 +656,19 @@
     <flow id="flow_358" type="taxi" route="route_17" begin="81000" end="81600" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_359" type="taxi" route="route_18" begin="81000" end="81600" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_360" type="taxi" route="route_19" begin="81000" end="81600" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_361" type="bus" depart="81170" departLane="best" departSpeed="random">
+    <vehicle id="bus_361" type="type_car" depart="81170" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop busStop="bs_3" duration="24" />
         <stop busStop="bs_5" duration="21" />
         <stop busStop="bs_7" duration="36" />
     </vehicle>
-    <vehicle id="bus_362" type="bus" depart="81282" departLane="best" departSpeed="random">
+    <vehicle id="bus_362" type="type_car" depart="81282" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop busStop="bs_3" duration="29" />
         <stop busStop="bs_5" duration="20" />
         <stop busStop="bs_11" duration="39" />
     </vehicle>
-    <vehicle id="bus_363" type="bus" depart="81518" departLane="best" departSpeed="random">
+    <vehicle id="bus_363" type="type_car" depart="81518" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop busStop="bs_2" duration="31" />
     </vehicle>
@@ -732,71 +732,71 @@
     <flow id="flow_421" type="passenger" route="route_17" begin="81600" end="82200" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_422" type="passenger" route="route_18" begin="81600" end="82200" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_423" type="passenger" route="route_19" begin="81600" end="82200" number="4" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_424" type="microbus" depart="81619" departLane="best" departSpeed="random">
+    <vehicle id="microbus_424" type="type_microbus" depart="81619" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_425" type="microbus" depart="81634" departLane="best" departSpeed="random">
+    <vehicle id="microbus_425" type="type_taxi" depart="81634" departLane="best" departSpeed="random">
         <route edges="50211834#1 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="10873193#0_0" startPos="9.2" endPos="19.2" duration="31" parking="false" />
         <stop lane="10873193#1_0" startPos="12.2" endPos="22.2" duration="26" parking="false" />
     </vehicle>
-    <vehicle id="microbus_426" type="microbus" depart="81689" departLane="best" departSpeed="random">
+    <vehicle id="microbus_426" type="type_car" depart="81689" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 305873957#0" />
         <stop lane="28718874#0_0" startPos="11.8" endPos="21.8" duration="58" parking="false" />
         <stop lane="10873193#0_0" startPos="8.7" endPos="18.7" duration="32" parking="false" />
     </vehicle>
-    <vehicle id="microbus_427" type="microbus" depart="81706" departLane="best" departSpeed="random">
+    <vehicle id="microbus_427" type="type_microbus" depart="81706" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 138136500#0 138136500#1" />
     </vehicle>
-    <vehicle id="microbus_428" type="microbus" depart="81762" departLane="best" departSpeed="random">
+    <vehicle id="microbus_428" type="type_taxi" depart="81762" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_429" type="microbus" depart="81788" departLane="best" departSpeed="random">
+    <vehicle id="microbus_429" type="type_car" depart="81788" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_430" type="microbus" depart="81812" departLane="best" departSpeed="random">
+    <vehicle id="microbus_430" type="type_car" depart="81812" departLane="best" departSpeed="random">
         <route edges="690516091#1 10873186#9 10873186#0 10873186#1 10873186#2 10873186#3 10873186#4 10873186#5 10873186#6 305873958#0 305873958#1 305873958#2 305873958#3-AddedOnRampEdge" />
     </vehicle>
-    <vehicle id="microbus_431" type="microbus" depart="81834" departLane="best" departSpeed="random">
+    <vehicle id="microbus_431" type="type_microbus" depart="81834" departLane="best" departSpeed="random">
         <route edges="690516091#0 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0 10873191#1 10873191#2" />
     </vehicle>
-    <vehicle id="microbus_432" type="microbus" depart="81869" departLane="best" departSpeed="random">
+    <vehicle id="microbus_432" type="type_car" depart="81869" departLane="best" departSpeed="random">
         <route edges="690516091#0 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0 10873191#1 10873191#2" />
     </vehicle>
-    <vehicle id="microbus_433" type="microbus" depart="81921" departLane="best" departSpeed="random">
+    <vehicle id="microbus_433" type="type_microbus" depart="81921" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="7.9" endPos="17.9" duration="24" parking="false" />
         <stop lane="10873193#0_0" startPos="14.7" endPos="24.7" duration="60" parking="false" />
     </vehicle>
-    <vehicle id="microbus_434" type="microbus" depart="81937" departLane="best" departSpeed="random">
+    <vehicle id="microbus_434" type="type_car" depart="81937" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 138136500#0 138136500#1" />
     </vehicle>
-    <vehicle id="microbus_435" type="microbus" depart="81977" departLane="best" departSpeed="random">
+    <vehicle id="microbus_435" type="type_car" depart="81977" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop lane="192591565#0_0" startPos="5.2" endPos="15.2" duration="22" parking="false" />
         <stop lane="192591565#1_0" startPos="6.2" endPos="16.2" duration="44" parking="false" />
     </vehicle>
-    <vehicle id="microbus_436" type="microbus" depart="82012" departLane="best" departSpeed="random">
+    <vehicle id="microbus_436" type="type_truck" depart="82012" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop lane="192591565#0_0" startPos="12.3" endPos="22.3" duration="21" parking="false" />
         <stop lane="192591565#1_0" startPos="8.6" endPos="18.6" duration="32" parking="false" />
     </vehicle>
-    <vehicle id="microbus_437" type="microbus" depart="82039" departLane="best" departSpeed="random">
+    <vehicle id="microbus_437" type="type_car" depart="82039" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="28718874#0_0" startPos="10.0" endPos="20.0" duration="23" parking="false" />
         <stop lane="10873193#0_0" startPos="13.6" endPos="23.6" duration="57" parking="false" />
         <stop lane="10873193#1_0" startPos="7.6" endPos="17.6" duration="55" parking="false" />
     </vehicle>
-    <vehicle id="microbus_438" type="microbus" depart="82066" departLane="best" departSpeed="random">
+    <vehicle id="microbus_438" type="type_bus" depart="82066" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_439" type="microbus" depart="82126" departLane="best" departSpeed="random">
+    <vehicle id="microbus_439" type="type_motorcycle" depart="82126" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_440" type="microbus" depart="82147" departLane="best" departSpeed="random">
+    <vehicle id="microbus_440" type="type_car" depart="82147" departLane="best" departSpeed="random">
         <route edges="690516091#1 10873186#9 10873186#0 10873186#1 10873186#2 10873186#3 10873186#4 10873186#5 10873186#6 305873958#0 305873958#1 305873958#2 305873958#3-AddedOnRampEdge" />
     </vehicle>
-    <vehicle id="microbus_441" type="microbus" depart="82178" departLane="best" departSpeed="random">
+    <vehicle id="microbus_441" type="type_motorcycle" depart="82178" departLane="best" departSpeed="random">
         <route edges="690516091#1 10873186#9 10873186#0 10873186#1 10873186#2 10873186#3 10873186#4 10873186#5 10873186#6 305873958#0 305873958#1 305873958#2 305873958#3-AddedOnRampEdge" />
     </vehicle>
     <flow id="flow_442" type="taxi" route="route_0" begin="81600" end="82200" number="2" departLane="best" departSpeed="random" />
@@ -819,15 +819,15 @@
     <flow id="flow_459" type="taxi" route="route_17" begin="81600" end="82200" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_460" type="taxi" route="route_18" begin="81600" end="82200" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_461" type="taxi" route="route_19" begin="81600" end="82200" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_462" type="bus" depart="81600" departLane="best" departSpeed="random">
+    <vehicle id="bus_462" type="type_bus" depart="81600" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 305873957#0" />
         <stop busStop="bs_3" duration="22" />
     </vehicle>
-    <vehicle id="bus_463" type="bus" depart="81836" departLane="best" departSpeed="random">
+    <vehicle id="bus_463" type="type_car" depart="81836" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop busStop="bs_11" duration="24" />
     </vehicle>
-    <vehicle id="bus_464" type="bus" depart="82152" departLane="best" departSpeed="random">
+    <vehicle id="bus_464" type="type_taxi" depart="82152" departLane="best" departSpeed="random">
         <route edges="50211834#1 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop busStop="bs_1" duration="43" />
         <stop busStop="bs_11" duration="28" />
@@ -892,86 +892,86 @@
     <flow id="flow_522" type="passenger" route="route_17" begin="82200" end="82800" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_523" type="passenger" route="route_18" begin="82200" end="82800" number="4" departLane="best" departSpeed="random" />
     <flow id="flow_524" type="passenger" route="route_19" begin="82200" end="82800" number="4" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_525" type="microbus" depart="82216" departLane="best" departSpeed="random">
+    <vehicle id="microbus_525" type="type_car" depart="82216" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_526" type="microbus" depart="82256" departLane="best" departSpeed="random">
+    <vehicle id="microbus_526" type="type_car" depart="82256" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="28718874#0_0" startPos="6.7" endPos="16.7" duration="15" parking="false" />
         <stop lane="10873193#0_0" startPos="13.3" endPos="23.3" duration="60" parking="false" />
         <stop lane="10873193#1_0" startPos="12.5" endPos="22.5" duration="18" parking="false" />
     </vehicle>
-    <vehicle id="microbus_527" type="microbus" depart="82276" departLane="best" departSpeed="random">
+    <vehicle id="microbus_527" type="type_microbus" depart="82276" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="8.8" endPos="18.8" duration="31" parking="false" />
         <stop lane="192591565#1_0" startPos="8.9" endPos="18.9" duration="33" parking="false" />
     </vehicle>
-    <vehicle id="microbus_528" type="microbus" depart="82324" departLane="best" departSpeed="random">
+    <vehicle id="microbus_528" type="type_truck" depart="82324" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="10.8" endPos="20.8" duration="22" parking="false" />
         <stop lane="10873193#0_0" startPos="12.3" endPos="22.3" duration="52" parking="false" />
     </vehicle>
-    <vehicle id="microbus_529" type="microbus" depart="82348" departLane="best" departSpeed="random">
+    <vehicle id="microbus_529" type="type_bus" depart="82348" departLane="best" departSpeed="random">
         <route edges="29181613#1 29181613#2 961982432#0 961982432#1" />
         <stop lane="29181613#1_0" startPos="6.0" endPos="16.0" duration="28" parking="false" />
     </vehicle>
-    <vehicle id="microbus_530" type="microbus" depart="82386" departLane="best" departSpeed="random">
+    <vehicle id="microbus_530" type="type_car" depart="82386" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop lane="192591565#0_0" startPos="9.7" endPos="19.7" duration="34" parking="false" />
         <stop lane="192591565#1_0" startPos="13.6" endPos="23.6" duration="10" parking="false" />
     </vehicle>
-    <vehicle id="microbus_531" type="microbus" depart="82425" departLane="best" departSpeed="random">
+    <vehicle id="microbus_531" type="type_car" depart="82425" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="6.1" endPos="16.1" duration="18" parking="false" />
         <stop lane="10873193#0_0" startPos="14.0" endPos="24.0" duration="55" parking="false" />
     </vehicle>
-    <vehicle id="microbus_532" type="microbus" depart="82431" departLane="best" departSpeed="random">
+    <vehicle id="microbus_532" type="type_car" depart="82431" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 28718874#1" />
         <stop lane="28718874#0_0" startPos="10.8" endPos="20.8" duration="46" parking="false" />
         <stop lane="28718874#1_0" startPos="12.0" endPos="22.0" duration="60" parking="false" />
     </vehicle>
-    <vehicle id="microbus_533" type="microbus" depart="82485" departLane="best" departSpeed="random">
+    <vehicle id="microbus_533" type="type_car" depart="82485" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_534" type="microbus" depart="82515" departLane="best" departSpeed="random">
+    <vehicle id="microbus_534" type="type_car" depart="82515" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
-    <vehicle id="microbus_535" type="microbus" depart="82552" departLane="best" departSpeed="random">
+    <vehicle id="microbus_535" type="type_car" depart="82552" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
-    <vehicle id="microbus_536" type="microbus" depart="82571" departLane="best" departSpeed="random">
+    <vehicle id="microbus_536" type="type_microbus" depart="82571" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="12.4" endPos="22.4" duration="33" parking="false" />
         <stop lane="192591565#1_0" startPos="11.0" endPos="21.0" duration="11" parking="false" />
     </vehicle>
-    <vehicle id="microbus_537" type="microbus" depart="82618" departLane="best" departSpeed="random">
+    <vehicle id="microbus_537" type="type_car" depart="82618" departLane="best" departSpeed="random">
         <route edges="50211834#0 50211834#1 10873186#6 305873958#0" />
         <stop lane="50211834#0_0" startPos="9.9" endPos="19.9" duration="30" parking="false" />
         <stop lane="50211834#1_0" startPos="8.0" endPos="18.0" duration="60" parking="false" />
     </vehicle>
-    <vehicle id="microbus_538" type="microbus" depart="82651" departLane="best" departSpeed="random">
+    <vehicle id="microbus_538" type="type_microbus" depart="82651" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop lane="10873193#0_0" startPos="14.2" endPos="24.2" duration="19" parking="false" />
         <stop lane="10873193#1_0" startPos="8.3" endPos="18.3" duration="43" parking="false" />
     </vehicle>
-    <vehicle id="microbus_539" type="microbus" depart="82685" departLane="best" departSpeed="random">
+    <vehicle id="microbus_539" type="type_car" depart="82685" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop lane="28718874#0_0" startPos="8.3" endPos="18.3" duration="27" parking="false" />
         <stop lane="10873193#0_0" startPos="14.4" endPos="24.4" duration="20" parking="false" />
         <stop lane="10873193#1_0" startPos="14.0" endPos="24.0" duration="33" parking="false" />
     </vehicle>
-    <vehicle id="microbus_540" type="microbus" depart="82708" departLane="best" departSpeed="random">
+    <vehicle id="microbus_540" type="type_car" depart="82708" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop lane="28718874#0_0" startPos="13.4" endPos="23.4" duration="58" parking="false" />
         <stop lane="10873193#1_0" startPos="9.0" endPos="19.0" duration="14" parking="false" />
     </vehicle>
-    <vehicle id="microbus_541" type="microbus" depart="82751" departLane="best" departSpeed="random">
+    <vehicle id="microbus_541" type="type_taxi" depart="82751" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="28718874#0_0" startPos="14.2" endPos="24.2" duration="21" parking="false" />
         <stop lane="10873193#0_0" startPos="14.3" endPos="24.3" duration="46" parking="false" />
         <stop lane="10873193#1_0" startPos="7.7" endPos="17.7" duration="25" parking="false" />
     </vehicle>
-    <vehicle id="microbus_542" type="microbus" depart="82767" departLane="best" departSpeed="random">
+    <vehicle id="microbus_542" type="type_bus" depart="82767" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="6.4" endPos="16.4" duration="54" parking="false" />
         <stop lane="10873193#0_0" startPos="6.9" endPos="16.9" duration="23" parking="false" />
@@ -996,20 +996,20 @@
     <flow id="flow_560" type="taxi" route="route_17" begin="82200" end="82800" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_561" type="taxi" route="route_18" begin="82200" end="82800" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_562" type="taxi" route="route_19" begin="82200" end="82800" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_563" type="bus" depart="82352" departLane="best" departSpeed="random">
+    <vehicle id="bus_563" type="type_taxi" depart="82352" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop busStop="bs_3" duration="29" />
         <stop busStop="bs_5" duration="39" />
         <stop busStop="bs_11" duration="37" />
     </vehicle>
-    <vehicle id="bus_564" type="bus" depart="82535" departLane="best" departSpeed="random">
+    <vehicle id="bus_564" type="type_microbus" depart="82535" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 28718874#1 28718874#2" />
         <stop busStop="bs_3" duration="29" />
         <stop busStop="bs_5" duration="32" />
         <stop busStop="bs_7" duration="24" />
         <stop busStop="bs_9" duration="25" />
     </vehicle>
-    <vehicle id="bus_565" type="bus" depart="82667" departLane="best" departSpeed="random">
+    <vehicle id="bus_565" type="type_taxi" depart="82667" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop busStop="bs_2" duration="31" />
     </vehicle>
@@ -1073,43 +1073,43 @@
     <flow id="flow_623" type="passenger" route="route_17" begin="82800" end="83400" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_624" type="passenger" route="route_18" begin="82800" end="83400" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_625" type="passenger" route="route_19" begin="82800" end="83400" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_626" type="microbus" depart="82854" departLane="best" departSpeed="random">
+    <vehicle id="microbus_626" type="type_truck" depart="82854" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="14.6" endPos="24.6" duration="55" parking="false" />
         <stop lane="192591565#1_0" startPos="5.6" endPos="15.6" duration="39" parking="false" />
     </vehicle>
-    <vehicle id="microbus_627" type="microbus" depart="82882" departLane="best" departSpeed="random">
+    <vehicle id="microbus_627" type="type_car" depart="82882" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop lane="28718874#0_0" startPos="5.8" endPos="15.8" duration="57" parking="false" />
         <stop lane="10873193#0_0" startPos="6.0" endPos="16.0" duration="13" parking="false" />
         <stop lane="10873193#1_0" startPos="15.0" endPos="25.0" duration="49" parking="false" />
     </vehicle>
-    <vehicle id="microbus_628" type="microbus" depart="82995" departLane="best" departSpeed="random">
+    <vehicle id="microbus_628" type="type_bus" depart="82995" departLane="best" departSpeed="random">
         <route edges="50211834#1 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="28718874#0_0" startPos="7.5" endPos="17.5" duration="58" parking="false" />
         <stop lane="10873193#0_0" startPos="8.2" endPos="18.2" duration="40" parking="false" />
     </vehicle>
-    <vehicle id="microbus_629" type="microbus" depart="83047" departLane="best" departSpeed="random">
+    <vehicle id="microbus_629" type="type_car" depart="83047" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="28718874#0_0" startPos="5.7" endPos="15.7" duration="51" parking="false" />
         <stop lane="10873193#0_0" startPos="12.0" endPos="22.0" duration="28" parking="false" />
         <stop lane="10873193#1_0" startPos="10.0" endPos="20.0" duration="13" parking="false" />
     </vehicle>
-    <vehicle id="microbus_630" type="microbus" depart="83065" departLane="best" departSpeed="random">
+    <vehicle id="microbus_630" type="type_taxi" depart="83065" departLane="best" departSpeed="random">
         <route edges="690516091#1 10873186#9 10873186#0 10873186#1 10873186#2 10873186#3 10873186#4 10873186#5 10873186#6 305873958#0 305873958#1 305873958#2 305873958#3-AddedOnRampEdge" />
     </vehicle>
-    <vehicle id="microbus_631" type="microbus" depart="83130" departLane="best" departSpeed="random">
+    <vehicle id="microbus_631" type="type_taxi" depart="83130" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop lane="192591565#0_0" startPos="8.7" endPos="18.7" duration="53" parking="false" />
         <stop lane="192591565#1_0" startPos="7.4" endPos="17.4" duration="28" parking="false" />
     </vehicle>
-    <vehicle id="microbus_632" type="microbus" depart="83253" departLane="best" departSpeed="random">
+    <vehicle id="microbus_632" type="type_taxi" depart="83253" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_633" type="microbus" depart="83302" departLane="best" departSpeed="random">
+    <vehicle id="microbus_633" type="type_car" depart="83302" departLane="best" departSpeed="random">
         <route edges="690516091#0 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0 10873191#1 10873191#2" />
     </vehicle>
-    <vehicle id="microbus_634" type="microbus" depart="83379" departLane="best" departSpeed="random">
+    <vehicle id="microbus_634" type="type_car" depart="83379" departLane="best" departSpeed="random">
         <route edges="50211834#1 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="50211834#1_0" startPos="8.2" endPos="18.2" duration="44" parking="false" />
         <stop lane="28718874#0_0" startPos="13.3" endPos="23.3" duration="52" parking="false" />
@@ -1134,7 +1134,7 @@
     <flow id="flow_652" type="taxi" route="route_17" begin="82800" end="83400" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_653" type="taxi" route="route_18" begin="82800" end="83400" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_654" type="taxi" route="route_19" begin="82800" end="83400" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_655" type="bus" depart="83315" departLane="best" departSpeed="random">
+    <vehicle id="bus_655" type="type_bus" depart="83315" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop busStop="bs_2" duration="30" />
     </vehicle>
@@ -1178,40 +1178,40 @@
     <flow id="flow_693" type="passenger" route="route_17" begin="83400" end="84000" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_694" type="passenger" route="route_18" begin="83400" end="84000" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_695" type="passenger" route="route_19" begin="83400" end="84000" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_696" type="microbus" depart="83422" departLane="best" departSpeed="random">
+    <vehicle id="microbus_696" type="type_taxi" depart="83422" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop lane="192591565#0_0" startPos="13.0" endPos="23.0" duration="42" parking="false" />
         <stop lane="192591565#1_0" startPos="13.0" endPos="23.0" duration="49" parking="false" />
     </vehicle>
-    <vehicle id="microbus_697" type="microbus" depart="83513" departLane="best" departSpeed="random">
+    <vehicle id="microbus_697" type="type_microbus" depart="83513" departLane="best" departSpeed="random">
         <route edges="29181613#1 29181613#2 961982432#0 961982432#1" />
         <stop lane="29181613#1_0" startPos="6.6" endPos="16.6" duration="58" parking="false" />
     </vehicle>
-    <vehicle id="microbus_698" type="microbus" depart="83540" departLane="best" departSpeed="random">
+    <vehicle id="microbus_698" type="type_car" depart="83540" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 28718874#1 28718874#2" />
         <stop lane="28718874#0_0" startPos="7.6" endPos="17.6" duration="26" parking="false" />
         <stop lane="28718874#1_0" startPos="6.7" endPos="16.7" duration="40" parking="false" />
     </vehicle>
-    <vehicle id="microbus_699" type="microbus" depart="83660" departLane="best" departSpeed="random">
+    <vehicle id="microbus_699" type="type_taxi" depart="83660" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="6.6" endPos="16.6" duration="60" parking="false" />
         <stop lane="10873193#0_0" startPos="5.5" endPos="15.5" duration="34" parking="false" />
     </vehicle>
-    <vehicle id="microbus_700" type="microbus" depart="83720" departLane="best" departSpeed="random">
+    <vehicle id="microbus_700" type="type_car" depart="83720" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_701" type="microbus" depart="83743" departLane="best" departSpeed="random">
+    <vehicle id="microbus_701" type="type_taxi" depart="83743" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop lane="192591565#0_0" startPos="9.5" endPos="19.5" duration="41" parking="false" />
         <stop lane="192591565#1_0" startPos="13.0" endPos="23.0" duration="10" parking="false" />
     </vehicle>
-    <vehicle id="microbus_702" type="microbus" depart="83829" departLane="best" departSpeed="random">
+    <vehicle id="microbus_702" type="type_taxi" depart="83829" departLane="best" departSpeed="random">
         <route edges="690516091#1 10873186#9 10873186#0 10873186#1 10873186#2 10873186#3 10873186#4 10873186#5 10873186#6 305873958#0 305873958#1 305873958#2 305873958#3-AddedOnRampEdge" />
     </vehicle>
-    <vehicle id="microbus_703" type="microbus" depart="83888" departLane="best" departSpeed="random">
+    <vehicle id="microbus_703" type="type_car" depart="83888" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
-    <vehicle id="microbus_704" type="microbus" depart="83940" departLane="best" departSpeed="random">
+    <vehicle id="microbus_704" type="type_car" depart="83940" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 28718874#1" />
         <stop lane="28718874#0_0" startPos="9.5" endPos="19.5" duration="54" parking="false" />
         <stop lane="28718874#1_0" startPos="6.1" endPos="16.1" duration="21" parking="false" />
@@ -1236,7 +1236,7 @@
     <flow id="flow_722" type="taxi" route="route_17" begin="83400" end="84000" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_723" type="taxi" route="route_18" begin="83400" end="84000" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_724" type="taxi" route="route_19" begin="83400" end="84000" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_725" type="bus" depart="83501" departLane="best" departSpeed="random">
+    <vehicle id="bus_725" type="type_microbus" depart="83501" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop busStop="bs_3" duration="25" />
     </vehicle>
@@ -1280,37 +1280,37 @@
     <flow id="flow_763" type="passenger" route="route_17" begin="84000" end="84600" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_764" type="passenger" route="route_18" begin="84000" end="84600" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_765" type="passenger" route="route_19" begin="84000" end="84600" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_766" type="microbus" depart="84049" departLane="best" departSpeed="random">
+    <vehicle id="microbus_766" type="type_microbus" depart="84049" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="12.9" endPos="22.9" duration="46" parking="false" />
         <stop lane="192591565#1_0" startPos="7.4" endPos="17.4" duration="54" parking="false" />
     </vehicle>
-    <vehicle id="microbus_767" type="microbus" depart="84086" departLane="best" departSpeed="random">
+    <vehicle id="microbus_767" type="type_motorcycle" depart="84086" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 28718874#1" />
         <stop lane="28718874#0_0" startPos="10.4" endPos="20.4" duration="10" parking="false" />
         <stop lane="28718874#1_0" startPos="6.9" endPos="16.9" duration="47" parking="false" />
     </vehicle>
-    <vehicle id="microbus_768" type="microbus" depart="84171" departLane="best" departSpeed="random">
+    <vehicle id="microbus_768" type="type_motorcycle" depart="84171" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_769" type="microbus" depart="84239" departLane="best" departSpeed="random">
+    <vehicle id="microbus_769" type="type_car" depart="84239" departLane="best" departSpeed="random">
         <route edges="690516091#0 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0 10873191#1 10873191#2" />
     </vehicle>
-    <vehicle id="microbus_770" type="microbus" depart="84320" departLane="best" departSpeed="random">
+    <vehicle id="microbus_770" type="type_car" depart="84320" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0 10873191#1 10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_771" type="microbus" depart="84384" departLane="best" departSpeed="random">
+    <vehicle id="microbus_771" type="type_car" depart="84384" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_772" type="microbus" depart="84435" departLane="best" departSpeed="random">
+    <vehicle id="microbus_772" type="type_motorcycle" depart="84435" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_773" type="microbus" depart="84502" departLane="best" departSpeed="random">
+    <vehicle id="microbus_773" type="type_taxi" depart="84502" departLane="best" departSpeed="random">
         <route edges="50211834#0 50211834#1 10873186#6 305873958#0" />
         <stop lane="50211834#0_0" startPos="12.0" endPos="22.0" duration="26" parking="false" />
         <stop lane="50211834#1_0" startPos="13.3" endPos="23.3" duration="58" parking="false" />
     </vehicle>
-    <vehicle id="microbus_774" type="microbus" depart="84578" departLane="best" departSpeed="random">
+    <vehicle id="microbus_774" type="type_car" depart="84578" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop lane="192591565#0_0" startPos="7.7" endPos="17.7" duration="23" parking="false" />
         <stop lane="192591565#1_0" startPos="14.2" endPos="24.2" duration="60" parking="false" />
@@ -1335,7 +1335,7 @@
     <flow id="flow_792" type="taxi" route="route_17" begin="84000" end="84600" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_793" type="taxi" route="route_18" begin="84000" end="84600" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_794" type="taxi" route="route_19" begin="84000" end="84600" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_795" type="bus" depart="84162" departLane="best" departSpeed="random">
+    <vehicle id="bus_795" type="type_car" depart="84162" departLane="best" departSpeed="random">
         <route edges="50211834#1 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop busStop="bs_1" duration="20" />
         <stop busStop="bs_11" duration="43" />
@@ -1380,42 +1380,42 @@
     <flow id="flow_833" type="passenger" route="route_17" begin="84600" end="85200" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_834" type="passenger" route="route_18" begin="84600" end="85200" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_835" type="passenger" route="route_19" begin="84600" end="85200" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_836" type="microbus" depart="84659" departLane="best" departSpeed="random">
+    <vehicle id="microbus_836" type="type_taxi" depart="84659" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_837" type="microbus" depart="84676" departLane="best" departSpeed="random">
+    <vehicle id="microbus_837" type="type_car" depart="84676" departLane="best" departSpeed="random">
         <route edges="50211834#1 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="50211834#1_0" startPos="6.9" endPos="16.9" duration="25" parking="false" />
         <stop lane="28718874#0_0" startPos="9.7" endPos="19.7" duration="18" parking="false" />
         <stop lane="10873193#0_0" startPos="13.7" endPos="23.7" duration="43" parking="false" />
         <stop lane="10873193#1_0" startPos="8.5" endPos="18.5" duration="41" parking="false" />
     </vehicle>
-    <vehicle id="microbus_838" type="microbus" depart="84744" departLane="best" departSpeed="random">
+    <vehicle id="microbus_838" type="type_car" depart="84744" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 28718874#1" />
         <stop lane="28718874#0_0" startPos="12.7" endPos="22.7" duration="47" parking="false" />
         <stop lane="28718874#1_0" startPos="13.4" endPos="23.4" duration="29" parking="false" />
     </vehicle>
-    <vehicle id="microbus_839" type="microbus" depart="84823" departLane="best" departSpeed="random">
+    <vehicle id="microbus_839" type="type_motorcycle" depart="84823" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="28718874#0_0" startPos="7.8" endPos="17.8" duration="49" parking="false" />
         <stop lane="10873193#0_0" startPos="9.1" endPos="19.1" duration="39" parking="false" />
         <stop lane="10873193#1_0" startPos="14.3" endPos="24.3" duration="43" parking="false" />
     </vehicle>
-    <vehicle id="microbus_840" type="microbus" depart="84872" departLane="best" departSpeed="random">
+    <vehicle id="microbus_840" type="type_motorcycle" depart="84872" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 138136500#0 138136500#1" />
     </vehicle>
-    <vehicle id="microbus_841" type="microbus" depart="84991" departLane="best" departSpeed="random">
+    <vehicle id="microbus_841" type="type_car" depart="84991" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 138136500#0 138136500#1" />
     </vehicle>
-    <vehicle id="microbus_842" type="microbus" depart="85009" departLane="best" departSpeed="random">
+    <vehicle id="microbus_842" type="type_taxi" depart="85009" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="14.9" endPos="24.9" duration="43" parking="false" />
         <stop lane="10873193#0_0" startPos="9.1" endPos="19.1" duration="20" parking="false" />
     </vehicle>
-    <vehicle id="microbus_843" type="microbus" depart="85089" departLane="best" departSpeed="random">
+    <vehicle id="microbus_843" type="type_bus" depart="85089" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_844" type="microbus" depart="85150" departLane="best" departSpeed="random">
+    <vehicle id="microbus_844" type="type_car" depart="85150" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop lane="28718874#0_0" startPos="6.4" endPos="16.4" duration="27" parking="false" />
         <stop lane="10873193#0_0" startPos="13.5" endPos="23.5" duration="10" parking="false" />
@@ -1441,7 +1441,7 @@
     <flow id="flow_862" type="taxi" route="route_17" begin="84600" end="85200" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_863" type="taxi" route="route_18" begin="84600" end="85200" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_864" type="taxi" route="route_19" begin="84600" end="85200" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_865" type="bus" depart="85065" departLane="best" departSpeed="random">
+    <vehicle id="bus_865" type="type_microbus" depart="85065" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1" />
         <stop busStop="bs_3" duration="44" />
         <stop busStop="bs_5" duration="20" />
@@ -1487,39 +1487,39 @@
     <flow id="flow_903" type="passenger" route="route_17" begin="85200" end="85800" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_904" type="passenger" route="route_18" begin="85200" end="85800" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_905" type="passenger" route="route_19" begin="85200" end="85800" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_906" type="microbus" depart="85240" departLane="best" departSpeed="random">
+    <vehicle id="microbus_906" type="type_taxi" depart="85240" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_907" type="microbus" depart="85273" departLane="best" departSpeed="random">
+    <vehicle id="microbus_907" type="type_car" depart="85273" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
-    <vehicle id="microbus_908" type="microbus" depart="85338" departLane="best" departSpeed="random">
+    <vehicle id="microbus_908" type="type_car" depart="85338" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
-    <vehicle id="microbus_909" type="microbus" depart="85442" departLane="best" departSpeed="random">
+    <vehicle id="microbus_909" type="type_car" depart="85442" departLane="best" departSpeed="random">
         <route edges="29181613#4 29181613#5 10873186#4 192591565#0 192591565#1" />
         <stop lane="192591565#0_0" startPos="12.4" endPos="22.4" duration="54" parking="false" />
         <stop lane="192591565#1_0" startPos="12.0" endPos="22.0" duration="37" parking="false" />
     </vehicle>
-    <vehicle id="microbus_910" type="microbus" depart="85500" departLane="best" departSpeed="random">
+    <vehicle id="microbus_910" type="type_truck" depart="85500" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop lane="192591565#0_0" startPos="11.9" endPos="21.9" duration="57" parking="false" />
         <stop lane="192591565#1_0" startPos="13.7" endPos="23.7" duration="20" parking="false" />
     </vehicle>
-    <vehicle id="microbus_911" type="microbus" depart="85534" departLane="best" departSpeed="random">
+    <vehicle id="microbus_911" type="type_bus" depart="85534" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 28718874#1" />
         <stop lane="28718874#0_0" startPos="11.3" endPos="21.3" duration="12" parking="false" />
         <stop lane="28718874#1_0" startPos="14.1" endPos="24.1" duration="47" parking="false" />
     </vehicle>
-    <vehicle id="microbus_912" type="microbus" depart="85611" departLane="best" departSpeed="random">
+    <vehicle id="microbus_912" type="type_taxi" depart="85611" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop lane="28718874#0_0" startPos="7.7" endPos="17.7" duration="17" parking="false" />
         <stop lane="10873193#0_0" startPos="13.7" endPos="23.7" duration="40" parking="false" />
     </vehicle>
-    <vehicle id="microbus_913" type="microbus" depart="85676" departLane="best" departSpeed="random">
+    <vehicle id="microbus_913" type="type_truck" depart="85676" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_914" type="microbus" depart="85765" departLane="best" departSpeed="random">
+    <vehicle id="microbus_914" type="type_truck" depart="85765" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5" />
     </vehicle>
     <flow id="flow_915" type="taxi" route="route_0" begin="85200" end="85800" number="2" departLane="best" departSpeed="random" />
@@ -1542,7 +1542,7 @@
     <flow id="flow_932" type="taxi" route="route_17" begin="85200" end="85800" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_933" type="taxi" route="route_18" begin="85200" end="85800" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_934" type="taxi" route="route_19" begin="85200" end="85800" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_935" type="bus" depart="85686" departLane="best" departSpeed="random">
+    <vehicle id="bus_935" type="type_taxi" depart="85686" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0" />
         <stop busStop="bs_3" duration="40" />
         <stop busStop="bs_5" duration="40" />
@@ -1587,38 +1587,38 @@
     <flow id="flow_973" type="passenger" route="route_17" begin="85800" end="86400" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_974" type="passenger" route="route_18" begin="85800" end="86400" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_975" type="passenger" route="route_19" begin="85800" end="86400" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="microbus_976" type="microbus" depart="85806" departLane="best" departSpeed="random">
+    <vehicle id="microbus_976" type="type_car" depart="85806" departLane="best" departSpeed="random">
         <route edges="-711671304 28718647#3 138136500#0 138136500#1" />
     </vehicle>
-    <vehicle id="microbus_977" type="microbus" depart="85905" departLane="best" departSpeed="random">
+    <vehicle id="microbus_977" type="type_truck" depart="85905" departLane="best" departSpeed="random">
         <route edges="29181613#2 29181613#3 29181613#4 29181613#5 10873186#4 10873186#5 10873186#6 10873186#7 10873186#8 10873186#9 10873186#0 28718874#0 10873193#0 10873193#1 10873193#2" />
         <stop lane="28718874#0_0" startPos="5.5" endPos="15.5" duration="60" parking="false" />
         <stop lane="10873193#0_0" startPos="10.9" endPos="20.9" duration="34" parking="false" />
         <stop lane="10873193#1_0" startPos="7.4" endPos="17.4" duration="55" parking="false" />
     </vehicle>
-    <vehicle id="microbus_978" type="microbus" depart="85997" departLane="best" departSpeed="random">
+    <vehicle id="microbus_978" type="type_car" depart="85997" departLane="best" departSpeed="random">
         <route edges="690516091#0 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0 10873191#1 10873191#2" />
     </vehicle>
-    <vehicle id="microbus_979" type="microbus" depart="86039" departLane="best" departSpeed="random">
+    <vehicle id="microbus_979" type="type_car" depart="86039" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 28718874#1 28718874#2" />
         <stop lane="28718874#0_0" startPos="11.1" endPos="21.1" duration="50" parking="false" />
         <stop lane="28718874#1_0" startPos="12.6" endPos="22.6" duration="13" parking="false" />
     </vehicle>
-    <vehicle id="microbus_980" type="microbus" depart="86080" departLane="best" departSpeed="random">
+    <vehicle id="microbus_980" type="type_car" depart="86080" departLane="best" departSpeed="random">
         <route edges="29181613#5 10873186#4 192591565#0 192591565#1 192591565#2" />
         <stop lane="192591565#0_0" startPos="13.7" endPos="23.7" duration="23" parking="false" />
         <stop lane="192591565#1_0" startPos="14.2" endPos="24.2" duration="11" parking="false" />
     </vehicle>
-    <vehicle id="microbus_981" type="microbus" depart="86186" departLane="best" departSpeed="random">
+    <vehicle id="microbus_981" type="type_taxi" depart="86186" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_982" type="microbus" depart="86261" departLane="best" departSpeed="random">
+    <vehicle id="microbus_982" type="type_bicycle" depart="86261" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
-    <vehicle id="microbus_983" type="microbus" depart="86320" departLane="best" departSpeed="random">
+    <vehicle id="microbus_983" type="type_car" depart="86320" departLane="best" departSpeed="random">
         <route edges="10873191#2 10873191#3 10873191#4 10873191#5" />
     </vehicle>
-    <vehicle id="microbus_984" type="microbus" depart="86339" departLane="best" departSpeed="random">
+    <vehicle id="microbus_984" type="type_car" depart="86339" departLane="best" departSpeed="random">
         <route edges="28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 10873186#1 10873191#0" />
     </vehicle>
     <flow id="flow_985" type="taxi" route="route_0" begin="85800" end="86400" number="2" departLane="best" departSpeed="random" />
@@ -1641,7 +1641,7 @@
     <flow id="flow_1002" type="taxi" route="route_17" begin="85800" end="86400" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_1003" type="taxi" route="route_18" begin="85800" end="86400" number="2" departLane="best" departSpeed="random" />
     <flow id="flow_1004" type="taxi" route="route_19" begin="85800" end="86400" number="2" departLane="best" departSpeed="random" />
-    <vehicle id="bus_1005" type="bus" depart="86298" departLane="best" departSpeed="random">
+    <vehicle id="bus_1005" type="type_taxi" depart="86298" departLane="best" departSpeed="random">
         <route edges="28718647#1 28718647#2 28718647#3 690516091#1 10873186#9 10873186#0 28718874#0 10873193#0" />
         <stop busStop="bs_3" duration="42" />
         <stop busStop="bs_5" duration="20" />
