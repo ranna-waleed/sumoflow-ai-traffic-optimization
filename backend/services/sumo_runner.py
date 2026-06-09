@@ -19,51 +19,111 @@ PROFILES = {
     "custom":       os.path.join(MAPS_DIR, "config_file.sumocfg"),
 }
 
+# Tahrir Square center coordinates (from net.xml boundary)
+MAP_CENTER_X = 3694.5
+MAP_CENTER_Y = 1539.5
+MAP_ZOOM     = 1500
+
 _running       = False
 _profile       = None
 _step          = 0
 _gui           = False
 _port          = 8813
-_view_id       = None
+_view_id       = "View #0"
 _last_ss_error = None
-
-# LSTM history buffer
-# Now stores 7 features (matching new train_lstm.py FEATURES):
-# north, south, east, west, total, avg_speed, avg_waiting
-_lstm_history = []
+_first_frame   = None   # cached first frame for instant display
+_lstm_history  = []
 
 
 def _angle_to_direction(angle: float) -> str:
     a = float(angle) % 360
-    if a < 45 or a >= 315:  return "north"
-    if 45  <= a < 135:      return "east"
-    if 135 <= a < 225:      return "south"
+    if a < 45 or a >= 315: return "north"
+    if 45  <= a < 135:     return "east"
+    if 135 <= a < 225:     return "south"
     return "west"
 
 
 def _run_yolo_on_frame() -> dict:
-    """
-    Run YOLO inference on the latest screenshot.
-    Returns vehicle type counts from the frame.
-    Falls back gracefully if YOLO not available.
-    """
     if not os.path.exists(FRAME_PATH):
         return {}
     try:
         from services.yolo_detect import detect_image
         with open(FRAME_PATH, "rb") as f:
             image_bytes = f.read()
-        if len(image_bytes) < 1000:   # too small = blank frame
+        if len(image_bytes) < 1000:
             return {}
         result = detect_image(image_bytes)
         return result.get("class_counts", {})
     except Exception as e:
-        print(f"[YOLO] Inference skipped: {e}")
+        print(f"[YOLO] Skipped: {e}")
         return {}
 
 
+def _take_screenshot() -> str | None:
+    """Take screenshot and return as base64 data URL."""
+    global _last_ss_error
+    try:
+        traci.gui.screenshot(_view_id, FRAME_PATH, width=960, height=600)
+        time.sleep(0.15)
+        if os.path.exists(FRAME_PATH) and os.path.getsize(FRAME_PATH) > 1000:
+            with open(FRAME_PATH, "rb") as f:
+                data = f.read()
+            _last_ss_error = None
+            return "data:image/jpeg;base64," + base64.b64encode(data).decode()
+    except Exception as e:
+        _last_ss_error = str(e)
+    return None
+
+
+def _setup_gui_view():
+    """
+    Set up GUI camera and force SUMO to render the map.
+    Returns True when the map is visible (non-black frame).
+    """
+    global _view_id, _first_frame
+
+    # Wait for GUI to be ready
+    time.sleep(2.5)
+
+    # Get view ID
+    for attempt in range(8):
+        try:
+            views = traci.gui.getIDList()
+            if views:
+                _view_id = views[0]
+                break
+        except Exception:
+            pass
+        time.sleep(0.5)
+
+    # Set camera to Tahrir Square center
+    try:
+        traci.gui.setOffset(_view_id, MAP_CENTER_X, MAP_CENTER_Y)
+        traci.gui.setZoom(_view_id, MAP_ZOOM)
+    except Exception as e:
+        print(f"[SUMO] Camera setup: {e}")
+
+    # Force render by stepping simulation and retrying screenshot
+    # until we get a non-black frame
+    for attempt in range(10):
+        try:
+            traci.simulationStep()
+            time.sleep(0.3)
+            frame = _take_screenshot()
+            if frame and len(frame) > 5000:  # real image, not black
+                _first_frame = frame
+                print(f"[SUMO] Map rendered on attempt {attempt + 1}")
+                return True
+        except Exception as e:
+            print(f"[SUMO] Render attempt {attempt + 1}: {e}")
+        time.sleep(0.5)
+
+    print("[SUMO] Could not confirm map render — continuing anyway")
+    return False
+
+
 def start(profile: str = "morning_rush", gui: bool = True) -> dict:
-    global _running, _profile, _step, _gui, _view_id, _lstm_history
+    global _running, _profile, _step, _gui, _view_id, _first_frame, _lstm_history
 
     if _running:
         return {"status": "already_running", "profile": _profile, "step": _step}
@@ -80,43 +140,35 @@ def start(profile: str = "morning_rush", gui: bool = True) -> dict:
     except Exception:
         pass
 
-    binary   = "sumo-gui" if gui else "sumo"
+    # Always use sumo-gui so user can see the simulation
     sumo_cmd = [
-        binary, "-c", config_path,
-        "--no-warnings",  
-        "--start", "--delay", "50",
-        "--window-size", "1920,1080",
-        "--window-pos", "0,0",
+        "sumo-gui", "-c", config_path,
+        "--no-warnings",
+        "--no-step-log",
+        "--start",
+        "--delay", "50",
+        "--window-size", "1280,720",
+        "--error-log", "NUL",
     ]
 
     traci.start(sumo_cmd, port=_port)
     _running      = True
     _profile      = profile
-    _gui          = gui
+    _gui          = True
     _step         = 0
+    _first_frame  = None
     _lstm_history = []
 
-    time.sleep(2.0)
+    # Set up GUI view and get first frame BEFORE returning
+    # This is what prevents the black window on frontend
+    _setup_gui_view()
 
-    if gui:
-        try:
-            views    = traci.gui.getIDList()
-            _view_id = views[0] if views else "View #0"
-            boundary = traci.simulation.getNetBoundary()
-            cx = (boundary[0][0] + boundary[1][0]) / 2
-            cy = (boundary[0][1] + boundary[1][1]) / 2
-            traci.gui.setOffset(_view_id, cx, cy)
-            traci.gui.setZoom(_view_id, 1500)
-            print(f"[SUMO] View={_view_id}, zoomed to center")
-        except Exception as e:
-            _view_id = "View #0"
-            print(f"[SUMO] GUI setup: {e}")
-
-    return {"status": "started", "profile": profile, "gui": gui}
+    print(f"[SUMO] Started {profile} — GUI ready")
+    return {"status": "started", "profile": profile, "gui": True}
 
 
 def stop() -> dict:
-    global _running, _profile, _step, _gui, _view_id, _lstm_history
+    global _running, _profile, _step, _gui, _view_id, _first_frame, _lstm_history
     if not _running:
         return {"status": "not_running"}
     try:
@@ -126,7 +178,7 @@ def stop() -> dict:
     _running      = False
     _step         = 0
     _gui          = False
-    _view_id      = None
+    _first_frame  = None
     _lstm_history = []
     profile       = _profile
     _profile      = None
@@ -134,7 +186,7 @@ def stop() -> dict:
 
 
 def run_steps_with_screenshot(n: int = 30) -> dict:
-    global _step, _last_ss_error
+    global _step, _first_frame
 
     if not _running:
         raise RuntimeError("Simulation not running.")
@@ -145,47 +197,27 @@ def run_steps_with_screenshot(n: int = 30) -> dict:
         traci.simulationStep()
         _step += 1
 
-    # Screenshot
-    image_b64 = None
-    if _gui and _view_id:
-        try:
-            traci.gui.screenshot(_view_id, FRAME_PATH, width=960, height=600)
-            time.sleep(0.3)
-            if os.path.exists(FRAME_PATH) and os.path.getsize(FRAME_PATH) > 0:
-                with open(FRAME_PATH, "rb") as f:
-                    image_b64 = "data:image/jpeg;base64," + base64.b64encode(
-                        f.read()).decode()
-                print(f"[screenshot] done length={len(image_b64)}")
-        except Exception as e:
-            _last_ss_error = str(e)
-            print(f"[screenshot] error: {e}")
+    # Take screenshot
+    image_b64 = _take_screenshot()
 
-    state = _get_state_safe()
+    # If screenshot failed but we have first frame, use it
+    if not image_b64 and _first_frame:
+        image_b64 = _first_frame
 
-    # Run YOLO on the frame to get vehicle type counts
+    state       = _get_state_safe()
     yolo_counts = _run_yolo_on_frame()
 
-    # Build richer LSTM history entry
-    # 7 features: north, south, east, west, total, avg_speed, avg_waiting
-    # YOLO enriches vehicle counts; TraCI provides speed + waiting
-    lstm_entry = {
-        "north":       state.get("direction_counts", {}).get("north", 0),
-        "south":       state.get("direction_counts", {}).get("south", 0),
-        "east":        state.get("direction_counts", {}).get("east",  0),
-        "west":        state.get("direction_counts", {}).get("west",  0),
+    # Update LSTM history
+    dir_c = state.get("direction_counts", {})
+    _lstm_history.append({
+        "north":       dir_c.get("north", 0),
+        "south":       dir_c.get("south", 0),
+        "east":        dir_c.get("east",  0),
+        "west":        dir_c.get("west",  0),
         "total":       state["vehicles"],
         "avg_speed":   state.get("avg_speed", 0.0),
-        "avg_waiting": state.get("avg_wait_s", 0.0),   # ← NEW: waiting time
-    }
-
-    # If YOLO detected vehicles, cross-check total with TraCI
-    # (YOLO gives type breakdown; TraCI gives exact positions)
-    if yolo_counts:
-        yolo_total = sum(yolo_counts.values())
-        # Blend: use TraCI direction counts but log YOLO type counts
-        lstm_entry["yolo_total"] = yolo_total   # stored but not used as feature
-
-    _lstm_history.append(lstm_entry)
+        "avg_waiting": state.get("avg_wait_s", 0.0),
+    })
     if len(_lstm_history) > 120:
         _lstm_history.pop(0)
 
@@ -195,8 +227,13 @@ def run_steps_with_screenshot(n: int = 30) -> dict:
         "image":            image_b64,
         "yolo_counts":      yolo_counts,
         "lstm_history_len": len(_lstm_history),
-        "screenshot_error": _last_ss_error if image_b64 is None else None,
+        "screenshot_error": _last_ss_error if not image_b64 else None,
     }
+
+
+def get_first_frame() -> str | None:
+    """Return cached first frame for immediate display."""
+    return _first_frame
 
 
 def get_lstm_history() -> list:
@@ -205,7 +242,6 @@ def get_lstm_history() -> list:
 
 def _get_state_safe() -> dict:
     vehicle_ids  = traci.vehicle.getIDList()
-    num_vehicles = len(vehicle_ids)
     waiting_times, co2_values, speeds = [], [], []
     type_counts = {}
     dir_counts  = {"north": 0, "south": 0, "east": 0, "west": 0}
@@ -222,10 +258,10 @@ def _get_state_safe() -> dict:
         except traci.exceptions.TraCIException:
             continue
 
-    avg_wait  = round(sum(waiting_times) / len(waiting_times), 2) if waiting_times else 0.0
-    max_wait  = round(max(waiting_times), 2)                      if waiting_times else 0.0
+    avg_wait  = round(sum(waiting_times)/len(waiting_times), 2) if waiting_times else 0.0
+    max_wait  = round(max(waiting_times), 2)                    if waiting_times else 0.0
     total_co2 = round(sum(co2_values), 2)
-    avg_speed = round(sum(speeds) / len(speeds), 2)               if speeds        else 0.0
+    avg_speed = round(sum(speeds)/len(speeds), 2)               if speeds        else 0.0
 
     tl_states = {}
     for tl in traci.trafficlight.getIDList():
@@ -238,7 +274,7 @@ def _get_state_safe() -> dict:
         "step":             _step,
         "profile":          _profile,
         "time_s":           round(_step * 1.0, 1),
-        "vehicles":         num_vehicles,
+        "vehicles":         len(vehicle_ids),
         "avg_wait_s":       avg_wait,
         "max_wait_s":       max_wait,
         "total_co2_mg":     total_co2,
@@ -255,8 +291,10 @@ def get_state() -> dict:
         return {"status": "not_running"}
     return _get_state_safe()
 
+
 def is_running() -> bool:
     return _running
+
 
 def get_status() -> dict:
     return {
@@ -267,14 +305,16 @@ def get_status() -> dict:
         "view_id":               _view_id,
         "lstm_history_len":      len(_lstm_history),
         "last_screenshot_error": _last_ss_error,
+        "first_frame_ready":     _first_frame is not None,
     }
+
 
 def _map_type(vtype_id: str) -> str:
     v = vtype_id.lower()
-    if "bus"        in v: return "bus"
-    if "truck"      in v: return "truck"
-    if "taxi"       in v: return "taxi"
-    if "microbus"   in v: return "microbus"
-    if "motorcycle" in v: return "motorcycle"
-    if "bicycle"    in v: return "bicycle"
-    return "car"
+    if v == "bus" or v.startswith("bus"):           return "bus"
+    if v == "truck" or "truck" in v:                return "truck"
+    if "taxi" in v:                                  return "taxi"
+    if "microbus" in v:                              return "microbus"
+    if "motorcycle" in v or "moto" in v:            return "motorcycle"
+    if "bicycle" in v or "bike" in v:               return "bicycle"
+    return "car"   # passenger, veh, default
