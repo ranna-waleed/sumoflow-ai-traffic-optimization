@@ -330,7 +330,7 @@ react-router-dom 6.0+
 ![Live Simulation](docs/screenshots/live_simulation.JPG)
 
 **Model Comparison**
-![Model Comparison](docs/screenshots/model_comparison.JPG)
+![Model Comparison](docs/screenshots/Model_comparison.JPG)
 
 **Before vs After**
 ![Before vs After](docs/screenshots/before_after.JPG)
