@@ -311,10 +311,10 @@ def get_status() -> dict:
 
 def _map_type(vtype_id: str) -> str:
     v = vtype_id.lower()
-    if v == "bus" or v.startswith("bus"):           return "bus"
-    if v == "truck" or "truck" in v:                return "truck"
-    if "taxi" in v:                                  return "taxi"
-    if "microbus" in v:                              return "microbus"
-    if "motorcycle" in v or "moto" in v:            return "motorcycle"
-    if "bicycle" in v or "bike" in v:               return "bicycle"
-    return "car"   # passenger, veh, default
+    if "bicycle"    in v: return "bicycle"
+    if "motorcycle" in v: return "motorcycle"
+    if "microbus"   in v: return "microbus"
+    if "bus"        in v: return "bus"
+    if "truck"      in v: return "truck"
+    if "taxi"       in v: return "taxi"
+    return "car"
