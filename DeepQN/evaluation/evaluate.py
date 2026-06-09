@@ -37,7 +37,7 @@ logging.basicConfig(
 )
 
 
-#  Helpers 
+# ── Helpers ───────────────────────────────────────────────────────
 
 def _baseline_dir(cfg: dict) -> Path:
     """Read baseline output dir from config — works for any map."""
@@ -78,7 +78,7 @@ def get_baseline_metrics(cfg: dict, profile: str) -> EpisodeMetrics:
     return m
 
 
-# DQN / random runner 
+# ── DQN / random runner ───────────────────────────────────────────
 
 def run_dqn(
     cfg:        dict,
@@ -158,7 +158,7 @@ def run_dqn(
     return m
 
 
-#  Comparison 
+# ── Comparison ────────────────────────────────────────────────────
 
 def compare(
     config_path:    str                 = "DeepQN/configs/dqn_config.yaml",
@@ -242,7 +242,7 @@ def compare(
     return results
 
 
-#  Print helpers 
+# ── Print helpers ─────────────────────────────────────────────────
 
 def _print_profile_table(
     profile:       str,
@@ -281,8 +281,8 @@ def _print_final_summary(results: dict, random_policy: bool = False):
     print(f"  {'Profile':<22} {'Wait ↓':>10} {'CO2 ↓':>10}")
     print("  " + "─" * 44)
     for profile, r in results.items():
-        w = " PASS" if r["kpi_wait_pass"] else "✗ FAIL"
-        c = " PASS" if r["kpi_co2_pass"]  else "✗ FAIL"
+        w = "✓ PASS" if r["kpi_wait_pass"] else "✗ FAIL"
+        c = "✓ PASS" if r["kpi_co2_pass"]  else "✗ FAIL"
         print(f"  {profile:<22} {w:>10} {c:>10}")
     print("=" * 60)
     if random_policy:
@@ -290,7 +290,7 @@ def _print_final_summary(results: dict, random_policy: bool = False):
     print()
 
 
-# CLI 
+# ── CLI ───────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(

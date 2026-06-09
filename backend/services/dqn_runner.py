@@ -1,5 +1,5 @@
 # backend/services/dqn_runner.py
-import os, sys, time, threading, csv
+import os, sys, time, threading, csv, yaml
 from datetime import datetime
 import numpy as np
 
@@ -11,16 +11,16 @@ import traci
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MAPS_DIR = os.path.join(BASE_DIR, "simulation", "maps")
 
-#  State 
-_running  = False
-_profile  = None
-_step     = 0
-_view_id  = "View #0"
-_agent    = None
-_metrics  = {}
-_lock     = threading.Lock()
+# ── Runtime state ─────────────────────────────────────────────
+_running      = False
+_profile      = None
+_step         = 0
+_view_id      = "View #0"
+_multi_agent  = None
+_tls_config   = None
+_metrics      = {}
+_lock         = threading.Lock()
 
-# Pipeline state : exposed via /api/dqn/cycle/status
 _pipeline_state = {
     "sumo_vehicles":    0,
     "yolo_counts":      {},
@@ -34,51 +34,37 @@ FRAME_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "dqn_frame.jpg"
 )
 
-# Logging 
+# ── Logging ───────────────────────────────────────────────────
 LOGS_DIR = os.path.join(BASE_DIR, "logs")
 os.makedirs(LOGS_DIR, exist_ok=True)
-_decision_log_path = None
-_decision_log_file = None
+_decision_log_path   = None
+_decision_log_file   = None
 _decision_log_writer = None
 
 
 def _init_decision_log(profile: str):
-    """Initialize CSV log file for this simulation session."""
     global _decision_log_path, _decision_log_file, _decision_log_writer
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     _decision_log_path = os.path.join(
         LOGS_DIR, f"dqn_decisions_{profile}_{timestamp}.csv"
     )
-    _decision_log_file = open(_decision_log_path, "w", newline="")
+    _decision_log_file   = open(_decision_log_path, "w", newline="")
     _decision_log_writer = csv.writer(_decision_log_file)
-    # Header
     _decision_log_writer.writerow([
         "timestamp", "step", "profile",
-        # DQN decision
-        "action", "action_name",
-        # Q-values for all 4 actions
-        "q_value_0", "q_value_1", "q_value_2", "q_value_3",
-        # State features
-        "north_ratio", "south_ratio", "east_ratio", "west_ratio",
-        "north_queue", "south_queue", "east_queue", "west_queue",
+        "n_switched", "action_name",
+        "avg_wait_s", "vehicles", "total_co2_mg",
         "lstm_north", "lstm_south", "lstm_east", "lstm_west",
-        "current_phase", "avg_wait_normalized",
-        # Traffic metrics
-        "vehicles", "avg_wait_s", "total_co2_mg",
-        # YOLO counts
         "yolo_car", "yolo_bus", "yolo_taxi", "yolo_microbus",
         "yolo_truck", "yolo_motorcycle", "yolo_bicycle",
-        # LSTM predictions
-        "pred_north", "pred_south", "pred_east", "pred_west",
     ])
     _decision_log_file.flush()
-    print(f"[DQN Logger] Logging decisions → {_decision_log_path}")
+    print(f"[DQN Logger] Logging -> {_decision_log_path}")
 
 
-def _log_decision(step, profile, action, q_values, state,
+def _log_decision(step, profile, n_switched, action_name,
                   avg_wait, n_vehicles, total_co2,
                   yolo_counts, lstm_pred):
-    """Log one DQN decision to CSV."""
     global _decision_log_writer, _decision_log_file
     if _decision_log_writer is None:
         return
@@ -86,33 +72,10 @@ def _log_decision(step, profile, action, q_values, state,
         _decision_log_writer.writerow([
             datetime.now().strftime("%H:%M:%S"),
             step, profile,
-            # DQN decision
-            action, ACTION_NAMES[action],
-            # Q-values : shows WHY the action was chosen
-            round(float(q_values[0]), 4),
-            round(float(q_values[1]), 4),
-            round(float(q_values[2]), 4),
-            round(float(q_values[3]), 4),
-            # State features (14)
-            round(float(state[0]),  4),   # north_ratio
-            round(float(state[1]),  4),   # south_ratio
-            round(float(state[2]),  4),   # east_ratio
-            round(float(state[3]),  4),   # west_ratio
-            round(float(state[4]),  4),   # north_queue
-            round(float(state[5]),  4),   # south_queue
-            round(float(state[6]),  4),   # east_queue
-            round(float(state[7]),  4),   # west_queue
-            round(float(state[8]),  4),   # lstm_north
-            round(float(state[9]),  4),   # lstm_south
-            round(float(state[10]), 4),   # lstm_east
-            round(float(state[11]), 4),   # lstm_west
-            round(float(state[12]), 4),   # current_phase
-            round(float(state[13]), 4),   # avg_wait_normalized
-            # Traffic metrics
-            n_vehicles,
-            round(avg_wait, 2),
-            round(total_co2, 1),
-            # YOLO counts
+            n_switched, action_name,
+            round(avg_wait, 2), n_vehicles, round(total_co2, 1),
+            lstm_pred.get("north", 0), lstm_pred.get("south", 0),
+            lstm_pred.get("east",  0), lstm_pred.get("west",  0),
             yolo_counts.get("car",        0),
             yolo_counts.get("bus",        0),
             yolo_counts.get("taxi",       0),
@@ -120,11 +83,6 @@ def _log_decision(step, profile, action, q_values, state,
             yolo_counts.get("truck",      0),
             yolo_counts.get("motorcycle", 0),
             yolo_counts.get("bicycle",    0),
-            # LSTM predictions
-            lstm_pred.get("north", 0),
-            lstm_pred.get("south", 0),
-            lstm_pred.get("east",  0),
-            lstm_pred.get("west",  0),
         ])
         _decision_log_file.flush()
     except Exception as e:
@@ -132,18 +90,18 @@ def _log_decision(step, profile, action, q_values, state,
 
 
 def _close_decision_log():
-    """Close the log file cleanly."""
     global _decision_log_file, _decision_log_writer
     try:
         if _decision_log_file:
             _decision_log_file.close()
-            print(f"[DQN Logger] Log saved → {_decision_log_path}")
+            print(f"[DQN Logger] Log saved -> {_decision_log_path}")
     except Exception:
         pass
     _decision_log_file   = None
     _decision_log_writer = None
 
 
+# ── Config ────────────────────────────────────────────────────
 CONFIG_PATHS = {
     "morning_rush": os.path.join(MAPS_DIR, "config_morning_rush.sumocfg"),
     "evening_rush": os.path.join(MAPS_DIR, "config_evening_rush.sumocfg"),
@@ -159,53 +117,143 @@ BEGIN_TIMES = {
 }
 
 MAX_STEPS_PER_PROFILE = {
-    "morning_rush": 3600,
-    "evening_rush": 3600,
-    "midday":       3600,
-    "night":        3600,
+    "morning_rush": 10800,
+    "evening_rush": 18000,
+    "midday":       10800,
+    "night":        7200,
 }
 
 STEP_DELAY = 0.05
-
-MAIN_TL = "315744796"
-SECONDARY_TL_PHASES = {
-    0: {"2031414903": 0, "96621100": 2, "2031414899": 0, "6288771431": 0,
-        "96621068": 0, "271064234": 0, "315743335": 0, "6288771435": 0},
-    1: {"2031414903": 2, "96621100": 2, "2031414899": 2, "6288771431": 2,
-        "96621068": 0, "271064234": 0, "315743335": 0, "6288771435": 0},
-}
-SECONDARY_TL_PHASES[2] = SECONDARY_TL_PHASES[0]
-SECONDARY_TL_PHASES[3] = SECONDARY_TL_PHASES[1]
-
-YELLOW_PHASE    = 1
-YELLOW_DURATION = 3
-
-ACTION_NAMES = [
-    "N-S Green (39s)",
-    "E-W Green (39s)",
-    "N-S Green (20s)",
-    "E-W Green (20s)",
-]
-
 _lstm_history = []
 
 
-def _load_agent():
-    global _agent
-    if _agent is not None:
+# ── Agent loading ─────────────────────────────────────────────
+
+def _load_agent() -> bool:
+    global _multi_agent, _tls_config
+    if _multi_agent is not None:
         return True
     try:
+        config_path = os.path.join(
+            BASE_DIR, "DeepQN", "configs", "dqn_config.yaml"
+        )
+        with open(config_path) as f:
+            cfg = yaml.safe_load(f)
+
+        _tls_config = cfg["tls_junctions"]
+
         sys.path.insert(0, BASE_DIR)
-        from dqn.agent import DQNAgent
-        _agent = DQNAgent(state_size=14, action_size=4)
-        _agent.load()
-        _agent.epsilon = 0.0
-        print("[DQN Runner] Agent loaded ")
+        from DeepQN.agent.dqn_agent import MultiAgentDQN
+
+        tls_ids      = list(cfg["tls_junctions"].keys())
+        _multi_agent = MultiAgentDQN(tls_ids, cfg["dqn"])
+        _multi_agent.load_latest(
+            os.path.join(BASE_DIR, "DeepQN", "checkpoints")
+        )
+        print(f"[DQN Runner] MultiAgentDQN loaded - {len(tls_ids)} agents")
         return True
     except Exception as e:
-        print(f"[DQN Runner] Failed to load agent: {e}")
+        print(f"[DQN Runner] Failed to load MultiAgentDQN: {e}")
         return False
 
+
+# ── Observation builder ───────────────────────────────────────
+
+def _build_observations(lstm_pred: dict) -> dict:
+    if _tls_config is None:
+        return {}
+
+    MAX_LANES = 10
+    FPERLANE  = 3
+    MAX_QUEUE = 50.0
+    MAX_WAIT  = 300.0
+    MAX_FLOW  = 136.0
+
+    global_feats = np.array([
+        min(lstm_pred.get("north", 0) / MAX_FLOW, 1.0),
+        min(lstm_pred.get("south", 0) / MAX_FLOW, 1.0),
+        min(lstm_pred.get("east",  0) / MAX_FLOW, 1.0),
+        min(lstm_pred.get("west",  0) / MAX_FLOW, 1.0),
+        0.5,
+    ], dtype=np.float32)
+
+    observations = {}
+    for tid, tls_info in _tls_config.items():
+        lanes      = tls_info.get("incoming_lanes", [])
+        lane_feats = np.zeros(MAX_LANES * FPERLANE, dtype=np.float32)
+
+        for i, lane in enumerate(lanes[:MAX_LANES]):
+            try:
+                halt = traci.lane.getLastStepHaltingNumber(lane) / MAX_QUEUE
+                wait = traci.lane.getWaitingTime(lane)           / MAX_WAIT
+                occ  = traci.lane.getLastStepOccupancy(lane)
+            except Exception:
+                halt, wait, occ = 0.0, 0.0, 0.0
+
+            base = i * FPERLANE
+            lane_feats[base]     = float(np.clip(halt, 0.0, 1.0))
+            lane_feats[base + 1] = float(np.clip(wait, 0.0, 1.0))
+            lane_feats[base + 2] = float(np.clip(occ,  0.0, 1.0))
+
+        junc_feats = np.array([0.0, 0.0], dtype=np.float32)
+        obs = np.concatenate([lane_feats, junc_feats, global_feats])
+
+        if np.any(np.isnan(obs)) or np.any(np.isinf(obs)):
+            obs = np.nan_to_num(obs, nan=0.0, posinf=1.0, neginf=0.0)
+
+        observations[tid] = obs
+
+    return observations
+
+
+# ── Build Q-value display dict ────────────────────────────────
+
+def _build_q_display(per_junction_actions: dict, observations: dict) -> dict:
+    """
+    Build a per-junction action summary for frontend display.
+    Shows which junctions kept (0) vs switched (1).
+    Format matches what BeforeAfter.jsx q_values panel expects:
+      { "TLS_id (keep)": 0.0, "TLS_id (switch)": 1.0, ... }
+    but simplified to just show junction decisions.
+    """
+    q_display = {}
+    short_names = {
+        "315744796":  "N-trunk entry",
+        "96621100":   "Ring N-entry",
+        "2031414903": "Ring W-entry",
+        "2031414899": "S-gate 1",
+        "6288771431": "S-gate 2",
+        "271064234":  "E-exit 1",
+        "315743335":  "E-exit 2",
+    }
+    for tid, action in per_junction_actions.items():
+        label = short_names.get(tid, tid)
+        # Use 1.0 for switch (active decision), 0.2 for keep (passive)
+        q_display[label] = 1.0 if action == 1 else 0.2
+    return q_display
+
+
+# ── Apply DQN decisions ───────────────────────────────────────
+
+def _apply_dqn_actions(per_junction_actions: dict):
+    if _tls_config is None:
+        return
+    for tid, action in per_junction_actions.items():
+        if action == 1:
+            tls_info = _tls_config.get(tid, {})
+            g2y = {
+                int(k): v
+                for k, v in tls_info.get("green_to_yellow", {}).items()
+            }
+            try:
+                cur = traci.trafficlight.getPhase(tid)
+                if cur in g2y:
+                    traci.trafficlight.setPhase(tid, g2y[cur])
+            except Exception:
+                pass
+
+
+# ── YOLO ─────────────────────────────────────────────────────
 
 def _run_yolo_on_frame() -> dict:
     if not os.path.exists(FRAME_PATH):
@@ -224,6 +272,8 @@ def _run_yolo_on_frame() -> dict:
         return {}
 
 
+# ── LSTM ──────────────────────────────────────────────────────
+
 def _run_lstm_prediction() -> dict:
     if len(_lstm_history) < 10:
         return {"north": 0, "south": 0, "east": 0, "west": 0}
@@ -231,7 +281,8 @@ def _run_lstm_prediction() -> dict:
         sys.path.insert(0, BASE_DIR)
         from lstm.predict import predict
         result = predict(_lstm_history)
-        return result.get("next_30s",
+        return result.get(
+            "next_30s",
             {"north": 0, "south": 0, "east": 0, "west": 0}
         )
     except Exception as e:
@@ -239,108 +290,37 @@ def _run_lstm_prediction() -> dict:
         return {"north": 0, "south": 0, "east": 0, "west": 0}
 
 
-def _get_state(current_phase, lstm_pred):
-    """Returns (state_array, avg_wait, n_vehicles, dir_counts, total_co2)"""
+# ── Traffic metrics ───────────────────────────────────────────
+
+def _angle_to_direction(angle: float) -> str:
+    a = float(angle) % 360
+    if a < 45 or a >= 315: return "north"
+    if 45  <= a < 135:     return "east"
+    if 135 <= a < 225:     return "south"
+    return "west"
+
+
+def _get_traffic_metrics():
     vehicle_ids = traci.vehicle.getIDList()
     dir_counts  = {"north": 0, "south": 0, "east": 0, "west": 0}
-    dir_queues  = {"north": 0, "south": 0, "east": 0, "west": 0}
-    waiting     = []
-    co2_vals    = []
+    waiting, co2_vals = [], []
 
     for v in vehicle_ids:
         try:
-            a    = float(traci.vehicle.getAngle(v)) % 360
-            wait = traci.vehicle.getWaitingTime(v)
+            angle = float(traci.vehicle.getAngle(v))
+            wait  = traci.vehicle.getWaitingTime(v)
             co2_vals.append(traci.vehicle.getCO2Emission(v))
-
-            if a < 45 or a >= 315:    direction = "north"
-            elif 45  <= a < 135:      direction = "east"
-            elif 135 <= a < 225:      direction = "south"
-            else:                     direction = "west"
-
-            dir_counts[direction] += 1
-            if wait > 1.0:
-                dir_queues[direction] += 1
+            dir_counts[_angle_to_direction(angle)] += 1
             waiting.append(wait)
         except Exception:
             continue
 
-    total     = max(len(vehicle_ids), 1)
     avg_wait  = sum(waiting)  / len(waiting)  if waiting  else 0.0
     total_co2 = sum(co2_vals) if co2_vals else 0.0
-    max_queue = 50.0
-    max_pred  = 100.0
-
-    state = np.array([
-        dir_counts["north"] / total,
-        dir_counts["south"] / total,
-        dir_counts["east"]  / total,
-        dir_counts["west"]  / total,
-        min(dir_queues["north"] / max_queue, 1.0),
-        min(dir_queues["south"] / max_queue, 1.0),
-        min(dir_queues["east"]  / max_queue, 1.0),
-        min(dir_queues["west"]  / max_queue, 1.0),
-        min(lstm_pred.get("north", 0) / max_pred, 1.0),
-        min(lstm_pred.get("south", 0) / max_pred, 1.0),
-        min(lstm_pred.get("east",  0) / max_pred, 1.0),
-        min(lstm_pred.get("west",  0) / max_pred, 1.0),
-        current_phase / 3.0,
-        min(avg_wait / 300.0, 1.0),
-    ], dtype=np.float32)
-
-    # NaN/Inf guard
-    # If TraCI returns bad values (sensor glitch, division error)
-    # replace NaN/Inf with 0 to prevent silent DQN corruption
-    if np.any(np.isnan(state)) or np.any(np.isinf(state)):
-        print(f"[DQN] Bad state detected (NaN/Inf) at step {_step} — replacing with zeros")
-        state = np.nan_to_num(state, nan=0.0, posinf=1.0, neginf=0.0)
-
-    return state, avg_wait, len(vehicle_ids), dir_counts, total_co2
-
-def _apply_yellow(tl_ids, phase_counts):
-    for tl in tl_ids:
-        try:
-            n = phase_counts.get(tl, 1)
-            if n > YELLOW_PHASE:
-                traci.trafficlight.setPhase(tl, YELLOW_PHASE)
-        except Exception:
-            pass
-    for _ in range(YELLOW_DURATION):
-        try:
-            traci.simulationStep()
-        except Exception:
-            break
+    return avg_wait, len(vehicle_ids), dir_counts, total_co2
 
 
-def _apply_action(action, tl_ids, phase_counts, prev_action=None):
-    if prev_action is not None and action != prev_action:
-        _apply_yellow(tl_ids, phase_counts)
-
-    if MAIN_TL in tl_ids:
-        main_phase = 0 if action in [0, 2] else 2
-        try:
-            n = phase_counts.get(MAIN_TL, 1)
-            traci.trafficlight.setPhase(MAIN_TL, main_phase % n)
-        except Exception:
-            pass
-
-    secondary = SECONDARY_TL_PHASES.get(action, SECONDARY_TL_PHASES[0])
-    for tl, phase in secondary.items():
-        if tl in tl_ids:
-            try:
-                n = phase_counts.get(tl, 1)
-                traci.trafficlight.setPhase(tl, phase % n)
-            except Exception:
-                pass
-
-
-def _angle_to_direction(angle: float) -> str:
-    a = float(angle) % 360
-    if a < 45 or a >= 315:  return "north"
-    if 45  <= a < 135:      return "east"
-    if 135 <= a < 225:      return "south"
-    return "west"
-
+# ── Main start ────────────────────────────────────────────────
 
 def start(profile: str) -> bool:
     global _running, _profile, _step, _view_id, _metrics, _lstm_history
@@ -352,13 +332,10 @@ def start(profile: str) -> bool:
     if not _load_agent():
         return False
 
-    config    = CONFIG_PATHS.get(profile)
-    max_steps = MAX_STEPS_PER_PROFILE.get(profile, 3600)
-
+    config = CONFIG_PATHS.get(profile)
     if not config:
         return False
 
-    # Initialize decision log for this session
     _init_decision_log(profile)
 
     try:
@@ -377,44 +354,63 @@ def start(profile: str) -> bool:
         _metrics      = {}
         _lstm_history = []
 
-        try:
-            views    = traci.gui.getIDList()
-            _view_id = views[0] if views else "View #0"
-            time.sleep(2.0)
-            traci.gui.setOffset(_view_id, 3694.5, 1539.5)
-            traci.gui.setZoom(_view_id, 1500)
-            print(f"[DQN Runner] GUI ready ")
-        except Exception as e:
-            print(f"[DQN Runner] GUI setup: {e}")
-
-        tl_ids       = list(traci.trafficlight.getIDList())
-        phase_counts = {}
-        for tl in tl_ids:
+        # ── GUI setup: wait longer + retry to avoid black window ──
+        time.sleep(3.0)
+        for attempt in range(5):
             try:
-                logics = traci.trafficlight.getAllProgramLogics(tl)
-                phase_counts[tl] = len(logics[0].phases)
-            except Exception:
-                phase_counts[tl] = 1
+                views    = traci.gui.getIDList()
+                _view_id = views[0] if views else "View #0"
+                traci.gui.setOffset(_view_id, 3694.5, 1539.5)
+                traci.gui.setZoom(_view_id, 1500)
+                # Force a render step so window is not black
+                traci.simulationStep()
+                _step += 1
+                print(f"[DQN Runner] GUI ready (attempt {attempt+1})")
+                break
+            except Exception as e:
+                print(f"[DQN Runner] GUI attempt {attempt+1}: {e}")
+                time.sleep(1.0)
 
-        current_phase = [0]
-        prev_action   = [0]
-        lstm_pred     = [{"north": 0, "south": 0, "east": 0, "west": 0}]
+        max_steps = MAX_STEPS_PER_PROFILE.get(profile, 10800)
+        print(f"[DQN Runner] Started {profile}")
 
-        _apply_action(0, tl_ids, phase_counts)
-        print(f"[DQN Runner] Started {profile} ")
-
+        # ── Simulation thread ─────────────────────────────────────
         def run():
             global _running, _step, _metrics, _pipeline_state
 
-            action_timer = 0
-            lstm_counter = 0
+            action_timer   = 0
+            lstm_counter   = 0
+            lstm_pred      = [{"north": 0, "south": 0, "east": 0, "west": 0}]
             _fallback_mode = False
+
+            # Point 10: Monitoring
+            try:
+                from DeepQN.monitoring.monitor import DQNMonitor
+                _monitor = DQNMonitor(
+                    baseline_avg_wait=626.6,
+                    log_dir=os.path.join(BASE_DIR, "DeepQN", "logs"),
+                )
+                print("[DQN Runner] Monitor active")
+            except Exception as _me:
+                _monitor = None
+
+            # Point 11: Explainability
+            try:
+                import yaml as _eyaml
+                with open(os.path.join(BASE_DIR, "DeepQN", "configs", "dqn_config.yaml")) as _ef:
+                    _ecfg = _eyaml.safe_load(_ef)
+                from DeepQN.explainability.explainer import DQNExplainer
+                _explainer = DQNExplainer(_ecfg)
+                print("[DQN Runner] Explainer active")
+            except Exception as _ee:
+                _explainer = None
 
             while _running:
                 try:
                     if traci.simulation.getMinExpectedNumber() == 0:
                         break
 
+                    # ── Every 30 steps: full pipeline cycle ───────
                     if action_timer % 30 == 0:
 
                         # Step 1: Screenshot
@@ -430,7 +426,7 @@ def start(profile: str) -> bool:
                         # Step 2: YOLO
                         yolo_counts = _run_yolo_on_frame()
 
-                        # Step 3: LSTM history
+                        # Step 3: LSTM history entry
                         vehicle_ids = traci.vehicle.getIDList()
                         dir_c = {"north":0,"south":0,"east":0,"west":0}
                         spds, waits = [], []
@@ -463,69 +459,100 @@ def start(profile: str) -> bool:
                         if lstm_counter % 3 == 0:
                             lstm_pred[0] = _run_lstm_prediction()
 
-                        # Step 5: Build DQN state
-                        result = _get_state(current_phase[0], lstm_pred[0])
-                        state, avg_wait, n_vehicles, dir_counts, total_co2 = result
+                        # Step 5: Traffic metrics
+                        avg_wait, n_vehicles, dir_counts, total_co2 = \
+                            _get_traffic_metrics()
 
-                        # Step 6: DQN decides , get Q-values too for logging
-                        # Fallback to fixed timing if DQN fails
+                        # Step 6: DQN decisions (7 agents)
                         try:
-                            action, q_values = _agent.act_with_q(state)
+                            observations         = _build_observations(lstm_pred[0])
+                            per_junction_actions = _multi_agent.act(
+                                observations, eval_mode=True
+                            )
+
+                            # Step 7: Apply to traffic lights
+                            _apply_dqn_actions(per_junction_actions)
+
+                            # Point 11: Explain decisions every 90 steps
+                            if _explainer and action_timer % 90 == 0:
+                                try:
+                                    exps = _explainer.explain_all(
+                                        observations       = observations,
+                                        actions            = per_junction_actions,
+                                        agents             = _multi_agent,
+                                        lstm_pred          = lstm_pred[0],
+                                        step               = _step,
+                                    )
+                                    switched_exps = [e for e in exps if e.action == 1]
+                                    if switched_exps:
+                                        print(f"[Explainer] Step {_step} — {len(switched_exps)} junctions switched:")
+                                        for exp in switched_exps[:3]:
+                                            print(f"  {exp.junction_name}: {exp._switch_reason()} (confidence={exp.confidence_label})")
+                                except Exception as _ex:
+                                    pass
+
+                            # Build display values for frontend
+                            n_switched  = sum(
+                                1 for a in per_junction_actions.values()
+                                if a == 1
+                            )
+                            action_name = f"{n_switched}/7 junctions switched"
+                            q_display   = _build_q_display(
+                                per_junction_actions, observations
+                            )
                             _fallback_mode = False
+
                         except Exception as dqn_err:
-                            print(f"[DQN] Inference failed: {dqn_err} — using fallback timing")
-                            # Fallback: cycle through phases like fixed timing
-                            # 0=N-S Green, 1=E-W Green alternating every 39s
-                            action     = 0 if (action_timer // 39) % 2 == 0 else 1
-                            q_values   = [0.0, 0.0, 0.0, 0.0]
+                            print(f"[DQN] Inference failed: {dqn_err}")
+                            n_switched     = 0
+                            action_name    = "fallback (fixed timing)"
+                            q_display      = {}
                             _fallback_mode = True
 
-                        # Step 7: Apply signal
-                        _apply_action(
-                            action, tl_ids, phase_counts,
-                            prev_action=prev_action[0]
-                        )
-                        prev_action[0]   = action
-                        current_phase[0] = action
-
-                        #  LOG THE DECISION 
+                        # Step 8: Log decision + monitor
                         _log_decision(
                             step        = _step,
                             profile     = profile,
-                            action      = action,
-                            q_values    = q_values,
-                            state       = state,
+                            n_switched  = n_switched,
+                            action_name = action_name,
                             avg_wait    = avg_wait,
                             n_vehicles  = n_vehicles,
                             total_co2   = total_co2,
                             yolo_counts = yolo_counts,
                             lstm_pred   = lstm_pred[0],
                         )
+                        if _monitor:
+                            alerts = _monitor.record(
+                                step       = _step,
+                                avg_wait   = avg_wait,
+                                total_co2  = total_co2,
+                                n_switched = n_switched,
+                                throughput = n_vehicles,
+                            )
+                            for alert in alerts:
+                                print(f"[Monitor] {alert.level}: {alert.code} — {alert.message}")
 
+                        # Step 9: Update pipeline state for API
                         with _lock:
                             _pipeline_state = {
                                 "sumo_vehicles":   n_vehicles,
                                 "yolo_counts":     yolo_counts,
                                 "lstm_prediction": lstm_pred[0],
-                                "dqn_action":      action,
-                                "dqn_action_name": ACTION_NAMES[action],
+                                "dqn_action":      n_switched,
+                                "dqn_action_name": action_name,
                                 "avg_wait_s":      round(avg_wait, 2),
                                 "fallback_mode":   _fallback_mode,
-                                # Q-values exposed for frontend
-                                "q_values": {
-                                    "N-S Green (39s)": round(float(q_values[0]), 4),
-                                    "E-W Green (39s)": round(float(q_values[1]), 4),
-                                    "N-S Green (20s)": round(float(q_values[2]), 4),
-                                    "E-W Green (20s)": round(float(q_values[3]), 4),
-                                },
+                                "q_values":        q_display,
                             }
 
+                    # ── Every step ────────────────────────────────
                     traci.simulationStep()
                     _step        += 1
                     action_timer += 1
 
                     time.sleep(STEP_DELAY)
 
+                    # ── Every 10 steps: update metrics ────────────
                     if _step % 10 == 0:
                         vehicle_ids          = traci.vehicle.getIDList()
                         waiting, co2_vals, speeds = [], [], []
@@ -546,13 +573,25 @@ def start(profile: str) -> bool:
                                 "step":           _step,
                                 "vehicles":       len(vehicle_ids),
                                 "queued":         queued,
-                                "avg_wait_s":     round(sum(waiting)/len(waiting) if waiting else 0.0, 2),
-                                "avg_speed":      round(sum(speeds)/len(speeds)   if speeds  else 0.0, 2),
-                                "total_co2_mg":   round(sum(co2_vals) if co2_vals else 0.0, 1),
-                                "current_action": ACTION_NAMES[current_phase[0]],
+                                "avg_wait_s":     round(
+                                    sum(waiting)/len(waiting) if waiting else 0.0, 2
+                                ),
+                                "avg_speed":      round(
+                                    sum(speeds)/len(speeds) if speeds else 0.0, 2
+                                ),
+                                "total_co2_mg":   round(
+                                    sum(co2_vals) if co2_vals else 0.0, 1
+                                ),
+                                "current_action": _pipeline_state.get(
+                                    "dqn_action_name", "—"
+                                ),
                                 "profile":        _profile,
-                                "lstm_pred":      lstm_pred[0],
-                                "q_values":       _pipeline_state.get("q_values", {}),
+                                "lstm_pred":      _pipeline_state.get(
+                                    "lstm_prediction", {}
+                                ),
+                                # q_values for the frontend panel
+                                "q_values": _pipeline_state.get("q_values", {}),
+                                "fallback_mode": _fallback_mode,
                             }
 
                     if _step >= max_steps:
@@ -564,11 +603,13 @@ def start(profile: str) -> bool:
 
             _running = False
             _close_decision_log()
+            if _monitor:
+                _monitor.print_summary()
             try:
                 traci.close()
             except Exception:
                 pass
-            print("[DQN Runner] Simulation ended ")
+            print("[DQN Runner] Simulation ended")
 
         t = threading.Thread(target=run, daemon=True)
         t.start()
@@ -581,6 +622,8 @@ def start(profile: str) -> bool:
         return False
 
 
+# ── Stop ──────────────────────────────────────────────────────
+
 def stop():
     global _running
     _running = False
@@ -591,6 +634,8 @@ def stop():
     except Exception:
         pass
 
+
+# ── Screenshot ────────────────────────────────────────────────
 
 def get_screenshot() -> bytes | None:
     if not _running:
@@ -603,14 +648,16 @@ def get_screenshot() -> bytes | None:
         return None
 
 
+# ── Status ────────────────────────────────────────────────────
+
 def get_status() -> dict:
     with _lock:
         return {
-            "running":      _running,
-            "profile":      _profile,
-            "step":         _step,
-            "metrics":      _metrics,
-            "log_path":     _decision_log_path,
+            "running":  _running,
+            "profile":  _profile,
+            "step":     _step,
+            "metrics":  _metrics,
+            "log_path": _decision_log_path,
         }
 
 
@@ -620,5 +667,4 @@ def get_pipeline_state() -> dict:
 
 
 def get_log_path() -> str | None:
-    """Return path to current decision log file."""
     return _decision_log_path
