@@ -308,3 +308,7 @@ lstm/data/
 
 # YOLO detection outputs
 detection/yolo_results/
+
+
+#logs for dqn 
+logs/
