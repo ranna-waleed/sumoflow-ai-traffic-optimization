@@ -312,3 +312,7 @@ detection/yolo_results/
 
 #logs for dqn 
 logs/
+
+#TAKSIM SQUARE FILES
+simulation/taksim/map/baseline_outputs
+simulation/taksim/map/outputs
