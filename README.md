@@ -333,7 +333,7 @@ react-router-dom 6.0+
 ![Model Comparison](docs/screenshots/Model_comparison.JPG)
 
 **Before vs After**
-![Before vs After](docs/screenshots/before_after.JPG)
+![Before vs After](docs/screenshots/Before_After.JPG)
 
 **About**
 ![About](docs/screenshots/about.JPG)
