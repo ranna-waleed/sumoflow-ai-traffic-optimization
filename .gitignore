@@ -316,3 +316,6 @@ logs/
 #TAKSIM SQUARE FILES
 simulation/taksim/map/baseline_outputs
 simulation/taksim/map/outputs
+
+# build folder for deployment
+Add-Content .gitignore "`nfrontend/build"
