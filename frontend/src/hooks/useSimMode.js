@@ -112,7 +112,7 @@ export function useSimMode() {
     const check = async () => {
       try {
         const res = await fetch(`${API}/health`, {
-          signal: AbortSignal.timeout(3000),
+          signal: AbortSignal.timeout(5000),
         });
         setMode(res.ok ? "live" : "video");
       } catch {
