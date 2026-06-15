@@ -11,7 +11,7 @@ import traci
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MAPS_DIR = os.path.join(BASE_DIR, "simulation", "maps")
 
-# ── Runtime state ─────────────────────────────────────────────
+# Runtime state 
 _running      = False
 _profile      = None
 _step         = 0
@@ -34,7 +34,7 @@ FRAME_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "dqn_frame.jpg"
 )
 
-# ── Logging ───────────────────────────────────────────────────
+# Logging 
 LOGS_DIR = os.path.join(BASE_DIR, "logs")
 os.makedirs(LOGS_DIR, exist_ok=True)
 _decision_log_path   = None
@@ -101,7 +101,7 @@ def _close_decision_log():
     _decision_log_writer = None
 
 
-# ── Config ────────────────────────────────────────────────────
+# Config 
 CONFIG_PATHS = {
     "morning_rush": os.path.join(MAPS_DIR, "config_morning_rush.sumocfg"),
     "evening_rush": os.path.join(MAPS_DIR, "config_evening_rush.sumocfg"),
@@ -127,7 +127,7 @@ STEP_DELAY = 0.05
 _lstm_history = []
 
 
-# ── Agent loading ─────────────────────────────────────────────
+# Agent loading
 
 def _load_agent() -> bool:
     global _multi_agent, _tls_config
@@ -157,7 +157,7 @@ def _load_agent() -> bool:
         return False
 
 
-# ── Observation builder ───────────────────────────────────────
+# Observation builder
 
 def _build_observations(lstm_pred: dict) -> dict:
     if _tls_config is None:
@@ -206,7 +206,7 @@ def _build_observations(lstm_pred: dict) -> dict:
     return observations
 
 
-# ── Build Q-value display dict ────────────────────────────────
+#  Build Q-value display dict 
 
 def _build_q_display(per_junction_actions: dict, observations: dict) -> dict:
     """
@@ -233,7 +233,7 @@ def _build_q_display(per_junction_actions: dict, observations: dict) -> dict:
     return q_display
 
 
-# ── Apply DQN decisions ───────────────────────────────────────
+#  Apply DQN decisions
 
 def _apply_dqn_actions(per_junction_actions: dict):
     if _tls_config is None:
@@ -253,7 +253,7 @@ def _apply_dqn_actions(per_junction_actions: dict):
                 pass
 
 
-# ── YOLO ─────────────────────────────────────────────────────
+#  YOLO 
 
 def _run_yolo_on_frame() -> dict:
     if not os.path.exists(FRAME_PATH):
@@ -272,7 +272,7 @@ def _run_yolo_on_frame() -> dict:
         return {}
 
 
-# ── LSTM ──────────────────────────────────────────────────────
+# LSTM 
 
 def _run_lstm_prediction() -> dict:
     if len(_lstm_history) < 10:
@@ -290,7 +290,7 @@ def _run_lstm_prediction() -> dict:
         return {"north": 0, "south": 0, "east": 0, "west": 0}
 
 
-# ── Traffic metrics ───────────────────────────────────────────
+# Traffic metrics 
 
 def _angle_to_direction(angle: float) -> str:
     a = float(angle) % 360
@@ -320,7 +320,7 @@ def _get_traffic_metrics():
     return avg_wait, len(vehicle_ids), dir_counts, total_co2
 
 
-# ── Main start ────────────────────────────────────────────────
+#  Main start
 
 def start(profile: str) -> bool:
     global _running, _profile, _step, _view_id, _metrics, _lstm_history
@@ -354,7 +354,7 @@ def start(profile: str) -> bool:
         _metrics      = {}
         _lstm_history = []
 
-        # ── GUI setup: wait longer + retry to avoid black window ──
+        #  GUI setup: wait longer + retry to avoid black window 
         time.sleep(3.0)
         for attempt in range(5):
             try:
@@ -374,7 +374,7 @@ def start(profile: str) -> bool:
         max_steps = MAX_STEPS_PER_PROFILE.get(profile, 10800)
         print(f"[DQN Runner] Started {profile}")
 
-        # ── Simulation thread ─────────────────────────────────────
+        #  Simulation thread 
         def run():
             global _running, _step, _metrics, _pipeline_state
 
@@ -410,7 +410,7 @@ def start(profile: str) -> bool:
                     if traci.simulation.getMinExpectedNumber() == 0:
                         break
 
-                    # ── Every 30 steps: full pipeline cycle ───────
+                    # Every 30 steps: full pipeline cycle 
                     if action_timer % 30 == 0:
 
                         # Step 1: Screenshot
@@ -545,14 +545,14 @@ def start(profile: str) -> bool:
                                 "q_values":        q_display,
                             }
 
-                    # ── Every step ────────────────────────────────
+                    #  Every step 
                     traci.simulationStep()
                     _step        += 1
                     action_timer += 1
 
                     time.sleep(STEP_DELAY)
 
-                    # ── Every 10 steps: update metrics ────────────
+                    # Every 10 steps: update metrics 
                     if _step % 10 == 0:
                         vehicle_ids          = traci.vehicle.getIDList()
                         waiting, co2_vals, speeds = [], [], []
@@ -622,7 +622,7 @@ def start(profile: str) -> bool:
         return False
 
 
-# ── Stop ──────────────────────────────────────────────────────
+# Stop 
 
 def stop():
     global _running
@@ -635,7 +635,7 @@ def stop():
         pass
 
 
-# ── Screenshot ────────────────────────────────────────────────
+#  Screenshot 
 
 def get_screenshot() -> bytes | None:
     if not _running:
@@ -648,7 +648,7 @@ def get_screenshot() -> bytes | None:
         return None
 
 
-# ── Status ────────────────────────────────────────────────────
+#  Status
 
 def get_status() -> dict:
     with _lock:

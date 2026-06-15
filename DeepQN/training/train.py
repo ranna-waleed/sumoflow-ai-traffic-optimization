@@ -1,17 +1,14 @@
 """
-dqn/training/train.py
----------------------
+dqn/training/train.py:
 Main training entry-point for SUMOFlow AI DQN.
 
-Usage
------
+Usage:
     python -m dqn.training.train
     python -m dqn.training.train --config dqn/configs/dqn_config.yaml
     python -m dqn.training.train --profile morning_rush --episodes 50
     python -m dqn.training.train --resume dqn/checkpoints   # continue training
 
-Algorithm
----------
+Algorithm:
 For each episode:
   1. Pick a traffic profile (sequential or random rotation).
   2. Reset the SUMO environment.
@@ -65,8 +62,7 @@ def train(
     """
     Full training procedure.
 
-    Parameters
-    ----------
+    Parameters:
     config_path      : path to dqn_config.yaml
     override_profile : force a single profile (default: rotate through all 4)
     num_episodes     : override yaml setting

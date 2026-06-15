@@ -1,6 +1,5 @@
 """
-dqn/agent/network.py
---------------------
+dqn/agent/network.py:
 Dueling Deep Q-Network architecture for traffic signal control.
 
 Dueling advantage:
@@ -24,11 +23,10 @@ class DuelingQNetwork(nn.Module):
     """
     Dueling DQN Q-network.
 
-    Parameters
-    ----------
-    state_dim   : int  — observation vector size (default 37)
-    action_dim  : int  — number of discrete actions (default 2: keep/switch)
-    hidden_dims : list — widths of shared MLP hidden layers
+    Parameters:
+    state_dim   : int  , observation vector size (default 37)
+    action_dim  : int  , number of discrete actions (default 2: keep/switch)
+    hidden_dims : list , widths of shared MLP hidden layers
     """
 
     def __init__(
@@ -77,12 +75,10 @@ class DuelingQNetwork(nn.Module):
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
         """
-        Parameters
-        ----------
+        Parameters:
         state : Tensor shape (batch, state_dim) or (state_dim,)
 
-        Returns
-        -------
+        Returns:
         q_values : Tensor shape (batch, action_dim)
         """
         if state.dim() == 1:

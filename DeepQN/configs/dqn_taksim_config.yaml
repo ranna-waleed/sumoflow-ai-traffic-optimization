@@ -1,14 +1,12 @@
-# ================================================================
-#  SUMOFlow AI — DQN Configuration for Taksim Square, Istanbul
+#  SUMOFlow AI : DQN Configuration for Taksim Square, Istanbul
 #  8 controllable TLS agents (out of 12 total junctions)
-# ================================================================
 
 simulation:
   net_file:     simulation/taksim/map/taksim.net.xml
   step_length:  1
   decision_interval: 10      # DQN decides every 10 sim steps
 
-# ── Traffic profiles ────────────────────────────────────────────
+# Traffic profiles
 profiles:
   taksim_morning:
     config:    simulation/taksim/map/config_taksim.sumocfg
@@ -16,7 +14,7 @@ profiles:
     end:       36000          # 10:00
     port:      8814           # different port from Tahrir (8813)
 
-# ── 8 Controlled TLS junctions ──────────────────────────────────
+#  8 Controlled TLS junctions 
 # Skipped (always-green / no transitions):
 #   278558186, 8974792339,
 #   joinedG_269515490_434343816, joinedG_278615578_278615579
@@ -92,14 +90,14 @@ tls_junctions:
     green_to_yellow: {"0": 1, "2": 3}
     yellow_to_green: {"1": 2, "3": 0}
 
-# ── State vector ─────────────────────────────────────────────────
+# State vector
 state:
   max_lanes:        10
   features_per_lane: 3       # halting count, wait time, occupancy
   global_features:   5       # lstm N/S/E/W + time_of_day
-  # Total = 10×3 + 2 (junction) + 5 (global) = 37 — same as Tahrir
+  # Total = 10×3 + 2 (junction) + 5 (global) = 37 , same as Tahrir
 
-# ── Reward function ──────────────────────────────────────────────
+#  Reward function 
 reward:
   wait_weight:       -1.0
   co2_weight:        -0.001
@@ -107,7 +105,7 @@ reward:
   clip_min:          -200.0
   clip_max:           10.0
 
-# ── DQN hyperparameters (same as Tahrir — proven settings) ───────
+# DQN hyperparameters (same as Tahrir , proven settings)
 dqn:
   state_size:        37
   action_size:       2
@@ -122,7 +120,7 @@ dqn:
   target_update:     10
   checkpoint_every:  10
 
-# ── BiLSTM adapter ───────────────────────────────────────────────
+# BiLSTM adapter 
 bilstm:
   features:
     - north
@@ -139,7 +137,7 @@ bilstm:
     west:  136.0
   history_len: 60
 
-# ── Evaluation paths ─────────────────────────────────────────────
+# Evaluation paths
 evaluation:
   baseline_output_dir: simulation/taksim/map/baseline_outputs
   results_dir:         DeepQN/results/taksim

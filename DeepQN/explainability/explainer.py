@@ -1,6 +1,5 @@
 """
-DeepQN/explainability/explainer.py
-------------------------------------
+DeepQN/explainability/explainer.py:
 Human-readable explanations for DQN decisions.
 
 For each decision step, explains:
@@ -296,7 +295,7 @@ class DQNExplainer:
         switched = [e for e in explanations if e.action == 1]
         kept     = [e for e in explanations if e.action == 0]
 
-        print(f"\n── Step {step} Decision Explanations ──────────────────────")
+        print(f"\n Step {step} Decision Explanations ")
         print(f"   {len(switched)}/{len(explanations)} junctions switched\n")
 
         to_show = explanations if show_all else switched

@@ -1,11 +1,9 @@
 """
-dqn/integration/dqn_controller.py
-----------------------------------
+dqn/integration/dqn_controller.py:
 Drop-in controller that the FastAPI backend imports to run the trained DQN
 agents inside an active SUMO/TraCI session.
 
-Design principle
-----------------
+Design principle:
 The backend already manages the TraCI lifecycle.  This module adds a
 ``DQNController`` singleton that:
   1. Loads the trained agent checkpoints on startup.
@@ -14,8 +12,7 @@ The backend already manages the TraCI lifecycle.  This module adds a
   3. Exposes ``get_status()`` for the REST API ``GET /dqn/status`` endpoint.
   4. Exposes ``set_mode(mode)`` for toggling DQN / fixed-time from the dashboard.
 
-Usage in backend (pseudo-code)
--------------------------------
+Usage in backend (pseudo-code):
     from DeepQN.integration.dqn_controller import get_controller
 
     controller = get_controller()          # singleton
@@ -65,8 +62,7 @@ class DQNController:
     """
     Stateful controller that runs DQN agents inside an active TraCI session.
 
-    Parameters
-    ----------
+    Parameters:
     config_path : path to dqn_config.yaml
     """
 
@@ -139,8 +135,7 @@ class DQNController:
         """
         Call this once per SUMO step from the backend's step loop.
 
-        Returns
-        -------
+        Returns:
         actions : {tls_id: 0_or_1} if a decision was made this step, else None
         """
         self._step_counter += 1

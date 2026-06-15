@@ -1,5 +1,5 @@
 # backend/main.py
-# SUMOFlow AI — FastAPI Backend
+# FastAPI Backend
 # Run: uvicorn main:app --reload --port 8000
 
 from fastapi import FastAPI

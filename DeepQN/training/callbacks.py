@@ -1,6 +1,5 @@
 """
-dqn/training/callbacks.py
--------------------------
+dqn/training/callbacks.py:
 Training callbacks: episode logging (CSV + JSON-lines) and early stopping.
 """
 
@@ -116,8 +115,7 @@ class EarlyStopping:
     Stops training if the mean reward has not improved by ``min_delta``
     for ``patience`` consecutive episodes.
 
-    Usage
-    -----
+    Usage:
         stopper = EarlyStopping(patience=20, min_delta=0.5)
         ...
         if stopper.should_stop(mean_reward):

@@ -1,6 +1,5 @@
 """
-dqn/evaluation/metrics.py
---------------------------
+dqn/evaluation/metrics.py:
 Parses SUMO output XML files to extract evaluation KPIs:
   - average_waiting_time  (from tripinfo XML)
   - total_co2             (from emission XML)
@@ -24,7 +23,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-# ── Metric containers ─────────────────────────────────────────────────────────
+# Metric containers
 
 @dataclass
 class EpisodeMetrics:
@@ -62,7 +61,7 @@ class EpisodeMetrics:
         return asdict(self)
 
 
-# ── XML parsers ───────────────────────────────────────────────────────────────
+# XML parsers
 
 def parse_tripinfo(xml_path: str | Path, profile: str, mode: str) -> EpisodeMetrics:
     """
@@ -158,7 +157,7 @@ def parse_summary(xml_path: str | Path, metrics: EpisodeMetrics) -> EpisodeMetri
     return metrics
 
 
-# ── Convenience loader ────────────────────────────────────────────────────────
+# Convenience loader
 
 def load_metrics_from_outputs(
     output_dir:      str | Path | None,
@@ -168,7 +167,7 @@ def load_metrics_from_outputs(
 ) -> EpisodeMetrics:
     """
     Load baseline metrics from SUMO XML output files.
-    Works for any map — pass suffix_override to use a custom filename suffix.
+    Works for any map , pass suffix_override to use a custom filename suffix.
 
     Tahrir:  tripinfo_morning.xml, tripinfo_evening.xml, etc.
     Taksim:  tripinfo_taksim.xml  (suffix_override="taksim")

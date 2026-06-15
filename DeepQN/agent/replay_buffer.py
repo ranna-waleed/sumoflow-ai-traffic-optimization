@@ -1,6 +1,5 @@
 """
-dqn/agent/replay_buffer.py
---------------------------
+dqn/agent/replay_buffer.py:
 Experience replay buffers for the DQN agent.
 
 Provides:
@@ -51,8 +50,7 @@ class UniformReplayBuffer:
     """
     Fixed-capacity circular replay buffer.
 
-    Parameters
-    ----------
+    Parameters:
     capacity : int   — maximum number of stored transitions
     seed     : int   — random seed for reproducible sampling
     """
@@ -113,8 +111,7 @@ class PrioritisedReplayBuffer:
     Transitions with higher TD-error are sampled more frequently.
     Importance-sampling weights correct for the sampling bias.
 
-    Parameters
-    ----------
+    Parameters:
     capacity : int
     alpha    : float — priority exponent (0 = uniform, 1 = full priority)
     beta     : float — IS-weight exponent (0 = no correction, 1 = full)

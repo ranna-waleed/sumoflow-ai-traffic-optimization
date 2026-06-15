@@ -1,6 +1,5 @@
 """
-DeepQN/monitoring/monitor.py
------------------------------
+DeepQN/monitoring/monitor.py:
 Real-time monitoring of DQN decision quality during live simulation.
 
 Detects:
@@ -30,7 +29,7 @@ from typing import List, Optional
 logger = logging.getLogger(__name__)
 
 
-# ── Alert dataclass ───────────────────────────────────────────────
+# Alert dataclass
 
 @dataclass
 class Alert:
@@ -42,7 +41,7 @@ class Alert:
     threshold:  float
 
 
-# ── Monitor ───────────────────────────────────────────────────────
+# Monitor
 
 class DQNMonitor:
     """
@@ -97,7 +96,7 @@ class DQNMonitor:
         logger.info("[Monitor] Initialized. Baseline wait=%.1fs  Degrade threshold=%.1fs",
                     baseline_avg_wait, self.degrade_thresh)
 
-    # ── Record one decision step ───────────────────────────────────
+    # Record one decision step
 
     def record(
         self,
@@ -127,7 +126,7 @@ class DQNMonitor:
 
         return alerts_this_step
 
-    # ── Check all conditions ───────────────────────────────────────
+    # Check all conditions
 
     def _check_all(
         self, step, avg_wait, total_co2, n_switched, throughput, rolling_wait
@@ -187,7 +186,7 @@ class DQNMonitor:
         self.alerts.extend(new_alerts)
         return new_alerts
 
-    # ── Helper: create and log alert ──────────────────────────────
+    # Helper: create and log alert
 
     def _make_alert(
         self, level: str, code: str, message: str, value: float, threshold: float
@@ -204,7 +203,7 @@ class DQNMonitor:
     def _rolling_mean(buf) -> float:
         return float(sum(buf) / len(buf)) if buf else 0.0
 
-    # ── Summary ───────────────────────────────────────────────────
+    # Summary
 
     def summary(self) -> dict:
         """Return monitoring summary at end of simulation."""
@@ -236,9 +235,9 @@ class DQNMonitor:
         print(f"  Alert log      : {s['alert_log']}")
         print("=" * 55)
         if s["total_alerts"] == 0:
-            print("  ✓ No degradation detected.")
+            print("  No degradation detected.")
         elif s["critical_alerts"] > 0:
-            print("  ✗ CRITICAL alerts — DQN performing below baseline.")
+            print("  CRITICAL alerts : DQN performing below baseline.")
         else:
-            print("  ⚠ Warnings detected — review alert log.")
+            print("  Warnings detected : review alert log.")
         print()

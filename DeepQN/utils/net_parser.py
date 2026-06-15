@@ -1,6 +1,5 @@
 """
-dqn/utils/net_parser.py
------------------------
+dqn/utils/net_parser.py:
 Parses tahrirupdated.net.xml to extract:
   - All <tlLogic> phase definitions
   - Each TLS junction's incoming lanes
@@ -96,8 +95,7 @@ class NetParser:
     """
     Lightweight XML parser for SUMO .net.xml files.
 
-    Usage
-    -----
+    Usage:
     >>> parser = NetParser("simulation/maps/tahrirupdated.net.xml")
     >>> tls_map = parser.get_all_tls()
     >>> info = tls_map["315744796"]

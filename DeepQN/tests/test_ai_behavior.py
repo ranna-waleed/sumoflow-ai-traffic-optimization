@@ -1,6 +1,5 @@
 """
-DeepQN/tests/test_ai_behavior.py
----------------------------------
+DeepQN/tests/test_ai_behavior.py:
 Edge case and adversarial tests for the SUMOFlow AI components.
 
 Tests covered:
@@ -34,8 +33,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-PASS = "✓ PASS"
-FAIL = "✗ FAIL"
+PASS = "PASS"
+FAIL = "FAIL"
 results = []
 
 
@@ -82,7 +81,7 @@ def make_obs_with_nan(tls_ids: list) -> dict:
 
 
 print("\n" + "=" * 60)
-print("  SUMOFlow AI — Behavior & Edge Case Tests")
+print("  SUMOFlow AI : Behavior & Edge Case Tests")
 print("=" * 60 + "\n")
 
 #  Load agents 
@@ -96,9 +95,9 @@ except Exception as e:
     sys.exit(1)
 
 
-print("── Test Group 1: State Edge Cases ──────────────────────────")
+print(" Test Group 1: State Edge Cases")
 
-# Test 1 — Empty network (all zeros)
+# Test 1 : Empty network (all zeros)
 try:
     obs     = make_obs(tls_ids, value=0.0)
     actions = agents.act(obs, eval_mode=True)
@@ -109,7 +108,7 @@ try:
 except Exception as e:
     record("Empty network (all-zero state)", False, str(e))
 
-# Test 2 — Maximum congestion (all features = 1.0)
+# Test 2 : Maximum congestion (all features = 1.0)
 try:
     obs     = make_obs(tls_ids, value=1.0)
     actions = agents.act(obs, eval_mode=True)
@@ -121,7 +120,7 @@ try:
 except Exception as e:
     record("Maximum congestion (all-one state)", False, str(e))
 
-# Test 3 — NaN / Inf sensor failure
+# Test 3 : NaN / Inf sensor failure
 try:
     obs_bad = make_obs_with_nan(tls_ids)
     # The sumo_env has a NaN guard — simulate it here
@@ -137,7 +136,7 @@ try:
 except Exception as e:
     record("Sensor failure (NaN/Inf → sanitized)", False, str(e))
 
-# Test 4 — Random noise state
+# Test 4 : Random noise state
 try:
     np.random.seed(42)
     obs     = {tid: np.random.rand(37).astype(np.float32) for tid in tls_ids}
@@ -150,9 +149,9 @@ except Exception as e:
     record("Random noise state", False, str(e))
 
 
-print("\n── Test Group 2: BiLSTM Input Variations ───────────────────")
+print("\n Test Group 2: BiLSTM Input Variations ")
 
-# Test 5 — BiLSTM zeros (no prediction signal)
+# Test 5 : BiLSTM zeros (no prediction signal)
 try:
     lstm_zero = {"north": 0, "south": 0, "east": 0, "west": 0}
     # Build state with zero global features (positions 32-35)
@@ -167,7 +166,7 @@ try:
 except Exception as e:
     record("BiLSTM zero prediction", False, str(e))
 
-# Test 6 — BiLSTM maximum prediction (traffic spike incoming)
+# Test 6 : BiLSTM maximum prediction (traffic spike incoming)
 try:
     obs = make_obs(tls_ids, value=0.5)
     for tid in obs:
@@ -182,9 +181,9 @@ except Exception as e:
     record("BiLSTM max prediction (traffic spike)", False, str(e))
 
 
-print("\n── Test Group 3: Determinism & Consistency ─────────────────")
+print("\n Test Group 3: Determinism & Consistency ")
 
-# Test 7 : Determinism: same input → same output
+# Test 7 : Determinism: same input -> same output
 try:
     np.random.seed(0)
     obs   = {tid: np.random.rand(37).astype(np.float32) for tid in tls_ids}
@@ -213,7 +212,7 @@ except Exception as e:
     record("Action validity (1,000 random states)", False, str(e))
 
 
-print("\n── Test Group 4: Multi-Agent Independence ──────────────────")
+print("\n Test Group 4: Multi-Agent Independence ")
 
 # Test 9 : Changing one agent's state doesn't affect others
 try:
@@ -255,9 +254,9 @@ try:
 except Exception as e:
     record("Q-value output shape", False, str(e))
 
-print("\n── Test Group 5: Failure Recovery ──────────────────────────")
+print("\n Test Group 5: Failure Recovery ")
 
-# Test 11 — Missing junction in observation (partial state)
+# Test 11 : Missing junction in observation (partial state)
 try:
     obs_partial = make_obs(tls_ids, value=0.5)
     # Remove one junction from observations
@@ -274,7 +273,7 @@ try:
 except Exception as e:
     record("Missing junction observation", False, str(e))
 
-# Test 12 — State vector wrong size (should be caught before reaching agent)
+# Test 12 : State vector wrong size (should be caught before reaching agent)
 try:
     wrong_state = np.ones(20, dtype=np.float32)  # should be 37
     # Simulate the guard that pads/truncates

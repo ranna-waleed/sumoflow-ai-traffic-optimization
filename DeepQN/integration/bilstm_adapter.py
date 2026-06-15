@@ -1,11 +1,9 @@
 """
-dqn/integration/bilstm_adapter.py
-----------------------------------
+dqn/integration/bilstm_adapter.py:
 Connects the trained BiLSTM model (detection/lstm/predict.py) to the DQN
 state vector.
 
-What it does
-------------
+What it does:
 Every SUMO step it collects one row of traffic features from TraCI and
 appends it to a rolling 60-step history buffer (matching SEQ_LEN in predict.py).
 Every ``predict_every_steps`` SUMO steps it calls ``predict(history)`` and
@@ -16,8 +14,7 @@ returned as a float32 array ready to slot into the DQN state vector.
 If the model files are missing, or if predict() raises, it falls back
 transparently to live TraCI vehicle counts — training is never blocked.
 
-Usage (inside SumoEnv / DQNController)
----------------------------------------
+Usage (inside SumoEnv / DQNController):
     from DeepQN.integration.bilstm_adapter import BiLSTMAdapter
 
     adapter = BiLSTMAdapter(cfg)        # cfg = full dqn_config dict
@@ -47,7 +44,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 #  Path to the LSTM module 
-# lstm/ sits at the project root — two levels above dqn/integration/
+# lstm/ sits at the project root , two levels above dqn/integration/
 # Full path: sumoflow-ai-traffic-optimization/lstm/
 _DQN_INTEGRATION_DIR = Path(__file__).resolve().parent          # dqn/integration/
 _PROJECT_ROOT        = _DQN_INTEGRATION_DIR.parent.parent       # project root
@@ -56,7 +53,7 @@ LSTM_MODELS_PATH     = LSTM_MODULE_PATH / "models"
 
 SEQ_LEN = 60   # must match lstm/predict.py SEQ_LEN
 
-#  Direction → SUMO edge mapping (from net.xml analysis) 
+#  Direction -> SUMO edge mapping (from net.xml analysis) 
 DIRECTION_EDGES: Dict[str, List[str]] = {
     "north": ["690516091#0", "690516091#1"],
     "south": ["10873191#3", "10873191#4", "10873191#5"],
@@ -78,8 +75,7 @@ class BiLSTMAdapter:
     Wraps ``detection/lstm/predict.py`` so the DQN can use BiLSTM
     predictions as part of its state vector.
 
-    Parameters
-    ----------
+    Parameters:
     config : dict — the full dqn_config.yaml loaded as a dict
     """
 
@@ -181,7 +177,7 @@ class BiLSTMAdapter:
         each normalised to [0, 1].
 
         Uses the BiLSTM model when loaded, otherwise falls back to
-        live TraCI vehicle counts.  Safe to call every step — predictions
+        live TraCI vehicle counts.  Safe to call every step , predictions
         are cached between ``predict_every_steps`` intervals.
         """
         if self._use_proxy or not self._loaded:
@@ -219,12 +215,11 @@ class BiLSTMAdapter:
         Build one history row whose keys match the feature names in
         detection/lstm/models/config.json.
 
-        Strategy
-        --------
+        Strategy:
         For each feature name, scan for a direction keyword (north/south/
         east/west) and a metric keyword (count/speed/wait/occ).  Aggregate
         the corresponding TraCI values across all edges for that direction.
-        If a feature name cannot be matched, it defaults to 0.0 — the same
+        If a feature name cannot be matched, it defaults to 0.0 , the same
         fallback as ``r.get(f, 0.0)`` in predict.py.
         """
         try:

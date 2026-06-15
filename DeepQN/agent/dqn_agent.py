@@ -1,10 +1,8 @@
 """
-dqn/agent/dqn_agent.py
-----------------------
+dqn/agent/dqn_agent.py:
 DQN Agent for one TLS junction.
 
-Features
---------
+Features:
 - Double DQN (DDQN): online net selects action, target net evaluates it.
   Reduces Q-value overestimation.
 - Soft or hard target-network update.
@@ -41,9 +39,8 @@ class DQNAgent:
     """
     One DQN agent controlling one TLS junction.
 
-    Parameters
-    ----------
-    tls_id    : str — e.g. "315744796"
+    Parameters:
+    tls_id    : str , e.g. "315744796"
     cfg       : dict from dqn_config.yaml[dqn] section
     device    : torch device
     """
@@ -97,13 +94,11 @@ class DQNAgent:
         """
         Epsilon-greedy action selection.
 
-        Parameters
-        ----------
+        Parameters:
         state     : np.ndarray (state_dim,)
         eval_mode : if True, always greedy (epsilon = 0)
 
-        Returns
-        -------
+        Returns:
         action : 0 (keep) or 1 (switch)
         """
         eps = 0.0 if eval_mode else self.epsilon
@@ -253,7 +248,6 @@ class DQNAgent:
 class MultiAgentDQN:
     """
     Container for all 7 per-junction DQN agents.
-
     Wraps act / push / update / save / load for convenience.
     """
 

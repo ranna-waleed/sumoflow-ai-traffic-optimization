@@ -1,10 +1,9 @@
 """
-DeepQN/evaluation/evaluate.py
-------------------------------
-Before/after comparison — supports both Tahrir and Taksim configs.
+DeepQN/evaluation/evaluate.py:
+Before/after comparison , supports both Tahrir and Taksim configs.
 
 BASELINE: read from XML files whose path comes from the config YAML
-          (evaluation.baseline_output_dir) — not hardcoded.
+          (evaluation.baseline_output_dir) , not hardcoded.
 
 DQN:      collect live from TraCI per-vehicle metrics.
           If no checkpoints exist, runs a RANDOM policy (Option A test).
@@ -37,10 +36,10 @@ logging.basicConfig(
 )
 
 
-# ── Helpers ───────────────────────────────────────────────────────
+# Helpers
 
 def _baseline_dir(cfg: dict) -> Path:
-    """Read baseline output dir from config — works for any map."""
+    """Read baseline output dir from config , works for any map."""
     ev = cfg.get("evaluation", {})
     d  = ev.get("baseline_output_dir", "simulation/maps/baseline_outputs")
     return Path(d)
@@ -48,7 +47,7 @@ def _baseline_dir(cfg: dict) -> Path:
 
 def _suffix_map(cfg: dict) -> dict:
     """Map profile names to XML file suffixes."""
-    # Custom map from config (e.g. taksim_morning → taksim)
+    # Custom map from config (e.g. taksim_morning -> taksim)
     sm = cfg.get("baseline_suffix_map", {})
     # Tahrir defaults
     defaults = {
@@ -61,7 +60,7 @@ def _suffix_map(cfg: dict) -> dict:
     return defaults
 
 
-# ── Baseline ──────────────────────────────────────────────────────
+# Baseline
 
 def get_baseline_metrics(cfg: dict, profile: str) -> EpisodeMetrics:
     """Read baseline KPIs from SUMO XML files — no re-run needed."""
@@ -78,7 +77,7 @@ def get_baseline_metrics(cfg: dict, profile: str) -> EpisodeMetrics:
     return m
 
 
-# ── DQN / random runner ───────────────────────────────────────────
+# DQN / random runner 
 
 def run_dqn(
     cfg:        dict,
@@ -158,7 +157,7 @@ def run_dqn(
     return m
 
 
-# ── Comparison ────────────────────────────────────────────────────
+# Comparison
 
 def compare(
     config_path:    str                 = "DeepQN/configs/dqn_config.yaml",
@@ -177,7 +176,7 @@ def compare(
     out_dir      = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Try to load checkpoints — fall back to random policy if none exist
+    # Try to load checkpoints , fall back to random policy if none exist
     agents = MultiAgentDQN(tls_ids, cfg["dqn"])
     try:
         agents.load_latest(checkpoint_dir)
@@ -242,7 +241,7 @@ def compare(
     return results
 
 
-# ── Print helpers ─────────────────────────────────────────────────
+# Print helpers
 
 def _print_profile_table(
     profile:       str,
@@ -265,11 +264,11 @@ def _print_profile_table(
     for name, bv, dv, pct in rows:
         if pct is not None:
             pct_str = f"{pct:+.1f}%"
-            arrow   = "✓" if pct > 0 else "✗"
+            arrow   = "PASS" if pct > 0 else "FAIL"
         else:
             delta   = imp.get("throughput_delta", 0)
             pct_str = f"Δ{delta:+d}"
-            arrow   = "✓" if delta >= 0 else "✗"
+            arrow   = "PASS" if delta >= 0 else "FAIL"
         print(f"  {name:<30} {bv:>16.1f} {dv:>16.1f} {pct_str:>9} {arrow}")
 
 
@@ -281,8 +280,8 @@ def _print_final_summary(results: dict, random_policy: bool = False):
     print(f"  {'Profile':<22} {'Wait ↓':>10} {'CO2 ↓':>10}")
     print("  " + "─" * 44)
     for profile, r in results.items():
-        w = "✓ PASS" if r["kpi_wait_pass"] else "✗ FAIL"
-        c = "✓ PASS" if r["kpi_co2_pass"]  else "✗ FAIL"
+        w = "PASS" if r["kpi_wait_pass"] else "FAIL"
+        c = "PASS" if r["kpi_co2_pass"]  else "FAIL"
         print(f"  {profile:<22} {w:>10} {c:>10}")
     print("=" * 60)
     if random_policy:
@@ -290,7 +289,7 @@ def _print_final_summary(results: dict, random_policy: bool = False):
     print()
 
 
-# ── CLI ───────────────────────────────────────────────────────────
+# CLI
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(

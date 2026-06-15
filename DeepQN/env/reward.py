@@ -1,16 +1,11 @@
 """
-dqn/env/reward.py
------------------
+dqn/env/reward.py:
 Reward signal for the DQN traffic controller.
 
-Design
-------
+Design:
 The reward at each decision step is:
 
-    R_t = - w_wait  * ΔW_t
-          - w_co2   * ΔC_t
-          + w_thru  * ΔT_t
-          - w_press * P_t
+    R_t = - w_wait  * ΔW_t - w_co2   * ΔC_t + w_thru  * ΔT_t - w_press * P_t
 
 Where:
   ΔW_t  = change in total halting-vehicle-seconds across all controlled lanes
@@ -68,8 +63,7 @@ class RewardFunction:
     Call ``reset()`` at the start of each episode, then ``compute()``
     after every simulation decision step.
 
-    Parameters
-    ----------
+    Parameters:
     all_controlled_lanes : list of str
         Every incoming lane ID across all 7 TLS junctions.
         Used to compute the global waiting-time signal.
@@ -129,7 +123,7 @@ class RewardFunction:
         #  Pressure (optional) 
         pressure = self._get_queue_pressure() if cfg.pressure_weight > 0 else 0.0
 
-        # ─ Compose reward 
+        # Compose reward 
         reward = (
             - cfg.wait_time_weight  * delta_wait
             - cfg.co2_weight        * delta_co2
@@ -200,8 +194,7 @@ def build_reward_function(tls_config: dict, reward_yaml: dict) -> RewardFunction
     """
     Build a RewardFunction from the tls_junctions block of dqn_config.yaml.
 
-    Parameters
-    ----------
+    Parameters:
     tls_config  : dict  , the ``tls_junctions`` sub-dict from yaml
     reward_yaml : dict  , the ``reward`` sub-dict from yaml
     """

@@ -1,10 +1,8 @@
 """
 dqn/env/sumo_env.py
--------------------
 OpenAI-Gym-compatible SUMO environment for the SUMOFlow AI DQN controller.
 
-Architecture
-------------
+Architecture:
 - 7 independent DQN agents, one per controllable TLS junction.
 - Each agent sees a LOCAL state (its own incoming lanes) + GLOBAL state
   (BiLSTM flow predictions + time-of-day).  All states are zero-padded to
@@ -13,8 +11,7 @@ Architecture
 - Yellow transitions are managed internally; the agent is blocked from
   switching again until the yellow clears AND min_green seconds have elapsed.
 
-Usage
------
+Usage:
     env = SumoEnv(config, profile="morning_rush")
     obs = env.reset()               # dict: {tls_id: np.ndarray(37,)}
     while True:
@@ -37,7 +34,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import yaml
 
-# TraCI import — SUMO_HOME must be set in the environment
+# TraCI import, SUMO_HOME must be set in the environment
 try:
     import traci
     import traci.constants as tc
@@ -59,8 +56,7 @@ class _PhaseController:
     """
     Manages green/yellow/red phase transitions for a single TLS junction.
 
-    Rules
-    -----
+    Rules:
     - Action 1 (switch) is only honoured after ``min_green`` seconds in
       the current green phase.
     - Switching triggers a yellow phase for ``yellow_duration`` SUMO steps
@@ -100,7 +96,7 @@ class _PhaseController:
     def phase_elapsed_s(self) -> float:
         return self.phase_elapsed_steps * self.step_length
 
-    # ── Core logic ────────────────────────────────────────────
+    # Core logic 
 
     def apply_action(self, action: int) -> None:
         """
@@ -108,7 +104,7 @@ class _PhaseController:
         action: 0 = keep, 1 = request switch.
         """
         if self.in_yellow:
-            return  # mid-transition — ignore action
+            return  # mid-transition , ignore action
 
         switch_requested = (action == 1)
         # Enforce max-green override
@@ -137,7 +133,7 @@ class _PhaseController:
         """Begin yellow phase for current green."""
         yellow_idx = self.green_to_yellow.get(self.current_green_phase)
         if yellow_idx is None:
-            # No yellow defined — switch directly (e.g., red_hold → green)
+            # No yellow defined , switch directly (e.g., red_hold -> green)
             self._finish_transition()
             return
         traci.trafficlight.setPhase(self.tls_id, yellow_idx)
@@ -264,8 +260,7 @@ class SumoEnv:
 
     def __init__(self, config: dict, profile: str = "morning_rush", port: int = 8813):
         """
-        Parameters
-        ----------
+        Parameters:
         config  : full dqn_config.yaml loaded as dict
         profile : one of morning_rush | midday | evening_rush | night
         port    : TraCI TCP port (increment when running parallel envs)
@@ -302,7 +297,7 @@ class SumoEnv:
         }
 
         # State config
-        st_cfg              = config["state"]
+        st_cfg = config["state"]
         self.state_dim:  int   = st_cfg.get("state_dim", 37)
         self.max_lanes:  int   = st_cfg.get("max_lanes", 10)
         self.fperlane:   int   = st_cfg.get("features_per_lane", 3)
@@ -361,8 +356,7 @@ class SumoEnv:
         Apply actions to all TLS, advance ``decision_interval`` SUMO steps,
         return (next_obs, rewards, done, info).
 
-        Parameters
-        ----------
+        Parameters:
         actions : {tls_id: 0_or_1}
         """
         if not self._connected:
@@ -493,7 +487,7 @@ class SumoEnv:
         ]
         logger.info("Launching SUMO: %s", " ".join(cmd))
         subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        time.sleep(1.5)  # let SUMO initialise
+        time.sleep(3.0)  # let SUMO initialise
         traci.init(self.port)
         logger.info(
             "TraCI connected (port %d)  profile=%s  t=[%d, %d]",

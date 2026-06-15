@@ -36,7 +36,7 @@ CLASS_COLORS = {
     "bicycle":    "#34d399",
 }
 
-#  Model singleton — loaded once at startup 
+#  Model singleton , loaded once at startup 
 _model = None
 
 def get_model() -> YOLO:
