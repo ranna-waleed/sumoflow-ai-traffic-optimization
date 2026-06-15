@@ -20,6 +20,27 @@ const PROFILES=[
   {key:"night",       label:"Night",       time:"22:00–24:00"},
 ];
 
+// Helper: format improvement with correct arrow and color
+function ImprovementBadge({ value, suffix = "%" }) {
+  if (value === null || value === undefined) return <span style={{color:"#94a3b8"}}>—</span>;
+  const improved = value > 0;
+  const neutral  = Math.abs(value) < 1;
+  const color    = neutral ? "#64748b" : improved ? "#15803d" : "#dc2626";
+  const arrow    = neutral ? "~" : improved ? "↓" : "↑";
+  return (
+    <span style={{fontWeight:700, color, fontFamily:"monospace"}}>
+      {arrow}{Math.abs(value).toFixed(1)}{suffix}
+    </span>
+  );
+}
+
+// Helper: KPI status badge — handles pass, fail, partial
+function KpiBadge({ waitPass, co2Pass }) {
+  if (waitPass && co2Pass)   return <span style={{padding:"3px 8px",borderRadius:"99px",fontSize:"11px",fontWeight:600,background:"#dcfce7",color:"#15803d"}}> Pass</span>;
+  if (!waitPass && !co2Pass) return <span style={{padding:"3px 8px",borderRadius:"99px",fontSize:"11px",fontWeight:600,background:"#fee2e2",color:"#dc2626"}}> Fail</span>;
+  return <span style={{padding:"3px 8px",borderRadius:"99px",fontSize:"11px",fontWeight:600,background:"#fef3c7",color:"#b45309"}}>~ Partial</span>;
+}
+
 export default function BeforeAfter(){
   const mode = useSimMode();
   const isMobile = useIsMobile();
@@ -36,7 +57,7 @@ export default function BeforeAfter(){
   const pollRef = useRef(null);
 
   useEffect(()=>{
-    if (mode === "checking") return; // wait for mode detection
+    if (mode === "checking") return;
     if (mode === "video") {
       setResults(STATIC_DQN_RESULTS);
       setError(null);
@@ -47,7 +68,6 @@ export default function BeforeAfter(){
       .then(r=>{ if(!r.ok) throw new Error(); return r.json(); })
       .then(d=>{ setResults(d); setLoading(false); })
       .catch(()=>{
-        // Backend online but no results yet — use static
         setResults(STATIC_DQN_RESULTS);
         setError(null);
         setLoading(false);
@@ -111,15 +131,20 @@ export default function BeforeAfter(){
   const waitBarData = [{name:"Fixed-Time",value:parseFloat(waitBefore.toFixed(1))},{name:"DQN Adaptive",value:parseFloat(waitAfter.toFixed(1))}];
   const co2BarData  = [{name:"Fixed-Time",value:parseFloat((fixedCo2/1e9).toFixed(2))},{name:"DQN Adaptive",value:parseFloat((dqnCo2/1e9).toFixed(2))}];
 
+  // Determine bar colors dynamically based on which is better
+  const waitDqnColor = waitAfter < waitBefore ? "#15803d" : "#dc2626";
+  const co2DqnColor  = dqnCo2   < fixedCo2   ? "#15803d" : "#dc2626";
+
   return(
     <div style={{paddingTop:"24px"}}>
+      {/* Header */}
       <div style={{paddingBottom:"16px",borderBottom:"1px solid #e2e8f0",marginBottom:"24px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
         <div>
-          <h1 style={{margin:0,fontSize:"20px",fontWeight:700,color:"#0f172a"}}>Before vs After — DQN Performance</h1>
-          <p style={{margin:"4px 0 0",fontSize:"13px",color:"#64748b"}}>Fixed-time baseline compared to DQN adaptive control — El-Tahrir Square</p>
+          <h1 style={{margin:0,fontSize:"20px",fontWeight:700,color:"#0f172a"}}>Before vs After: DQN Performance</h1>
+          <p style={{margin:"4px 0 0",fontSize:"13px",color:"#196cdf"}}>Fixed-time baseline compared to DQN adaptive control · El-Tahrir Square</p>
         </div>
-        <div style={{display:"flex",gap:"6px"}}>
-          {results&&<><span style={{padding:"4px 10px",borderRadius:"99px",fontSize:"12px",fontWeight:500,background:"#dbeafe",color:"#1d4ed8"}}>{results.episodes} episodes trained</span><span style={{padding:"4px 10px",borderRadius:"99px",fontSize:"12px",fontWeight:500,background:"#dcfce7",color:"#15803d"}}>All KPIs met</span></>}
+        <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
+          {results&&<span style={{padding:"4px 10px",borderRadius:"99px",fontSize:"12px",fontWeight:500,background:"#dbeafe",color:"#1d4ed8"}}>{results.episodes} episodes trained</span>}
           <span style={{padding:"4px 10px",borderRadius:"99px",fontSize:"12px",fontWeight:500,background:mode==="live"?"#dbeafe":"#f1f5f9",color:mode==="live"?"#1d4ed8":"#64748b",border:`1px solid ${mode==="live"?"#bfdbfe":"#e2e8f0"}`}}>{mode==="live"?" Live":"▶ Video"}</span>
         </div>
       </div>
@@ -130,14 +155,22 @@ export default function BeforeAfter(){
       {results&&(
         <div style={{display:"grid",gridTemplateColumns:gridCols(4,2,1,isMobile,isTablet),gap:"12px",marginBottom:"20px"}}>
           {[
-            {label:"Avg Wait: Baseline",value:`${waitBefore.toFixed(1)}s`,sub:"fixed-time signals",accent:"#dc2626"},
-            {label:"Avg Wait: DQN",     value:`${waitAfter.toFixed(1)}s`, sub:"adaptive control", accent:"#15803d"},
-            {label:"Wait Time Reduction",value:`↓${waitImprovement.toFixed(1)}%`,sub:"across all profiles",accent:"#15803d"},
-            {label:"CO₂ Reduction",      value:`↓${co2Improvement.toFixed(1)}%`, sub:"total emissions",   accent:"#15803d"},
+            {label:"Avg Wait: Baseline", value:`${waitBefore.toFixed(1)}s`,  sub:"fixed-time signals", accent:"#dc2626"},
+            {label:"Avg Wait: DQN",      value:`${waitAfter.toFixed(1)}s`,   sub:"adaptive control",  accent: waitAfter < waitBefore ? "#15803d" : "#dc2626"},
+            {label:"Wait Time Change",
+             value: <ImprovementBadge value={waitImprovement}/>,
+             sub:"across all profiles",
+             accent: waitImprovement > 0 ? "#15803d" : "#dc2626"},
+            {label:"CO₂ Change",
+             value: <ImprovementBadge value={co2Improvement}/>,
+             sub:"total emissions",
+             accent: co2Improvement > 0 ? "#15803d" : "#dc2626"},
           ].map(c=>(
             <div key={c.label} style={{...card,padding:"16px 20px",borderTop:`3px solid ${c.accent}`}}>
               <div style={{fontSize:"11px",fontWeight:600,letterSpacing:"0.06em",textTransform:"uppercase",color:"#64748b",marginBottom:"8px"}}>{c.label}</div>
-              <div style={{fontSize:"26px",fontWeight:700,color:c.accent,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{c.value}</div>
+              <div style={{fontSize:"26px",fontWeight:700,color:c.accent,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>
+                {typeof c.value === "string" ? c.value : c.value}
+              </div>
               <div style={{fontSize:"12px",color:"#94a3b8",marginTop:"6px"}}>{c.sub}</div>
             </div>
           ))}
@@ -148,7 +181,7 @@ export default function BeforeAfter(){
       {results&&Object.keys(profileData).length>0&&(
         <div style={{...card,marginBottom:"16px"}}>
           <div style={{padding:"12px 16px",borderBottom:"1px solid #f1f5f9",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={slabel}>Per-Profile KPI Results</span>
+            <span style={slabel}>Per-Profile Results, Fair Comparison</span>
             <div style={{display:"flex",gap:"16px",fontSize:"12px"}}>
               <span style={{color:"#dc2626"}}> Baseline (fixed-time)</span>
               <span style={{color:"#15803d"}}> DQN (adaptive)</span>
@@ -158,7 +191,7 @@ export default function BeforeAfter(){
             <table style={{width:"100%",borderCollapse:"collapse"}}>
               <thead>
                 <tr style={{background:"#f8fafc"}}>
-                  {["Profile","Baseline Wait","DQN Wait","Wait ↓","Baseline CO₂","DQN CO₂","CO₂ ↓","Throughput Δ","Status"].map(h=>(
+                  {["Profile","Baseline Wait","DQN Wait","Wait Change","Baseline CO₂","DQN CO₂","CO₂ Change"].map(h=>(
                     <th key={h} style={{padding:"10px 14px",textAlign:"left",fontSize:"12px",fontWeight:600,color:"#64748b",borderBottom:"1px solid #e2e8f0",whiteSpace:"nowrap"}}>{h}</th>
                   ))}
                 </tr>
@@ -166,20 +199,28 @@ export default function BeforeAfter(){
               <tbody>
                 {PROFILES.map(p=>{
                   const d=profileData[p.key]; if(!d) return null;
+                  const waitBetter = d.dqn_wait_s < d.fixed_wait_s;
+                  const co2Better  = d.dqn_co2_mg < d.fixed_co2_mg;
                   return(
                     <tr key={p.key} style={{borderBottom:"1px solid #f1f5f9"}}>
                       <td style={{padding:"10px 14px",fontSize:"14px",fontWeight:600,color:"#0f172a"}}>{p.label}</td>
                       <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",color:"#dc2626",fontWeight:500}}>{d.fixed_wait_s?.toFixed(1)}s</td>
-                      <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",color:"#15803d",fontWeight:500}}>{d.dqn_wait_s?.toFixed(1)}s</td>
-                      <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",fontWeight:700,color:"#15803d"}}>↓{d.wait_improvement?.toFixed(1)}%</td>
-                      <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",color:"#dc2626"}}>{(d.fixed_co2_mg/1e9).toFixed(2)}B mg</td>
-                      <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",color:"#15803d"}}>{(d.dqn_co2_mg/1e9).toFixed(2)}B mg</td>
-                      <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",fontWeight:700,color:"#15803d"}}>↓{d.co2_improvement?.toFixed(1)}%</td>
-                      <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",color:d.throughput_delta>=0?"#15803d":"#64748b"}}>{d.throughput_delta>=0?"+":""}{d.throughput_delta}</td>
+                      <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",color:waitBetter?"#15803d":"#dc2626",fontWeight:500}}>{d.dqn_wait_s?.toFixed(1)}s</td>
                       <td style={{padding:"10px 14px"}}>
-                        <span style={{padding:"3px 8px",borderRadius:"99px",fontSize:"11px",fontWeight:600,background:d.kpi_wait_pass&&d.kpi_co2_pass?"#dcfce7":"#fee2e2",color:d.kpi_wait_pass&&d.kpi_co2_pass?"#15803d":"#dc2626"}}>
-                          {d.kpi_wait_pass&&d.kpi_co2_pass?" Pass":" Fail"}
-                        </span>
+                        <ImprovementBadge value={d.wait_improvement}/>
+                      </td>
+                      <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",color:"#dc2626"}}>
+                        {d.fixed_co2_mg >= 1e9
+                          ? `${(d.fixed_co2_mg/1e9).toFixed(2)}B mg`
+                          : `${(d.fixed_co2_mg/1e6).toFixed(1)}M mg`}
+                      </td>
+                      <td style={{padding:"10px 14px",fontSize:"13px",fontFamily:"monospace",color:co2Better?"#15803d":"#dc2626"}}>
+                        {d.dqn_co2_mg >= 1e9
+                          ? `${(d.dqn_co2_mg/1e9).toFixed(2)}B mg`
+                          : `${(d.dqn_co2_mg/1e6).toFixed(1)}M mg`}
+                      </td>
+                      <td style={{padding:"10px 14px"}}>
+                        <ImprovementBadge value={d.co2_improvement}/>
                       </td>
                     </tr>
                   );
@@ -203,6 +244,8 @@ export default function BeforeAfter(){
             const pd=profileData[p.key];
             const isActive=simProfile===p.key&&simRunning;
             const starting=startingProfile===p.key;
+            const waitImp = pd?.wait_improvement;
+            const co2Imp  = pd?.co2_improvement;
             return(
               <button key={p.key} onClick={()=>handleStart(p.key)} disabled={starting}
                 style={{padding:"10px 16px",borderRadius:"4px",border:"1px solid",cursor:starting?"not-allowed":"pointer",
@@ -216,8 +259,16 @@ export default function BeforeAfter(){
                 <div style={{fontSize:"11px",color:isActive?"rgba(255,255,255,0.7)":"#94a3b8"}}>{p.time}</div>
                 {pd&&(
                   <div style={{display:"flex",gap:"6px",marginTop:"6px"}}>
-                    <span style={{padding:"2px 6px",borderRadius:"99px",fontSize:"11px",fontWeight:500,background:isActive?"rgba(255,255,255,0.2)":"#dcfce7",color:isActive?"#fff":"#15803d"}}>↓{pd.wait_improvement?.toFixed(0)}% wait</span>
-                    <span style={{padding:"2px 6px",borderRadius:"99px",fontSize:"11px",fontWeight:500,background:isActive?"rgba(255,255,255,0.2)":"#dcfce7",color:isActive?"#fff":"#15803d"}}>↓{pd.co2_improvement?.toFixed(0)}% CO₂</span>
+                    <span style={{padding:"2px 6px",borderRadius:"99px",fontSize:"11px",fontWeight:500,
+                      background:isActive?"rgba(255,255,255,0.2)": waitImp>0?"#dcfce7":"#fee2e2",
+                      color:isActive?"#fff": waitImp>0?"#15803d":"#dc2626"}}>
+                      {waitImp>0?"↓":"↑"}{Math.abs(waitImp).toFixed(0)}% wait
+                    </span>
+                    <span style={{padding:"2px 6px",borderRadius:"99px",fontSize:"11px",fontWeight:500,
+                      background:isActive?"rgba(255,255,255,0.2)": co2Imp>0?"#dcfce7":"#fee2e2",
+                      color:isActive?"#fff": co2Imp>0?"#15803d":"#dc2626"}}>
+                      {co2Imp>0?"↓":"↑"}{Math.abs(co2Imp).toFixed(0)}% CO₂
+                    </span>
                   </div>
                 )}
                 {!isActive&&!starting&&<div style={{fontSize:"11px",color:"#1d4ed8",marginTop:"4px",display:"flex",alignItems:"center",gap:"4px"}}><Play size={10}/> {mode==="video"?"Watch DQN":"Run DQN"}</div>}
@@ -230,8 +281,6 @@ export default function BeforeAfter(){
         <div style={{display:"grid",gridTemplateColumns:isMobile||isTablet?"1fr":"1fr 300px"}}>
           <div style={{padding:"12px",borderRight:"1px solid #f1f5f9"}}>
             <div style={{height:isMobile?"200px":"300px",background:"#0f172a",borderRadius:"4px",border:"1px solid #e2e8f0",overflow:"hidden",position:"relative"}}>
-
-              {/* VIDEO MODE */}
               {mode==="video" && simProfile && simRunning ? (
                 <>
                   <video key={simProfile} src={DQN_VIDEO_MAP[simProfile]} autoPlay loop muted playsInline
@@ -255,17 +304,16 @@ export default function BeforeAfter(){
                 </>
               ) : (
                 <div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:"8px"}}>
-                  <span style={{fontSize:"24px"}}></span>
                   <span style={{color:"#94a3b8",fontSize:"13px"}}>{simRunning?"Loading...":"Select a profile to watch DQN"}</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Metrics */}
+          {/* Metrics sidebar */}
           <div style={{padding:"16px"}}>
             <div style={{...slabel,marginBottom:"12px"}}>{simRunning&&mode==="live"?"Live Metrics":"Profile Results"}</div>
-            {simRunning&&mode==="live"&&simMetrics?( 
+            {simRunning&&mode==="live"&&simMetrics?(
               <>
                 {[
                   {label:"Vehicles", value:simMetrics.vehicles},
@@ -302,19 +350,24 @@ export default function BeforeAfter(){
               </>
             ):simProfile&&profileData[simProfile]?(
               <>
-                {[
-                  {label:"Fixed Wait",    value:`${profileData[simProfile].fixed_wait_s?.toFixed(1)}s`,color:"#dc2626"},
-                  {label:"DQN Wait",      value:`${profileData[simProfile].dqn_wait_s?.toFixed(1)}s`, color:"#15803d"},
-                  {label:"Reduction",     value:`↓${profileData[simProfile].wait_improvement?.toFixed(1)}%`,color:"#15803d"},
-                  {label:"Fixed CO₂",     value:`${(profileData[simProfile].fixed_co2_mg/1e9).toFixed(2)}B mg`,color:"#dc2626"},
-                  {label:"DQN CO₂",       value:`${(profileData[simProfile].dqn_co2_mg/1e9).toFixed(2)}B mg`,color:"#15803d"},
-                  {label:"CO₂ Reduction", value:`↓${profileData[simProfile].co2_improvement?.toFixed(1)}%`,color:"#15803d"},
-                ].map(row=>(
-                  <div key={row.label} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:"1px solid #f1f5f9"}}>
-                    <span style={{fontSize:"13px",color:"#64748b"}}>{row.label}</span>
-                    <span style={{fontSize:"13px",fontWeight:600,color:row.color,fontFamily:"monospace"}}>{row.value}</span>
-                  </div>
-                ))}
+                {(()=>{
+                  const d = profileData[simProfile];
+                  const waitBetter = d.dqn_wait_s < d.fixed_wait_s;
+                  const co2Better  = d.dqn_co2_mg < d.fixed_co2_mg;
+                  return [
+                    {label:"Fixed Wait",    value:`${d.fixed_wait_s?.toFixed(1)}s`,  color:"#dc2626"},
+                    {label:"DQN Wait",      value:`${d.dqn_wait_s?.toFixed(1)}s`,    color:waitBetter?"#15803d":"#dc2626"},
+                    {label:"Wait Change",   value:<ImprovementBadge value={d.wait_improvement}/>, color:"#0f172a"},
+                    {label:"Fixed CO₂",     value:d.fixed_co2_mg>=1e9?`${(d.fixed_co2_mg/1e9).toFixed(2)}B mg`:`${(d.fixed_co2_mg/1e6).toFixed(1)}M mg`, color:"#dc2626"},
+                    {label:"DQN CO₂",       value:d.dqn_co2_mg>=1e9?`${(d.dqn_co2_mg/1e9).toFixed(2)}B mg`:`${(d.dqn_co2_mg/1e6).toFixed(1)}M mg`,    color:co2Better?"#15803d":"#dc2626"},
+                    {label:"CO₂ Change",    value:<ImprovementBadge value={d.co2_improvement}/>, color:"#0f172a"},
+                  ].map(row=>(
+                    <div key={row.label} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:"1px solid #f1f5f9"}}>
+                      <span style={{fontSize:"13px",color:"#64748b"}}>{row.label}</span>
+                      <span style={{fontSize:"13px",fontWeight:600,color:row.color,fontFamily:"monospace"}}>{row.value}</span>
+                    </div>
+                  ));
+                })()}
               </>
             ):(
               <div style={{fontSize:"13px",color:"#94a3b8",paddingTop:"16px"}}>Select a profile above to see results</div>
@@ -337,11 +390,15 @@ export default function BeforeAfter(){
                 <XAxis dataKey="name" tick={TICK} tickLine={false}/>
                 <YAxis tick={TICK} tickLine={false}/>
                 <Tooltip contentStyle={TT} formatter={v=>[`${v}s`,"Avg Wait"]}/>
-                <Bar dataKey="value" radius={[3,3,0,0]}><Cell fill="#dc2626"/><Cell fill="#15803d"/></Bar>
+                <Bar dataKey="value" radius={[3,3,0,0]}>
+                  <Cell fill="#dc2626"/>
+                  <Cell fill={waitDqnColor}/>
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
+
         <div style={{...card,padding:"16px"}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:"14px"}}>
             <span style={{fontSize:"14px",fontWeight:600,color:"#0f172a"}}>CO₂ Emissions</span>
@@ -354,11 +411,15 @@ export default function BeforeAfter(){
                 <XAxis dataKey="name" tick={TICK} tickLine={false}/>
                 <YAxis tick={TICK} tickLine={false}/>
                 <Tooltip contentStyle={TT} formatter={v=>[`${v}B mg`,"CO₂"]}/>
-                <Bar dataKey="value" radius={[3,3,0,0]}><Cell fill="#dc2626"/><Cell fill="#15803d"/></Bar>
+                <Bar dataKey="value" radius={[3,3,0,0]}>
+                  <Cell fill="#dc2626"/>
+                  <Cell fill={co2DqnColor}/>
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
+
         <div style={{...card,padding:"16px"}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:"14px"}}>
             <span style={{fontSize:"14px",fontWeight:600,color:"#0f172a"}}>DQN Learning Curve</span>

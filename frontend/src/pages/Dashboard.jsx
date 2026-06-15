@@ -24,14 +24,13 @@ const PROFILES = ["morning_rush","evening_rush","midday","night"];
 const PLABELS  = { morning_rush:"Morning Rush", evening_rush:"Evening Rush", midday:"Midday", night:"Night" };
 
 export default function Dashboard() {
-  const mode = useSimMode();
+  const mode    = useSimMode();
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
   const [sel,      setSel]      = useState("morning_rush");
   const [met,      setMet]      = useState(null);
   const [ts,       setTs]       = useState([]);
   const [loading,  setLoading]  = useState(true);
-  const [err,      setErr]      = useState(null);
 
   // Live mode state
   const [run,      setRun]      = useState(false);
@@ -51,8 +50,8 @@ export default function Dashboard() {
     if (mode === "video") {
       const d = STATIC_METRICS[sel];
       setMet(d);
-      setTs(d.timeseries.filter((_,i)=>i%10===0).map(d=>({
-        t:d.step, co2:Math.round(d.co2/1000), wait:d.avg_wait, vehicles:d.vehicles,
+      setTs(d.timeseries.filter((_,i)=>i%10===0).map(r=>({
+        t:r.step, co2:Math.round(r.co2/1000), wait:r.avg_wait, vehicles:r.vehicles,
       })));
       setLoading(false);
       return;
@@ -61,16 +60,16 @@ export default function Dashboard() {
       .then(r => r.json())
       .then(d => {
         setMet(d);
-        setTs(d.timeseries.filter((_,i) => i%10===0).map(d => ({
-          t:d.step, co2:Math.round(d.co2/1000), wait:d.avg_wait, vehicles:d.vehicles,
+        setTs(d.timeseries.filter((_,i) => i%10===0).map(r => ({
+          t:r.step, co2:Math.round(r.co2/1000), wait:r.avg_wait, vehicles:r.vehicles,
         })));
         setLoading(false);
       })
       .catch(() => {
         const d = STATIC_METRICS[sel];
         setMet(d);
-        setTs(d.timeseries.filter((_,i)=>i%10===0).map(d=>({
-          t:d.step, co2:Math.round(d.co2/1000), wait:d.avg_wait, vehicles:d.vehicles,
+        setTs(d.timeseries.filter((_,i)=>i%10===0).map(r=>({
+          t:r.step, co2:Math.round(r.co2/1000), wait:r.avg_wait, vehicles:r.vehicles,
         })));
         setLoading(false);
       });
@@ -173,7 +172,7 @@ export default function Dashboard() {
         <div style={{ height:"100%", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:"8px" }}>
           {simState==="starting"
             ? <><div style={{ width:"28px", height:"28px", border:"2px solid #3b82f6", borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.8s linear infinite" }}/><span style={{ color:"#60a5fa", fontSize:"13px" }}>Opening SUMO-GUI...</span></>
-            : <><span style={{ fontSize:"28px" }}></span><span style={{ color:"#64748b", fontSize:"13px" }}>Select a profile and press <strong style={{ color:"#1d4ed8" }}>Start</strong></span></>
+            : <><span style={{ color:"#64748b", fontSize:"13px" }}>Select a profile and press <strong style={{ color:"#1d4ed8" }}>Start</strong></span></>
           }
         </div>
       )}
@@ -193,14 +192,14 @@ export default function Dashboard() {
       <div style={{ paddingBottom:"16px", borderBottom:"1px solid #e2e8f0", marginBottom:"24px", display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
         <div>
           <h1 style={{ margin:0, fontSize:"20px", fontWeight:700, color:"#0f172a" }}>Dashboard</h1>
-          <p style={{ margin:"4px 0 0", fontSize:"13px", color:"#64748b" }}>El-Tahrir Square — Cairo, Egypt</p>
+          <p style={{ margin:"4px 0 0", fontSize:"13px", color:"#196cdf" }}>El-Tahrir Square, Cairo, Egypt</p>
         </div>
         <div style={{ display:"flex", gap:"8px", alignItems:"center" }}>
           <span style={{ padding:"4px 10px", borderRadius:"4px", fontSize:"12px", fontWeight:500,
             background: mode==="live" ? "#dbeafe" : "#f1f5f9",
             color: mode==="live" ? "#1d4ed8" : "#64748b",
             border: `1px solid ${mode==="live"?"#bfdbfe":"#e2e8f0"}` }}>
-            {mode==="live" ? " Live Mode" : "▶ Video Mode"}
+            {mode==="live" ? " Live Mode" : " Video Mode"}
           </span>
           {mode==="live" && run && <span style={{ padding:"4px 10px", borderRadius:"4px", fontSize:"12px", fontFamily:"monospace", background:"#dbeafe", border:"1px solid #bfdbfe", color:"#1d4ed8" }}>Step {step.toLocaleString()}</span>}
         </div>
@@ -224,13 +223,44 @@ export default function Dashboard() {
 
       {simErr && <div style={{ padding:"8px 12px", background:"#fee2e2", border:"1px solid #fca5a5", borderRadius:"4px", color:"#dc2626", fontSize:"13px", marginBottom:"16px" }}>⚠ {simErr}</div>}
 
-      {/* KPI cards */}
+      {/* ── 4 KPI cards ── */}
       {!loading && met && (
         <div style={{ display:"grid", gridTemplateColumns:gridCols(4,2,2,isMobile,isTablet), gap:"12px", marginBottom:"20px" }}>
-          <MetricCard label="Vehicles"      value={run&&live?live.vehicles:met.peak_vehicles}                              unit={run?"live count":"peak count"} accent="#1d4ed8"/>
-          <MetricCard label="Avg Wait Time" value={run&&live?live.avg_wait_s:met.avg_wait_s}                               unit="seconds"                      accent="#15803d"/>
-          <MetricCard label="CO₂ Emissions" value={run&&live?(live.total_co2_mg/1000).toFixed(0):(met.peak_co2_mg/1000).toFixed(0)} unit="×1,000 mg/step"    accent="#b45309"/>
-          <MetricCard label="Max Wait Time" value={run&&live?live.max_wait_s:met.max_wait_s}                               unit="seconds"                      accent="#7c3aed"/>
+
+          {/* Avg Wait Time */}
+          <MetricCard
+            label="Avg Wait Time"
+            value={run&&live ? live.avg_wait_s : met.avg_wait_s}
+            unit="seconds"
+            accent="#1d4ed8"
+          />
+
+          {/* Total CO2 */}
+          <MetricCard
+            label="Total CO₂"
+            value={run&&live
+              ? (live.total_co2_mg/1e9).toFixed(2)
+              : (met.total_co2_mg/1e9).toFixed(2)}
+            unit="billion mg"
+            accent="#b45309"
+          />
+
+          {/* Throughput */}
+          <MetricCard
+            label="Throughput"
+            value={run&&live ? live.vehicles : met.throughput}
+            unit="vehicles completed"
+            accent="#15803d"
+          />
+
+          {/* Avg Time Loss */}
+          <MetricCard
+            label="Avg Time Loss"
+            value={run&&live ? live.avg_wait_s : met.avg_time_loss_s}
+            unit="seconds"
+            accent="#7c3aed"
+          />
+
         </div>
       )}
 
@@ -260,21 +290,32 @@ export default function Dashboard() {
 
           <div style={{ padding:"8px 16px", borderTop:"1px solid #f1f5f9", display:"flex", gap:"16px", fontSize:"12px", color:"#64748b" }}>
             <span>Profile: <strong style={{ color:"#1d4ed8" }}>{PLABELS[sel]}</strong></span>
-            {met && <><span>Avg vehicles: <strong>{met.avg_vehicles}</strong></span><span>Steps: <strong>{met.total_steps}</strong></span></>}
+            {met && (
+              <>
+                <span>Throughput: <strong>{met.throughput?.toLocaleString()}</strong></span>
+                <span>Steps: <strong>{met.total_steps}</strong></span>
+              </>
+            )}
           </div>
         </div>
 
         {/* Right column */}
         <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
-          <TrafficLightStatus trafficLights={mode==="video" ? STATIC_SIGNALS : live?.traffic_lights} typeCounts={mode==="video" ? {"car":280,"taxi":76,"microbus":61,"bus":40,"truck":25,"motorcycle":20,"bicycle":5} : live?.type_counts}/>
+          <TrafficLightStatus
+            trafficLights={mode==="video" ? STATIC_SIGNALS : live?.traffic_lights}
+            typeCounts={mode==="video"
+              ? {"car":280,"taxi":76,"microbus":61,"bus":40,"truck":25,"motorcycle":20,"bicycle":5}
+              : live?.type_counts}
+          />
           <div style={{ ...card, padding:"16px" }}>
             <div style={{ ...slabel, marginBottom:"12px" }}>Profile Summary</div>
             {met && [
-              { label:"Time period",   value: met.time_period },
-              { label:"Avg vehicles",  value: met.avg_vehicles },
-              { label:"Peak vehicles", value: met.peak_vehicles },
-              { label:"Avg wait",      value: `${met.avg_wait_s}s` },
-              { label:"Max wait",      value: `${met.max_wait_s}s` },
+              { label:"Time period",    value: met.time_period },
+              { label:"Throughput",     value: met.throughput?.toLocaleString() },
+              { label:"Avg wait",       value: `${met.avg_wait_s}s` },
+              { label:"Max wait",       value: `${met.max_wait_s}s` },
+              { label:"Avg time loss",  value: `${met.avg_time_loss_s}s` },
+              { label:"Total CO₂",      value: `${(met.total_co2_mg/1e9).toFixed(2)}B mg` },
             ].map(row => (
               <div key={row.label} style={{ display:"flex", justifyContent:"space-between", padding:"7px 0", borderBottom:"1px solid #f1f5f9" }}>
                 <span style={{ fontSize:"13px", color:"#64748b" }}>{row.label}</span>

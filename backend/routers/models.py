@@ -26,8 +26,8 @@ def get_comparison():
                 "selected":     True,
                 "mAP50":        0.483,
                 "mAP50_95":     0.344,
-                "precision":    0.750,
-                "recall":       0.818,
+                "precision":    0.818,
+                "recall":       0.411,
                 "fps":          208,
                 "inference_ms": 4.8,
                 "per_class_ap": {
@@ -96,8 +96,8 @@ def get_yolo():
         "gpu":          "Google Colab T4",
         "mAP50":        0.483,
         "mAP50_95":     0.344,
-        "precision":    0.750,
-        "recall":       0.818,
+        "precision":    0.818,
+        "recall":       0.411,
         "fps":          208,
         "inference_ms": 4.8,
         "per_class_ap": {

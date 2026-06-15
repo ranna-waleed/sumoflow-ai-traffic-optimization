@@ -4,69 +4,59 @@
 
 * { box-sizing: border-box; }
 
-body {
-  background: #f1f5f9;
-  color: #1e293b;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-}
-
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-/* ── Page padding ───────────────────────────────────────────── */
+/*  Page padding */
 .page-root {
   padding: 24px 24px 48px;
   max-width: 1280px;
   margin: 0 auto;
 }
 
-/* ── Responsive grid helpers ────────────────────────────────── */
+/*  Responsive grid helpers  */
 
-/* 4-column KPI cards → 2 on tablet, 1 on mobile */
+/* 4-column KPI cards -> 2 on tablet, 1 on mobile */
 .grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
 }
 
-/* 3-column → 1 on mobile */
+/* 3-column -> 1 on mobile */
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
 
-/* 2-column → 1 on mobile */
+/* 2-column -> 1 on mobile */
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-/* Main + sidebar layout → stack on mobile */
+/* Main + sidebar layout -> stack on mobile */
 .grid-main-sidebar {
   display: grid;
   grid-template-columns: 1fr 300px;
   gap: 16px;
 }
 
-/* ── Tables: horizontal scroll on mobile ────────────────────── */
+/*  Tables: horizontal scroll on mobile  */
 .table-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* ── Navbar ─────────────────────────────────────────────────── */
+/*  Navbar  */
 .nav-links {
   display: flex;
   gap: 2px;
 }
 
-/* ── Video / viewport height on mobile ─────────────────────── */
+/* Video / viewport height on mobile  */
 .sim-viewport {
   height: 320px;
 }
@@ -75,7 +65,7 @@ body {
   height: 420px;
 }
 
-/* ── Mobile breakpoint (≤ 640px) ───────────────────────────── */
+/* Mobile breakpoint (<= 640px)  */
 @media (max-width: 640px) {
   body { font-size: 13px; }
 
@@ -126,7 +116,7 @@ body {
   .overlay-metric { font-size: 14px !important; }
 }
 
-/* ── Tablet breakpoint (641px – 1024px) ─────────────────────── */
+/* Tablet breakpoint (641px – 1024px)  */
 @media (min-width: 641px) and (max-width: 1024px) {
   .grid-4 {
     grid-template-columns: 1fr 1fr;

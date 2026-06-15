@@ -1,21 +1,18 @@
-/* SUMOFLOW Design System - Clean Dark Dashboard */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* SUMOFLOW Design System , Clean Dashboard */
 
 :root {
-  --bg-page: #0b1220; /* slightly lighter navy */
-  --bg-surface: #0f172a;
-  --bg-card: #111827;
-  --border-subtle: rgba(148, 163, 184, 0.25);
-  --border-strong: rgba(148, 163, 184, 0.45);
-  --accent: #3b82f6; /* blue */
-  --accent-soft: rgba(59, 130, 246, 0.15);
-  --accent-alt: #22c55e; /* green */
-  --text-main: #e5e7eb;
-  --text-muted: #9ca3af;
-  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --bg-page:        #f1f5f9;   /* matches index.css body bg */
+  --bg-surface:     #f8fafc;
+  --bg-card:        #ffffff;   /* matches MetricCard, TrafficLightStatus */
+  --border-subtle:  #e2e8f0;   /* matches all component borders */
+  --border-strong:  #cbd5e1;
+  --accent:         #2563eb;   /* matches Navbar blue */
+  --accent-soft:    rgba(37, 99, 235, 0.10);
+  --accent-alt:     #16a34a;
+  --text-main:      #0f172a;   /* matches MetricCard value color */
+  --text-muted:     #64748b;   /* matches label colors */
+  --font-sans:      "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono:      "JetBrains Mono", ui-monospace, monospace;
 }
 
 *,
@@ -28,8 +25,6 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   background-color: var(--bg-page);
-  background-image: radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.12), transparent 55%);
   color: var(--text-main);
   min-height: 100vh;
 }
@@ -51,14 +46,14 @@ body {
   background-color: var(--bg-card);
   border-radius: 16px;
   border: 1px solid var(--border-subtle);
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.55);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .card:hover {
   transform: translateY(-2px);
   border-color: var(--border-strong);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
 }
 
 /* Badges */
@@ -82,12 +77,7 @@ body {
 
 /* Mini traffic light */
 .traffic-light {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 4px 6px;
-  border-radius: 9999px;
-  background-color: #020617;
+  background-color: #f1f5f9;   /* was #020617 */
   border: 1px solid var(--border-subtle);
 }
 
@@ -98,17 +88,9 @@ body {
   opacity: 0.4;
 }
 
-.traffic-light-dot.red {
-  background-color: #ef4444;
-}
-
-.traffic-light-dot.yellow {
-  background-color: #eab308;
-}
-
-.traffic-light-dot.green {
-  background-color: #22c55e;
-}
+.traffic-light-dot.red    { background-color: #ef4444; }
+.traffic-light-dot.yellow { background-color: #eab308; }
+.traffic-light-dot.green  { background-color: #22c55e; }
 
 .traffic-light-dot.active {
   opacity: 1;
@@ -117,13 +99,11 @@ body {
 
 /* Simulation viewport */
 .viewport-frame {
-  position: relative;
-  border-radius: 16px;
-  background: radial-gradient(circle at top, #1e293b, #020617);
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #f8fafc;
+  border: 1px solid var(--border-subtle);
 }
 
-/* Optional light scanline, much softer */
+/* Optional light scanline */
 .scanline::before {
   content: "";
   position: absolute;
@@ -139,30 +119,15 @@ body {
 }
 
 /* mAP coloring helpers */
-.map-badge-good {
-  color: #22c55e;
-}
-.map-badge-mid {
-  color: #3b82f6;
-}
-.map-badge-bad {
-  color: #f97316;
-}
+.map-badge-good { color: #22c55e; }
+.map-badge-mid  { color: #3b82f6; }
+.map-badge-bad  { color: #f97316; }
 
 /* Pulse for ONLINE dot */
 @keyframes pulse-ring {
-  0% {
-    transform: scale(0.9);
-    opacity: 0.5;
-  }
-  70% {
-    transform: scale(1.15);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1.2);
-    opacity: 0;
-  }
+  0%   { transform: scale(0.9); opacity: 0.5; }
+  70%  { transform: scale(1.15); opacity: 0; }
+  100% { transform: scale(1.2);  opacity: 0; }
 }
 
 .badge-pulse {

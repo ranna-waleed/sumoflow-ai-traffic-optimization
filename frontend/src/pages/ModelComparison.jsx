@@ -7,7 +7,7 @@ const TT={backgroundColor:"#fff",border:"1px solid #e2e8f0",borderRadius:"4px",f
 const TICK={fill:"#94a3b8",fontSize:11};
 const card={background:"#fff",border:"1px solid #e2e8f0",borderRadius:"6px",boxShadow:"0 1px 3px rgba(0,0,0,.04)"};
 const slabel={fontSize:"11px",fontWeight:600,letterSpacing:"0.06em",textTransform:"uppercase",color:"#64748b"};
-const MCOLORS={"YOLOv8s":"#1d4ed8","Faster RCNN":"#f97316","RetinaNet":"#16a34a"};
+const MCOLORS={"YOLOv8s":"#d01b15","Faster RCNN":"#110f92","RetinaNet":"#16a34a"};
 const CLASSES=["car","bus","truck","taxi","microbus","motorcycle","bicycle"];
 
 function pct(v){return v==null?"—":`${(v*100).toFixed(1)}%`;}
@@ -19,7 +19,6 @@ export default function ModelComparison(){
   const isTablet = useIsTablet();
   const [models,setModels]=useState([]);
   const [loading,setLoading]=useState(true);
-  const [error,setError]=useState(null);
 
   useEffect(()=>{
     if(mode==="video"){
@@ -42,7 +41,7 @@ export default function ModelComparison(){
       <div style={{paddingBottom:"16px",borderBottom:"1px solid #e2e8f0",marginBottom:"24px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
         <div>
           <h1 style={{margin:0,fontSize:"20px",fontWeight:700,color:"#0f172a"}}>Detection Model Comparison</h1>
-          <p style={{margin:"4px 0 0",fontSize:"13px",color:"#64748b"}}>YOLOv8s · Faster R-CNN · RetinaNet — 7 vehicle classes</p>
+          <p style={{margin:"4px 0 0",fontSize:"13px",color:"#196cdf"}}>YOLOv8s · Faster R-CNN · RetinaNet, 7 vehicle classes</p>
         </div>
         <div style={{display:"flex",gap:"6px"}}>
           {[["3 Models","#dbeafe","#1d4ed8"],["7 Classes","#f1f5f9","#374151"]].map(([t,bg,c])=>(

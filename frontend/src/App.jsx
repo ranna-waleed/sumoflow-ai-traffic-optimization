@@ -12,14 +12,15 @@ export default function App() {
     <>
       <Navbar />
       <div style={{
-        paddingTop: "60px",
+        paddingTop: "68px",
+        paddingBottom: "100px",
         minHeight: "100vh",
         background: "#f1f5f9",
       }}>
         <div style={{
           maxWidth: "1280px",
           margin: "0 auto",
-          padding: "0 16px 48px",
+          padding: "0 16px",
         }}>
           <Routes>
             <Route path="/"             element={<Dashboard/>}/>

@@ -1,7 +1,7 @@
 import { useIsMobile, useIsTablet } from "../hooks/useIsMobile";
 import React from "react";
 
-const card   = { background:"#fff", border:"1px solid #e2e8f0", borderRadius:"6px", boxShadow:"0 1px 3px rgba(0,0,0,.04)" };
+const card   = { background:"#fff", border:"1px solid #e2e8f0", borderRadius:"6px", boxShadow:"0 1px 3px rgba(196, 41, 44, 0.12)" };
 const slabel = { fontSize:"11px", fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", color:"#64748b" };
 
 const TEAM = [
@@ -54,9 +54,9 @@ const STACK = [
 function MemberCard({ member }) {
   return (
     <div style={{ ...card, overflow:"hidden", flex:1 }}>
-      <div style={{ padding:"10px 16px", background:"#0f2644", borderBottom:"1px solid #1e3a5f" }}>
+      <div style={{ padding:"10px 16px", background:"#156ee3", borderBottom:"1px solid #1e3a5f" }}>
         <div style={{ fontSize:"13px", fontWeight:700, color:"#fff" }}>{member.name}</div>
-        {member.id && <div style={{ fontSize:"11px", color:"#94a3b8", marginTop:"2px" }}>{member.id}</div>}
+        {member.id && <div style={{ fontSize:"11px", color:"#f7f9fb", marginTop:"2px" }}>{member.id}</div>}
       </div>
       <table style={{ width:"100%", borderCollapse:"collapse" }}>
         <thead>
@@ -87,8 +87,8 @@ export default function About() {
       {/* Header */}
       <div style={{ paddingBottom:"16px", borderBottom:"1px solid #e2e8f0", marginBottom:"24px", display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
         <div>
-          <h1 style={{ margin:0, fontSize:"20px", fontWeight:700, color:"#0f172a" }}>About — SUMOFlow AI</h1>
-          <p style={{ margin:"4px 0 0", fontSize:"13px", color:"#64748b" }}>El-Tahrir Square Traffic Optimization · Graduation Project · Zewail City</p>
+          <h1 style={{ margin:0, fontSize:"20px", fontWeight:700, color:"#0f172a" }}>About: SUMOFlow AI</h1>
+          <p style={{ margin:"4px 0 0", fontSize:"13px", color:"#196cdf" }}>El-Tahrir Square Traffic Optimization · Graduation Project · Zewail City</p>
         </div>
         <span style={{ padding:"4px 12px", borderRadius:"99px", fontSize:"12px", fontWeight:500, background:"#dbeafe", color:"#1d4ed8" }}>v1.0.0</span>
       </div>
@@ -99,8 +99,8 @@ export default function About() {
           SUMOFlow AI replaces fixed-time traffic signals at El-Tahrir Square, Cairo with an adaptive
           system using computer vision, flow prediction, and deep reinforcement learning. Seven DQN
           agents control 7 junctions simultaneously, reducing average waiting time by up to
-          <strong style={{ color:"#15803d" }}> 92.7%</strong> and CO₂ emissions by over
-          <strong style={{ color:"#15803d" }}> 90%</strong> compared to the fixed-time baseline,
+          <strong style={{ color:"#15803d" }}> 25.2%</strong> and CO₂ emissions by over
+          <strong style={{ color:"#15803d" }}> 17.9%</strong> compared to the fixed-time baseline,
           verified across 4 daily traffic profiles.
         </p>
       </div>
