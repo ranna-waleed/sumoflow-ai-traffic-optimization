@@ -1,4 +1,4 @@
-# backend/routers/dqn.py  — returns data in format BeforeAfter.jsx expects
+# backend/routers/dqn.py  , returns data in format BeforeAfter.jsx expects
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 import sys, os, json, glob, csv
@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 router = APIRouter()
 
 BASE_DIR        = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-RESULTS_PATH    = os.path.join(BASE_DIR, "DeepQN", "results", "evaluation_report.json")
+RESULTS_PATH    = os.path.join(BASE_DIR, "DeepQN", "results","fair", "evaluation_report_fair.json")
 CHECKPOINTS_DIR = os.path.join(BASE_DIR, "DeepQN", "checkpoints")
 LOGS_DIR        = os.path.join(BASE_DIR, "DeepQN", "logs")
 
@@ -60,7 +60,7 @@ def _count_episodes() -> int:
     return max(ep_nums) if ep_nums else 0
 
 
-# ── GET /api/dqn/status ───────────────────────────────────────
+#  GET /api/dqn/status
 @router.get("/status")
 def dqn_status():
     checkpoints = glob.glob(os.path.join(CHECKPOINTS_DIR, "*.pt"))
@@ -81,7 +81,7 @@ def dqn_status():
     }
 
 
-# ── GET /api/dqn/results ──────────────────────────────────────
+#  GET /api/dqn/results 
 @router.get("/results")
 def get_results():
     """
@@ -105,7 +105,7 @@ def get_results():
     with open(RESULTS_PATH) as f:
         report = json.load(f)
 
-    # ── Per-profile data ──────────────────────────────────────
+    #  Per-profile data 
     profiles_out = {}
     all_wait_improvements = []
     all_co2_improvements  = []
@@ -143,7 +143,7 @@ def get_results():
 
     def _avg(lst): return sum(lst) / len(lst) if lst else 0.0
 
-    # ── Top-level fields BeforeAfter.jsx reads directly ───────
+    # Top-level fields BeforeAfter.jsx reads directly 
     return {
         # Overall averages across all 4 profiles
         "avg_wait_fixed":      round(_avg(all_fixed_waits), 2),
@@ -162,7 +162,7 @@ def get_results():
     }
 
 
-# ── GET /api/dqn/cycle/status ─────────────────────────────────
+#  GET /api/dqn/cycle/status 
 @router.get("/cycle/status")
 def cycle_status():
     try:
@@ -207,7 +207,7 @@ def cycle_status():
         }
 
 
-# ── POST /api/dqn/sim/start/{profile} ────────────────────────
+#  POST /api/dqn/sim/start/{profile} 
 @router.post("/sim/start/{profile}")
 def start_dqn_sim(profile: str):
     valid = ["morning_rush", "evening_rush", "midday", "night"]
@@ -230,7 +230,7 @@ def start_dqn_sim(profile: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ── POST /api/dqn/sim/stop ───────────────────────────────────
+#  POST /api/dqn/sim/stop 
 @router.post("/sim/stop")
 def stop_dqn_sim():
     try:
@@ -241,7 +241,7 @@ def stop_dqn_sim():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ── GET /api/dqn/sim/status ──────────────────────────────────
+#  GET /api/dqn/sim/status 
 @router.get("/sim/status")
 def dqn_sim_status():
     try:
@@ -251,7 +251,7 @@ def dqn_sim_status():
         return {"running": False, "profile": None, "step": 0, "metrics": {}}
 
 
-# ── GET /api/dqn/sim/screenshot ──────────────────────────────
+#  GET /api/dqn/sim/screenshot 
 @router.get("/sim/screenshot")
 def dqn_screenshot():
     try:
