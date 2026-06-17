@@ -204,7 +204,7 @@ def run_steps_with_screenshot(n: int = 30) -> dict:
     if not image_b64 and _first_frame:
         image_b64 = _first_frame
 
-    state       = _get_state_safe()
+    state = _get_state_safe()
     yolo_counts = _run_yolo_on_frame()
 
     # Update LSTM history

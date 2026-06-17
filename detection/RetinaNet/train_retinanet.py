@@ -10,40 +10,40 @@ import mlflow
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from detection.RetinaNet.dataloader import get_train_loader, get_val_loader
 
-# ─── 1. Configuration ──────────────────────────────────────────────────────────
+#  1. Configuration 
 NUM_CLASSES    = 7
 BATCH_SIZE     = 2
 NUM_EPOCHS     = 60
 LEARNING_RATE  = 0.001
 SAVE_PATH      = "detection/RetinaNet/retinanet_best.pth"
-# Backup outside the repo — safe from accidental !cp overwrites
+# Backup outside the repo , safe from accidental !cp overwrites
 BACKUP_SAVE_PATH = "detection/RetinaNet/retinanet_best_BACKUP.pth"
 UNFREEZE_EPOCH = 15
 WARMUP_EPOCHS  = 5
 
-# ─── Resume config ─────────────────────────────────────────────────────────────
+#  Resume config 
 # START_EPOCH = the last COMPLETED epoch number shown in training output.
-# "Epoch 30 done" → START_EPOCH = 30.   Fresh run → START_EPOCH = 0.
+# "Epoch 30 done" → START_EPOCH = 30.   Fresh run -> START_EPOCH = 0.
 RESUME_WEIGHTS  = None
 START_EPOCH     = 0
 RESUME_BEST_MAP = 0.0
 
-# ─── Where cosine LR should be at START_EPOCH ─────────────────────────────────
+#  Where cosine LR should be at START_EPOCH 
 # lr(t) = eta_min + 0.5*(lr_max - eta_min)*(1 + cos(pi*t/T_max))
-# backbone: lr_max=0.00005, t=15, T_max=45 → 0.0000378
-# cls head: lr_max=0.001,   same ratio    → 0.0007560
-# reg head: lr_max=0.0005,  same ratio    → 0.0003780
+# backbone: lr_max=0.00005, t=15, T_max=45 -> 0.0000378
+# cls head: lr_max=0.001,   same ratio    -> 0.0007560
+# reg head: lr_max=0.0005,  same ratio    -> 0.0003780
 RESUME_LR_BACKBONE = 0.0000378
 RESUME_LR_CLS      = 0.0007560
 RESUME_LR_REG      = 0.0003780
 
-# Phase-2 peak LRs (lr_max in cosine formula — used as initial_lr by scheduler)
+# Phase-2 peak LRs (lr_max in cosine formula , used as initial_lr by scheduler)
 PHASE2_BASE_LR_BACKBONE = LEARNING_RATE * 0.05   # 0.00005
 PHASE2_BASE_LR_CLS      = LEARNING_RATE           # 0.001
 PHASE2_BASE_LR_REG      = LEARNING_RATE * 0.5     # 0.0005
 
 
-# ─── 2. Model ──────────────────────────────────────────────────────────────────
+#  2. Model 
 def get_retinanet_model(num_classes):
     print("Loading pre-trained RetinaNet ResNet-50-FPN...")
     model = torchvision.models.detection.retinanet_resnet50_fpn(
@@ -65,7 +65,7 @@ def get_retinanet_model(num_classes):
     return model
 
 
-# ─── 3. Optimizers ─────────────────────────────────────────────────────────────
+#  3. Optimizers 
 def build_phase1_optimizer(model, lr):
     """Phase 1: backbone frozen, heads only."""
     return torch.optim.AdamW([
@@ -107,7 +107,7 @@ def build_phase2_optimizer(model, lr,
     ], weight_decay=0.0005)
 
 
-# ─── 4. Training Loop ──────────────────────────────────────────────────────────
+#  4. Training Loop 
 def main():
     mlflow.set_experiment("SumoFlowAI-Traffic-Detection")
     os.makedirs(os.path.dirname(SAVE_PATH), exist_ok=True)
@@ -121,7 +121,7 @@ def main():
     train_loader = get_train_loader(BATCH_SIZE)
     val_loader   = get_val_loader(batch_size=1)
 
-    # ── Phase 1 setup (always built first; may be replaced below) ─────────────
+    #  Phase 1 setup (always built first; may be replaced below) 
     for param in model.backbone.parameters():
         param.requires_grad = False
 
@@ -143,7 +143,7 @@ def main():
     phase        = 1
     resume_epoch = False
 
-    # ── Resume logic ──────────────────────────────────────────────────────────
+    #  Resume logic 
     if START_EPOCH > 0 and RESUME_WEIGHTS:
         print(f"\n▶  Loading checkpoint: {RESUME_WEIGHTS}")
         state = torch.load(RESUME_WEIGHTS, map_location=device)
@@ -216,7 +216,7 @@ def main():
             )
             print(f"   Phase-1 scheduler resumed at step {START_EPOCH}\n")
 
-    # ── MLflow run ────────────────────────────────────────────────────────────
+    #  MLflow run 
     run_label = (f"retinanet_v3_resume_ep{START_EPOCH+1}"
                  if START_EPOCH > 0 else "retinanet_v2_adamw_per_head_lr")
 
@@ -240,7 +240,7 @@ def main():
 
         for epoch in range(START_EPOCH, NUM_EPOCHS):
 
-            # ── Phase 2 transition (fresh-start run only) ─────────────────────
+            #  Phase 2 transition (fresh-start run only) 
             if epoch == UNFREEZE_EPOCH and START_EPOCH < UNFREEZE_EPOCH:
                 print("\nUnfreezing backbone for full fine-tuning...")
                 for param in model.backbone.parameters():
@@ -254,7 +254,7 @@ def main():
                 print(f"Optimizer rebuilt | backbone LR={LEARNING_RATE*0.05:.6f} | "
                       f"cls LR={LEARNING_RATE:.6f} | reg LR={LEARNING_RATE*0.5:.6f}\n")
 
-            # ── Training pass ─────────────────────────────────────────────────
+            #  Training pass 
             model.train()
             epoch_loss   = 0.0
             batches_used = 0
@@ -266,7 +266,7 @@ def main():
                 images  = [img.to(device) for img in images]
                 targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-                # Mini-warmup: scale LR 10%→100% over first 10 batches of resume epoch
+                # Mini-warmup: scale LR 10%->100% over first 10 batches of resume epoch
                 if is_first_resume_epoch and batch_idx < 10:
                     scale = 0.1 + 0.09 * batch_idx
                     for group in optimizer.param_groups:
@@ -277,7 +277,7 @@ def main():
                 losses    = sum(loss for loss in loss_dict.values())
 
                 if not torch.isfinite(losses) or losses.item() > spike_threshold:
-                    print(f"⚠️  Batch {batch_idx} skipped — loss={losses.item():.2f} "
+                    print(f"  Batch {batch_idx} skipped — loss={losses.item():.2f} "
                           f"(threshold={spike_threshold})")
                     optimizer.zero_grad()
                     continue
@@ -290,7 +290,7 @@ def main():
                     for p in model.parameters() if p.grad is not None
                 )
                 if nan_grad:
-                    print(f"⚠️  Batch {batch_idx} skipped — NaN/Inf gradient detected")
+                    print(f"  Batch {batch_idx} skipped — NaN/Inf gradient detected")
                     optimizer.zero_grad()
                     continue
 
@@ -331,7 +331,7 @@ def main():
                   f"LR: {current_lr:.7f} | "
                   f"Batches used: {batches_used}/{len(train_loader)} ───\n")
 
-            # ── Validation mAP every 5 epochs ─────────────────────────────────
+            #  Validation mAP every 5 epochs 
             if (epoch + 1) % 5 == 0 or epoch == NUM_EPOCHS - 1:
                 model.eval()
                 val_metric = MeanAveragePrecision(
@@ -363,8 +363,8 @@ def main():
                     # Backup outside repo — safe from accidental overwrites
                     torch.save(model.state_dict(), BACKUP_SAVE_PATH)
                     mlflow.log_artifact(SAVE_PATH)
-                    print(f"✅ New best model saved! mAP@0.5 = {best_map:.4f}")
-                    print(f"   Backup → {BACKUP_SAVE_PATH}")
+                    print(f" New best model saved! mAP@0.5 = {best_map:.4f}")
+                    print(f"   Backup -> {BACKUP_SAVE_PATH}")
 
     print(f"\nTraining complete. Best val mAP@0.5 = {best_map:.4f}")
     print(f"Weights saved to: {SAVE_PATH}")

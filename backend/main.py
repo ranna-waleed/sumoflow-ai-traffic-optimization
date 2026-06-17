@@ -13,7 +13,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-#  CORS — allow React frontend on port 3000 
+#  CORS , allow React frontend on port 3000 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

@@ -11,7 +11,7 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from detection.RetinaNet.dataloader import get_test_loader, CLASS_TO_IDX_RETINANET
 import os
 
-# ─── 1. Configuration ──────────────────────────────────────────
+#  1. Configuration 
 NUM_CLASSES  = 7
 BATCH_SIZE   = 1
 WEIGHTS_PATH = "detection/RetinaNet/retinanet_best.pth"
@@ -21,7 +21,7 @@ IDX_TO_CLASS = {
     4: 'taxi', 5: 'microbus', 6: 'bicycle'
 }
 
-# ─── 2. Model Initialization ───────────────────────────────────
+#  2. Model Initialization 
 def get_retinanet_model(num_classes):
     model = torchvision.models.detection.retinanet_resnet50_fpn(weights=None)
     in_channels = model.head.classification_head.conv[0][0].in_channels
@@ -33,7 +33,7 @@ def get_retinanet_model(num_classes):
     )
     return model
 
-# ─── 3. Evaluation Loop ────────────────────────────────────────
+#  3. Evaluation Loop 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate RetinaNet and log to MLflow")
    
@@ -56,7 +56,7 @@ def main():
 
     test_loader = get_test_loader(BATCH_SIZE, class_to_idx=CLASS_TO_IDX_RETINANET)
 
-    # NOTE: max_detection_thresholds removed — breaks class_metrics in
+    # NOTE: max_detection_thresholds removed, breaks class_metrics in
     # torchmetrics 1.8.2, causing all per-class APs to return -1.0.
     metric = MeanAveragePrecision(
         box_format='xyxy',
@@ -67,7 +67,7 @@ def main():
     total_inference_time = 0.0
     num_images           = 0
 
-    print("Starting evaluation on Test Set (held-out)...")
+    print("Starting evaluation on Test Set (held-out)")
 
     with torch.no_grad():
         for batch_idx, (images, targets) in enumerate(test_loader):
@@ -104,9 +104,7 @@ def main():
     mar_100       = mAP_results['mar_100'].item()
     map_per_class = mAP_results.get('map_per_class', None)
 
-    print("\n══════════════════════════════════")
     print("  Evaluation Results (Test Set)  ")
-    print("══════════════════════════════════")
     print(f"  FPS:                    {fps:.2f}")
     print(f"  Inference Time:         {avg_inference_time:.4f} sec/image")
     print(f"  mAP@0.5:                {map_50:.4f}")
@@ -118,9 +116,8 @@ def main():
         for idx, ap in enumerate(map_per_class):
             class_name = IDX_TO_CLASS.get(idx, f"class_{idx}")
             print(f"    {class_name:<12}: {ap.item():.4f}")
-    print("══════════════════════════════════\n")
 
-    # ── Log to MLflow ─────────────────────────────────────────
+    #  Log to MLflow 
     mlflow.set_experiment("SumoFlowAI-Traffic-Detection")
 
     with mlflow.start_run():
@@ -137,7 +134,7 @@ def main():
                 class_name = IDX_TO_CLASS.get(idx, f"class_{idx}")
                 mlflow.log_metric(f"test_AP_{class_name}", ap.item())
         run = mlflow.active_run()
-        print("✅ Evaluation metrics logged to MLflow run:", run.info.run_id)
+        print(" Evaluation metrics logged to MLflow run:", run.info.run_id)
 
 
 if __name__ == "__main__":

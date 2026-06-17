@@ -22,13 +22,13 @@ from detection.RetinaNet.dataloader import (
     get_train_loader, get_val_loader, CLASS_TO_IDX_FASTERRCNN
 )
 
-# ── paths ────────────────────────────────────────────────────────────────────
+#  paths 
 IMGS_DIR   = "detection/dataset/images/train"
 XML_DIR    = "detection/dataset/annotations/train"
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "outputs")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# ── hyperparameters ───────────────────────────────────────────────────────────
+#  hyperparameters 
 NUM_CLASSES  = 8          # 7 vehicle classes + 1 background
 NUM_EPOCHS   = 60
 BATCH_SIZE   = 2
@@ -48,7 +48,6 @@ def build_model(num_classes: int, device: torch.device) -> torch.nn.Module:
     weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
     model   = fasterrcnn_resnet50_fpn_v2(weights=weights)
 
-    # Replace box predictor to match our class count
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
@@ -94,13 +93,13 @@ def evaluate_loss(model, loader, device):
     return total_loss / max(len(loader), 1)
 
 def main():
-    # ── device ────────────────────────────────────────────────────────────────
+    # device 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     if device.type == "cuda":
         print(f"GPU: {torch.cuda.get_device_name(0)}")
 
-    # ── dataset split ──────────────────────────────────────────────────────────
+    #  dataset split 
     full_dataset = TahrirTrafficDataset(imgs_dir=IMGS_DIR, xml_dir=XML_DIR)
     val_size   = max(1, int(len(full_dataset) * VAL_SPLIT))
     train_size = len(full_dataset) - val_size
@@ -114,7 +113,7 @@ def main():
 
     print(f"Train samples: {train_size} | Val samples: {val_size}")
 
-    # ── model, optimizer, scheduler ───────────────────────────────────────────
+    #  model, optimizer, scheduler 
     model     = build_model(NUM_CLASSES, device)
     optimizer = torch.optim.SGD(
         [p for p in model.parameters() if p.requires_grad],
@@ -122,7 +121,7 @@ def main():
     )
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=LR_STEP_SIZE, gamma=LR_GAMMA)
 
-    # ── MLflow run ────────────────────────────────────────────────────────────
+    #  MLflow run 
     mlflow.set_experiment("FasterRCNN_TahrirTraffic")
 
     with mlflow.start_run(run_name="v2_backbone_lr0.005_lrstepsize"):
@@ -167,9 +166,9 @@ def main():
                 best_epoch    = epoch + 1
                 best_state    = copy.deepcopy(model.state_dict())
                 torch.save(best_state, BEST_WEIGHTS)
-                print(f"  ✓ New best model saved (val_loss={best_val_loss:.4f})")
+                print(f"  New best model saved (val_loss={best_val_loss:.4f})")
 
-        # ── Save final artifacts ───────────────────────────────────────────────
+        #  Save final artifacts 
         torch.save(model.state_dict(), os.path.join(OUTPUT_DIR, "last_faster_rcnn.pth"))
         mlflow.log_artifact(BEST_WEIGHTS,  artifact_path="models")
         mlflow.log_artifact(os.path.join(OUTPUT_DIR, "last_faster_rcnn.pth"), artifact_path="models")

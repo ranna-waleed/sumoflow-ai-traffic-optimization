@@ -2,12 +2,12 @@ import os
 import shutil
 import random
 
-# ─── Paths ───────────────────────────────────────────
+#  Paths 
 RAW_IMAGES = "detection/dataset_v2/images/raw"
 RAW_LABELS = "detection/dataset_v2/labels/raw"
 
 
-# ─── Clean & Create Split Folders ────────────────────────
+#  Clean & Create Split Folders 
 for split in ["train", "val", "test"]:
     img_dir = f"detection/dataset_v2/images/{split}"
     lbl_dir = f"detection/dataset_v2/labels/{split}"
@@ -23,7 +23,7 @@ for split in ["train", "val", "test"]:
     os.makedirs(lbl_dir, exist_ok=True)
 
     
-# ─── Get Labeled Images Only ─────────────────────────
+#  Get Labeled Images Only 
 all_images = [
     f for f in os.listdir(RAW_IMAGES)
     if f.endswith(".png") and
@@ -32,7 +32,7 @@ all_images = [
 
 print(f"Total labeled images found: {len(all_images)}")
 
-# ─── Shuffle & Split ─────────────────────────────────
+#  Shuffle & Split 
 random.seed(42)
 random.shuffle(all_images)
 
@@ -44,7 +44,7 @@ train = all_images[:train_end]
 val   = all_images[train_end:val_end]
 test  = all_images[val_end:]
 
-# ─── Copy Files ──────────────────────────────────────
+#  Copy Files 
 def copy_files(file_list, split):
     for img in file_list:
         label = img.replace(".png", ".txt")
@@ -61,7 +61,7 @@ copy_files(train, "train")
 copy_files(val,   "val")
 copy_files(test,  "test")
 
-# ─── Summary ─────────────────────────────────────────
+#  Summary 
 print("\nDataset split complete!")
 print(f"   Train : {len(train)} images  (70%)")
 print(f"   Val   : {len(val)}   images  (20%)")

@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 import os
 import random
 
-# ─── 1. Configuration & Mapping ────────────────────────────────
+#  1. Configuration & Mapping 
 NUM_CLASSES = 7
 
-# ⚠️  VISUALIZATION ONLY — never use this threshold when computing mAP.
+#  VISUALIZATION ONLY , never use this threshold when computing mAP.
 # mAP metrics must receive ALL predictions (all confidence levels) so the
 # metric can sweep thresholds internally. Filtering here only affects what
 # gets drawn on screen.
@@ -37,7 +37,7 @@ CLASS_COLORS = {
 }
 
 
-# ─── 2. Model Initialization (Same as training) ────────────────
+#  2. Model Initialization (Same as training) 
 def get_retinanet_model(num_classes):
     # Load the blank architecture (no pretrained weights this time, we use yours!)
     model = torchvision.models.detection.retinanet_resnet50_fpn(weights=None)
@@ -52,7 +52,7 @@ def get_retinanet_model(num_classes):
     )
     return model
 
-# ─── 3. Inference & Visualization ──────────────────────────────
+#  3. Inference & Visualization 
 def main():
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     print(f"Evaluating on device: {device}")
@@ -68,7 +68,7 @@ def main():
         
     model.load_state_dict(torch.load(WEIGHTS_PATH, map_location=device, weights_only=True))
     model.to(device)
-    model.eval() # CRITICAL: Set model to evaluation mode!
+    model.eval() 
 
     # Grab a random image from the test set
     test_images = [f for f in os.listdir(TEST_DIR) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
@@ -136,7 +136,7 @@ def main():
     
     print(f"Saved evaluation image to {save_file}")
 
-    # Show the image right here in Google Colab!
+    # Show the image right here in Google Colab
     plt.figure(figsize=(16, 10))
     plt.imshow(img_draw)
     plt.axis('off')

@@ -23,7 +23,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from detection.RetinaNet.dataloader import TahrirTrafficDataset, collate_fn
 
-# ── paths ─────────────────────────────────────────────────────────────────────
+# paths
 
 BASE_DIR     = os.path.dirname(__file__)
 WEIGHTS_PATH = os.path.join(BASE_DIR, "outputs", "last_faster_rcnn.pth")
@@ -94,7 +94,7 @@ def run_evaluation():
     if device.type == "cuda":
         print(f"GPU: {torch.cuda.get_device_name(0)}")
 
-    # ── load model ────────────────────────────────────────────────────────────
+    # load model
     if not os.path.exists(WEIGHTS_PATH):
         raise FileNotFoundError(
             f"Weights not found at: {WEIGHTS_PATH}\n"
@@ -106,13 +106,13 @@ def run_evaluation():
     model.eval()
     print(f"[OK] Loaded weights from {WEIGHTS_PATH}")
 
-    # ── test dataset ──────────────────────────────────────────────────────────
+    #  test dataset
     test_dataset = TahrirTrafficDataset(imgs_dir=TEST_IMGS_DIR, xml_dir=TEST_XML_DIR)
     test_loader  = DataLoader(test_dataset, batch_size=1, shuffle=False,
                               collate_fn=collate_fn, num_workers=2, pin_memory=True)
     print(f"Test images: {len(test_dataset)}")
 
-    # ── metric accumulators ───────────────────────────────────────────────────
+    #  metric accumulators 
     metric = MeanAveragePrecision(iou_type="bbox", class_metrics=True)    
     all_inference_times_ms = []
     saved_count = 0
@@ -121,7 +121,7 @@ def run_evaluation():
         for img_idx, (images, targets) in enumerate(test_loader):
             images_gpu  = [img.to(device) for img in images]
 
-            # ── timed inference ────────────────────────────────────────────────
+            #  timed inference 
             if device.type == "cuda":
                 torch.cuda.synchronize()
             t0 = time.perf_counter()
@@ -135,7 +135,7 @@ def run_evaluation():
             elapsed_ms = (t1 - t0) * 1000
             all_inference_times_ms.append(elapsed_ms)
 
-            # ── accumulate metrics ─────────────────────────────────────────────
+            #  accumulate metrics 
             preds = [{
                 "boxes":  o["boxes"].cpu(),
                 "scores": o["scores"].cpu(),
@@ -149,7 +149,7 @@ def run_evaluation():
 
             metric.update(preds, gts)
 
-            # ── save sample detection images ───────────────────────────────────
+            #  save sample detection images 
             if saved_count < NUM_SAMPLE_IMGS:
                 out_path = os.path.join(DETECTIONS_DIR, f"detection_{img_idx:04d}.jpg")
                 draw_detections(
@@ -163,7 +163,7 @@ def run_evaluation():
                 )
                 saved_count += 1
 
-    # ── compute final metrics ─────────────────────────────────────────────────
+    #  compute final metrics 
     map_result = metric.compute()
 
     map50       = float(map_result["map_50"])
@@ -221,7 +221,7 @@ def run_evaluation():
     print(f"  Saved {saved_count} detection images → {DETECTIONS_DIR}")
     print("="*55)
 
-    # ── per-class AP ──────────────────────────────────────────────────────────
+    #  per-class AP 
     per_class_ap = {}
     if "map_per_class" in map_result:
         for cls_idx, ap in enumerate(map_result["map_per_class"].tolist()):
@@ -232,7 +232,7 @@ def run_evaluation():
     for cls, ap in per_class_ap.items():
         print(f"  {cls:<14}: {ap:.4f}")
 
-    # ── save results to JSON ──────────────────────────────────────────────────
+    #  save results to JSON 
     results = {
         "mAP@0.5":           round(map50, 6),
         "mAP@0.5:0.95":      round(map_val, 6),
@@ -249,7 +249,7 @@ def run_evaluation():
         json.dump(results, f, indent=2)
     print(f"\nResults saved to {results_path}")
 
-    # ── log to MLflow ──────────────────────────────────────────────────────────
+    # log to MLflow 
     mlflow.set_experiment("FasterRCNN_TahrirTraffic")
     with mlflow.start_run(run_name="eval_run2_weighted_sampling_filtered"):
         mlflow.log_metrics({

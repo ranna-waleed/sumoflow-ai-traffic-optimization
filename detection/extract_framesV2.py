@@ -2,7 +2,7 @@ import traci
 import os
 import time
 
-# ─── Paths ───────────────────────────────────────────
+#  Paths 
 SUMO_CFG    = "simulation/maps/config_file.sumocfg"
 OUTPUT_DIR  = "detection/dataset_v2/images/raw"
 TOTAL_STEPS = 3600
@@ -10,7 +10,7 @@ CAPTURE_EVERY = 10
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# ─── NEON COLOR MAPPING (R, G, B, Alpha) ─────────────
+#  NEON COLOR MAPPING (R, G, B, Alpha) 
 NEON_COLORS = {
     "car": (255, 0, 255, 255),        # Magenta
     "bus": (0, 255, 255, 255),        # Cyan
@@ -21,7 +21,7 @@ NEON_COLORS = {
     "motorcycle": (255, 150, 0, 255)  # Neon Orange
 }
 
-# ─── Start SUMO ──────────────────────────────────────
+#  Start SUMO 
 traci.start([
     "sumo-gui",
     "-c", SUMO_CFG,
@@ -50,7 +50,7 @@ print("Ready! Adjust your zoom now, then click Play in SUMO.")
 while step < TOTAL_STEPS:
     traci.simulationStep()
 
-    # ─── THE PAINT GUN ────────────────────────────────
+    #  THE PAINT GUN 
     # Find all vehicles that just spawned in this exact step
     for veh_id in traci.simulation.getDepartedIDList():
         vtype = traci.vehicle.getTypeID(veh_id)
@@ -59,7 +59,7 @@ while step < TOTAL_STEPS:
         if vtype in NEON_COLORS:
             traci.vehicle.setColor(veh_id, NEON_COLORS[vtype])
             
-    # ─── CAPTURE LOGIC ────────────────────────────────
+    #  CAPTURE LOGIC 
     if step % CAPTURE_EVERY == 0:
         time.sleep(0.05) # Tiny pause for screen buffer
         

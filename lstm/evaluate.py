@@ -12,9 +12,9 @@ MODELS_DIR = os.path.join(LSTM_DIR, "models")
 
 SEQ_LEN  = 60
 PRED_LEN = 30
-FEATURES = ["north", "south", "east", "west", "total", "avg_speed", "avg_waiting"]  # FIX 1: match train features
+FEATURES = ["north", "south", "east", "west", "total", "avg_speed", "avg_waiting"]  #
 
-# FIX 4: evaluate all profiles instead of only morning_rush
+
 ALL_PROFILES = ["morning_rush", "evening_rush", "midday", "night"]
 
 def evaluate():

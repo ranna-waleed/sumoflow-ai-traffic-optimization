@@ -19,7 +19,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from ..RetinaNet.dataloader import TahrirTrafficDataset, collate_fn
 
 
-# ── paths ─────────────────────────────────────────────────────────────────────
+#  paths 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 IMGS_DIR   = "detection/dataset/images/train"
@@ -27,7 +27,7 @@ XML_DIR    = "detection/dataset/annotations/train"
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "outputs")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# ── hyperparameters (same as Run 1) ──────────────────────────────────────────
+#  hyperparameters (same as Run 1) 
 NUM_CLASSES  = 8          # 7 vehicle classes + 1 background
 NUM_EPOCHS   = 60
 BATCH_SIZE   = 2
@@ -48,7 +48,7 @@ def build_model(num_classes: int, device: torch.device) -> torch.nn.Module:
     return model.to(device)
 
 
-# ── NEW: Filter empty annotation images ──────────────────────────────────────
+#  NEW: Filter empty annotation images 
 def filter_empty_images(dataset):
     """Remove images that have zero annotated boxes."""
     valid_indices = []
@@ -63,7 +63,7 @@ def filter_empty_images(dataset):
     return Subset(dataset, valid_indices), valid_indices
 
 
-# ── NEW: Build weighted sampler to fix class imbalance ───────────────────────
+#  NEW: Build weighted sampler to fix class imbalance 
 def build_weighted_sampler(dataset, num_classes=8):
     """
     Give higher sampling probability to images containing rare classes
@@ -131,7 +131,7 @@ def train_one_epoch(model, optimizer, loader, device, epoch):
 
     elapsed  = time.time() - start
     avg_loss = total_loss / len(loader)
-    print(f"  → Epoch {epoch+1:02d} avg loss: {avg_loss:.4f}  ({elapsed:.1f}s)")
+    print(f" -> Epoch {epoch+1:02d} avg loss: {avg_loss:.4f}  ({elapsed:.1f}s)")
     return avg_loss
 
 
@@ -153,15 +153,15 @@ def main():
     if device.type == "cuda":
         print(f"GPU: {torch.cuda.get_device_name(0)}")
 
-    # ── Step 1: Load full dataset ─────────────────────────────────────────────
+    #  Step 1: Load full dataset 
     full_dataset = TahrirTrafficDataset(imgs_dir=IMGS_DIR, xml_dir=XML_DIR)
     print(f"\nOriginal dataset size: {len(full_dataset)}")
 
-    # ── Step 2: Filter empty images ───────────────────────────────────────────
+    # Step 2: Filter empty images 
     print("\nFiltering empty annotation images...")
     filtered_dataset, _ = filter_empty_images(full_dataset)
 
-    # ── Step 3: Train/val split ───────────────────────────────────────────────
+    #  Step 3: Train/val split 
     val_size   = max(1, int(len(filtered_dataset) * VAL_SPLIT))
     train_size = len(filtered_dataset) - val_size
     train_ds, val_ds = random_split(
@@ -170,15 +170,15 @@ def main():
     )
     print(f"Train samples: {train_size} | Val samples: {val_size}")
 
-    # ── Step 4: Build weighted sampler on train split only ────────────────────
+    #  Step 4: Build weighted sampler on train split only 
     print("\nBuilding weighted sampler...")
     sampler = build_weighted_sampler(train_ds, num_classes=NUM_CLASSES)
 
-    # NOTE: sampler replaces shuffle=True — do not use both
+    # NOTE: sampler replaces shuffle=True , do not use both
     train_loader = DataLoader(
         train_ds,
         batch_size  = BATCH_SIZE,
-        sampler     = sampler,       # ← weighted sampling
+        sampler     = sampler,       # weighted sampling
         collate_fn  = collate_fn,
         num_workers = 2,
         pin_memory  = True
@@ -192,7 +192,7 @@ def main():
         pin_memory  = True
     )
 
-    # ── Step 5: Model, optimizer, scheduler ──────────────────────────────────
+    #  Step 5: Model, optimizer, scheduler 
     model     = build_model(NUM_CLASSES, device)
     optimizer = torch.optim.SGD(
         [p for p in model.parameters() if p.requires_grad],
@@ -202,7 +202,7 @@ def main():
         optimizer, step_size=LR_STEP_SIZE, gamma=LR_GAMMA
     )
 
-    # ── Step 6: MLflow run ────────────────────────────────────────────────────
+    #  Step 6: MLflow run 
     mlflow.set_experiment("FasterRCNN_TahrirTraffic")
 
     with mlflow.start_run(run_name="v2_backbone_weighted_sampling_filtered"):
@@ -250,7 +250,7 @@ def main():
                 torch.save(best_state, BEST_WEIGHTS)
                 print(f"  ✓ New best model saved (val_loss={best_val_loss:.4f})")
 
-        # ── Save final artifacts ──────────────────────────────────────────────
+        #  Save final artifacts 
         last_weights = os.path.join(OUTPUT_DIR, "last_faster_rcnn_run2.pth")
         torch.save(model.state_dict(), last_weights)
         mlflow.log_artifact(BEST_WEIGHTS,  artifact_path="models")

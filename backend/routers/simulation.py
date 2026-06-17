@@ -15,7 +15,7 @@ PROFILE_LABELS = {
     "night":        "10PM - 12AM",
 }
 
-# ── GET /api/simulation/profiles ─────────────────────────────
+# GET /api/simulation/profiles
 @router.get("/profiles")
 def get_profiles():
     return {
@@ -28,7 +28,7 @@ def get_profiles():
     }
 
 
-# ── GET /api/simulation/summary ───────────────────────────────
+# GET /api/simulation/summary
 @router.get("/summary")
 def get_summary():
     if not os.path.exists(FAIR_JSON_PATH):
@@ -69,7 +69,7 @@ def get_summary():
     }
 
 
-# ── GET /api/simulation/metrics/{profile} ─────────────────────
+# GET /api/simulation/metrics/{profile}
 @router.get("/metrics/{profile}")
 def get_metrics(profile: str):
     if profile not in PROFILE_LABELS:

@@ -96,7 +96,7 @@ def main():
         print(f"  Recall     : {recall:.4f}  ({recall*100:.2f}%)")
 
 
-    print(" Training Complete!")
+    print(" Training Complete")
 
 if __name__ == "__main__":
     main()

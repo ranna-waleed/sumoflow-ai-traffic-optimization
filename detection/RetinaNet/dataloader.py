@@ -6,23 +6,23 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import xml.etree.ElementTree as ET
 
-# ── RetinaNet: 0-indexed (no background class — handled by Focal Loss) ────────
+#  RetinaNet: 0-indexed (no background class, handled by Focal Loss) 
 CLASS_TO_IDX_RETINANET = {
     'car': 0, 'bus': 1, 'truck': 2, 'motorcycle': 3,
     'taxi': 4, 'microbus': 5, 'bicycle': 6
 }
 
-# ── Faster R-CNN: 1-indexed (index 0 is reserved for background) ──────────────
+#  Faster R-CNN: 1-indexed (index 0 is reserved for background) 
 CLASS_TO_IDX_FASTERRCNN = {
     'car': 1, 'bus': 2, 'truck': 3, 'motorcycle': 4,
     'taxi': 5, 'microbus': 6, 'bicycle': 7
 }
 
-# ── ImageNet normalization constants (MUST match pretrained backbone) ──────────
+#  ImageNet normalization constants (MUST match pretrained backbone) 
 IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 IMAGENET_STD  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
-# ── Safe num_workers: multiprocessing crashes on Windows with num_workers > 0 ──
+#  Safe num_workers: multiprocessing crashes on Windows with num_workers > 0 
 NUM_WORKERS = 0 if os.name == 'nt' else 4
 
 
@@ -72,7 +72,7 @@ class TahrirTrafficDataset(Dataset):
                 boxes.append([xmin, ymin, xmax, ymax])
                 labels.append(self.class_to_idx[label_name])
 
-        # ── Augmentation (training only) ──────────────────────────────────────
+        #  Augmentation (training only) 
         if self.augment and len(boxes) > 0:
             boxes = np.array(boxes, dtype=np.float32)
             h, w  = img.shape[:2]
@@ -98,12 +98,12 @@ class TahrirTrafficDataset(Dataset):
                     np.clip(img_hsv, 0, 255).astype(np.uint8), cv2.COLOR_HSV2RGB
                 ).astype(np.float32)
 
-            # 4. Random vertical flip (mild — helps with top-down SUMO camera view)
+            # 4. Random vertical flip (mild , helps with top-down SUMO camera view)
             if random.random() > 0.8:
                 img              = img[::-1, :, :].copy()
                 boxes[:, [1, 3]] = h - boxes[:, [3, 1]]
 
-            # 5. Random small rotation (±5°) — simulates slight camera angle drift
+            # 5. Random small rotation (±5°) , simulates slight camera angle drift
             if random.random() > 0.85:
                 angle  = random.uniform(-5, 5)
                 cx, cy = w / 2, h / 2
@@ -134,10 +134,10 @@ class TahrirTrafficDataset(Dataset):
 
             boxes = boxes.tolist()
 
-        # ── Normalize with ImageNet mean/std (CRITICAL for pretrained backbone) ──
+        #  Normalize with ImageNet mean/std (CRITICAL for pretrained backbone) 
         img_normalized = (img / 255.0 - IMAGENET_MEAN) / IMAGENET_STD
 
-        # ── Safe tensor logic ─────────────────────────────────────────────────
+        #  Safe tensor logic 
         if len(boxes) == 0:
             boxes_tensor  = torch.zeros((0, 4), dtype=torch.float32)
             labels_tensor = torch.zeros((0,),   dtype=torch.int64)
@@ -162,7 +162,7 @@ def collate_fn(batch):
     return tuple(zip(*batch))
 
 
-# ── RetinaNet loaders (0-indexed labels, default) ─────────────────────────────
+#  RetinaNet loaders (0-indexed labels, default) 
 
 def get_train_loader(batch_size=2, class_to_idx=None):
     dataset = TahrirTrafficDataset(
@@ -200,7 +200,7 @@ def get_val_loader(batch_size=1, class_to_idx=None):
 
 
 def get_test_loader(batch_size=1, class_to_idx=None):
-    """Completely held-out set — only call this in evaluate.py for final reporting."""
+    """Completely held-out set : only call this in evaluate.py for final reporting."""
     dataset = TahrirTrafficDataset(
         imgs_dir     = "detection/dataset/images/test",
         xml_dir      = "detection/dataset/annotations/test",
@@ -218,7 +218,7 @@ def get_test_loader(batch_size=1, class_to_idx=None):
 
 
 if __name__ == "__main__":
-    print("Testing RetinaNet DataLoader (0-indexed labels)...")
+    print("Testing RetinaNet DataLoader (0-indexed labels)")
     dataset = TahrirTrafficDataset(
         imgs_dir     = "detection/dataset/images/train",
         xml_dir      = "detection/dataset/annotations/train",
@@ -230,7 +230,7 @@ if __name__ == "__main__":
     print(f"Image tensor range: [{images[0].min():.3f}, {images[0].max():.3f}]")  # Should be ~[-2, 2]
     print(f"RetinaNet labels (expect 0-6): {targets[0]['labels']}")
 
-    print("\nTesting Faster R-CNN DataLoader (1-indexed labels)...")
+    print("\nTesting Faster R-CNN DataLoader (1-indexed labels)")
     dataset_frcnn = TahrirTrafficDataset(
         imgs_dir     = "detection/dataset/images/train",
         xml_dir      = "detection/dataset/annotations/train",
