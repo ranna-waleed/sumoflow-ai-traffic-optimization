@@ -2,6 +2,7 @@
 
 Live demo: [cute-entremet-5bea9e.netlify.app 
 ](https://cute-entremet-5bea9e.netlify.app) 
+  
 ---
 
 ## Team Members
@@ -177,12 +178,19 @@ On Mac or Linux:
 export SUMO_HOME="/usr/share/sumo"
 ```
 
-### Step 3 — Create the conda environment
-
+### Step 3 — Create the environment
+Option 1 (using conda)
 ```bash
 conda create -n sumoflow_env python=3.12
 conda activate sumoflow_env
 ```
+
+Option 2 (using git)
+```bash
+python -m venv sumoflow_env
+sumoflow_env\Scripts\activate
+```
+
 
 ### Step 4 — Install Python packages
 
@@ -252,9 +260,9 @@ The baseline is a standalone SUMO run with the original fixed-time signal plans 
 | Traffic Profile | Average Wait Time Change | CO₂ Emissions Change |
 | --------------- | ------------------------ | -------------------- |
 | Morning Rush    | ↓ 86.5%                  | ↓ 58.6%              |
-| Evening Rush    | ↓ 17.4%                  | ↑ 36.3%              |
+| Evening Rush    | ↑ 17.4%                  | ↑ 36.3%              |
 | Midday          | ↓ 17.3%                  | ↓ 14.2%              |
-| Night           | ↓ 14.2%                  | ↓ 9.1%               |
+| Night           | ↑ 14.2%                  | ↓ 9.1%               |
 | **Overall**     | **↓ 25.2%**              | **↓ 17.9%**          |
 
 
@@ -411,4 +419,6 @@ The Drive folder contains:
 ## Links
 
 GitHub: https://github.com/ranna-waleed/sumoflow-ai-traffic-optimization  
-Live demo: https://inquisitive-swan-9ffbe5.netlify.app
+Live demo: [cute-entremet-5bea9e.netlify.app 
+](https://cute-entremet-5bea9e.netlify.app) 
+  
