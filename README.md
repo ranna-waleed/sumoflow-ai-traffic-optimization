@@ -342,16 +342,16 @@ react-router-dom 6.0+
 ## Screenshots
 
 **Dashboard**
-![Dashboard](docs/screenshots/dashboard.JPG)
+![Dashboard](docs/screenshots/dashboard.JPEG)
 
 **Live Simulation**
-![Live Simulation](docs/screenshots/live_simulation.JPG)
+![Live Simulation](docs/screenshots/live_simulation.JPEG)
 
 **Model Comparison**
-![Model Comparison](docs/screenshots/Model_comparison.JPG)
+![Model Comparison](docs/screenshots/Model_comparison.JPEG)
 
 **Before vs After**
-![Before vs After](docs/screenshots/Before_After.JPG)
+![Before vs After](docs/screenshots/Before_After.JPEG)
 
 **About**
 ![About](docs/screenshots/about.JPG)
