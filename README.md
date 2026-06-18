@@ -28,13 +28,13 @@ We built SUMOFlow AI to tackle this. The idea is to replace the fixed signal pla
 ### Dataset Preparation (Auto-Labeling)
 
 - Generating 1,800 labeled training images with zero manual annotation using the Neon Trick:
-| Step | Tool | Action |
-|---|---|---|---|---|
-| 1 | SUMO | Render 1,800 simulation frames |
-| 2 | TraCI |Assign each vehicle type a unique neon color |
-| 3 | OpenCV | Isolate neon pixels and find contours |
-| 4 | OpenCV | Draw bounding boxes and read coordinates |
-| 5 | -- | Export 1,800 YOLO .txt label files |
+| Step | Tool   | Action                                          |
+| ---- | ------ | ----------------------------------------------- |
+| 1    | SUMO   | Render 1,800 simulation frames                  |
+| 2    | TraCI  | Assign a unique neon color to each vehicle type |
+| 3    | OpenCV | Isolate neon-colored pixels and detect contours |
+| 4    | OpenCV | Generate bounding boxes and extract coordinates |
+| 5    | Export | Save 1,800 YOLO `.txt` annotation files         |
 
 - Neon color key (per vehicle type):
    Each of the 7 vehicle classes (car, microbus, bus, truck, motorcycle, bicycle, taxi) is assigned    a distinct neon RGB value.
