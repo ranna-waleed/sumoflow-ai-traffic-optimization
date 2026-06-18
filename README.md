@@ -1,6 +1,6 @@
 # Reducing Traffic Congestion and Estimations at Urban Intersections Through Deep Reinforcement Learning and Computer Vision
 
-Live demo: https://prismatic-taffy-9c78b9.netlify.app/
+Live demo: cute-entremet-5bea9e.netlify.app
 
 ---
 
@@ -25,6 +25,24 @@ We built SUMOFlow AI to tackle this. The idea is to replace the fixed signal pla
 
 ---
 
+### Dataset Preparation (Auto-Labeling)
+
+- Generating 1,800 labeled training images with zero manual annotation using the Neon Trick:
+  
+| Step | Tool   | Action                                          |
+| ---- | ------ | ----------------------------------------------- |
+| 1    | SUMO   | Render 1,800 simulation frames                  |
+| 2    | TraCI  | Assign a unique neon color to each vehicle type |
+| 3    | OpenCV | Isolate neon-colored pixels and detect contours |
+| 4    | OpenCV | Generate bounding boxes and extract coordinates |
+| 5    | Export | Save 1,800 YOLO `.txt` annotation files         |
+
+- Neon color key (per vehicle type):
+   Each of the 7 vehicle classes (car, microbus, bus, truck, motorcycle, bicycle, taxi) is assigned    a distinct neon RGB value.
+   OpenCV isolates each color channel to auto-generate bounding boxes per class.
+   Result: 1,800 images + 1,800 labels — fully automated.
+
+---
 ## Features
 
 - Vehicle detection using three models: YOLOv8s, Faster R-CNN, and RetinaNet , detecting 7 vehicle types (car, taxi, bus, microbus, truck, motorcycle, bicycle)
@@ -37,7 +55,6 @@ We built SUMOFlow AI to tackle this. The idea is to replace the fixed signal pla
 - Successfully tested on a second city, Taksim Square in Istanbul, with no code changes
 
 ---
-
 ## System Architecture
 
 The system works as a pipeline. SUMO runs the traffic simulation and TraCI connects Python to it. Every 10 simulation steps, the system collects lane sensor data, runs the BiLSTM to predict upcoming flow, and feeds everything into the DQN agents. Each agent decides whether to keep the current signal phase or switch it. The decision gets applied back to the simulation via TraCI and the cycle repeats.
@@ -232,12 +249,13 @@ The `frontend/build/` folder is the production build. Drag it to Netlify to depl
 
 The baseline is a standalone SUMO run with the original fixed-time signal plans — no Python involved, just raw SUMO output read from XML files.
 
-| Profile | Baseline Wait | DQN Wait | Wait Reduction | CO2 Reduction |
+| Profile |  Wait ↓ | CO₂ ↓ |
 |---|---|---|---|---|
-| Morning Rush | 626.6s | 46.7s | 92.6% | 90.3% |
-| Midday | 629.1s | 59.2s | 90.6% | 90.1% |
-| Evening Rush | 632.1s | 46.1s | 92.7% | 90.0% |
-| Night | 24.3s | 10.2s | 57.9% | 91.4% |
+| Morning Rush  | 86.5% | 58.6% |
+| Evening Rush  | 17.4% | +36.3% |
+| Midday   | -17.3 | -14.2% |
+| Night  | 14.2% | -9.1% |
+| Overall | ↓25.2% | ↓17.9% |
 
 All KPIs passed across all 4 profiles. DQN was trained for 350 episodes across all profiles.
 
