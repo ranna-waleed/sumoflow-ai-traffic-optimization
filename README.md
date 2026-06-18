@@ -28,6 +28,7 @@ We built SUMOFlow AI to tackle this. The idea is to replace the fixed signal pla
 ### Dataset Preparation (Auto-Labeling)
 
 - Generating 1,800 labeled training images with zero manual annotation using the Neon Trick:
+  
 | Step | Tool   | Action                                          |
 | ---- | ------ | ----------------------------------------------- |
 | 1    | SUMO   | Render 1,800 simulation frames                  |
