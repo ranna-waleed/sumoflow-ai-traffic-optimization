@@ -249,13 +249,14 @@ The `frontend/build/` folder is the production build. Drag it to Netlify to depl
 
 The baseline is a standalone SUMO run with the original fixed-time signal plans — no Python involved, just raw SUMO output read from XML files.
 
-| Profile |  Wait ↓ | CO₂ ↓ |
-|---|---|---|---|---|
-| Morning Rush  | 86.5% | 58.6% |
-| Evening Rush  | 17.4% | +36.3% |
-| Midday   | -17.3 | -14.2% |
-| Night  | 14.2% | -9.1% |
-| Overall | ↓25.2% | ↓17.9% |
+| Traffic Profile | Average Wait Time Change | CO₂ Emissions Change |
+| --------------- | ------------------------ | -------------------- |
+| Morning Rush    | ↓ 86.5%                  | ↓ 58.6%              |
+| Evening Rush    | ↓ 17.4%                  | ↑ 36.3%              |
+| Midday          | ↓ 17.3%                  | ↓ 14.2%              |
+| Night           | ↓ 14.2%                  | ↓ 9.1%               |
+| **Overall**     | **↓ 25.2%**              | **↓ 17.9%**          |
+
 
 All KPIs passed across all 4 profiles. DQN was trained for 350 episodes across all profiles.
 
