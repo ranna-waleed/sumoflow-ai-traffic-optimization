@@ -1,5 +1,5 @@
-# SUMOFlow AI — AI Governance Checklist
-## El-Tahrir Square Traffic Optimization — Graduation Project
+# SUMOFlow AI: AI Governance Checklist
+## El-Tahrir Square Traffic Optimization (Graduation Project)
 
 ---
 
@@ -7,11 +7,11 @@
 
 **Why are we using AI here?**
 
-Fixed-time traffic signals run the same cycle regardless of real conditions. At 3 AM with empty roads they behave identically to peak rush hour. Rule-based adaptive systems like SCOOT or SCATS require manually tuned thresholds per junction and per time-of-day — this does not scale and cannot discover dependencies between junctions.
+Fixed-time traffic signals run the same cycle regardless of real conditions. At 3 AM with empty roads they behave identically to peak rush hour. Rule-based adaptive systems like SCOOT or SCATS require manually tuned thresholds per junction and per time-of-day. this does not scale and cannot discover dependencies between junctions.
 
 **What does AI enable that rules cannot?**
 
-The DQN learns optimal switching policies directly from 350 episodes of simulated experience without any manual threshold tuning. The BiLSTM discovers temporal patterns in traffic flow and provides 30-second predictions that allow proactive switching instead of reactive. YOLOv8s detects 7 vehicle classes simultaneously in a single forward pass. The 7 DQN agents implicitly coordinate through a shared reward signal — a rule-based system would need explicit coordination logic per junction pair.
+The DQN learns optimal switching policies directly from 350 episodes of simulated experience without any manual threshold tuning. The BiLSTM discovers temporal patterns in traffic flow and provides 30-second predictions that allow proactive switching instead of reactive. YOLOv8s detects 7 vehicle classes simultaneously in a single forward pass. The 7 DQN agents implicitly coordinate through a shared reward signal. a rule-based system would need explicit coordination logic per junction pair.
 
 **What happens if you remove the AI component?**
 
@@ -19,7 +19,7 @@ Waiting time returns to the fixed-time baseline: 626.6 seconds average per vehic
 
 **Key files:**
 - Baseline results: `simulation/maps/baseline_outputs/tripinfo_morning.xml`
-- Evaluation report: `DeepQN/results/evaluation_report.json`
+- Evaluation report: `DeepQN/results/evaluation_report_fair.json`
 
 ---
 
@@ -39,9 +39,9 @@ Waiting time returns to the fixed-time baseline: 626.6 seconds average per vehic
 
 YOLOv8s divides the input image into a grid, predicts bounding boxes and class probabilities in a single forward pass, anchor-free architecture.
 
-Faster R-CNN uses a region proposal network first, then classifies each region — more accurate but slower than YOLOv8s.
+Faster R-CNN uses a region proposal network first, then classifies each region. more accurate but slower than YOLOv8s.
 
-RetinaNet uses focal loss to handle class imbalance between easy and hard examples — good recall on rare classes like bicycles.
+RetinaNet uses focal loss to handle class imbalance between easy and hard examples. good recall on rare classes like bicycles.
 
 BiLSTM processes a 60-step history in both forward and backward directions simultaneously, capturing both recent trends and longer-term patterns. Outputs predicted vehicle counts for N/S/E/W for the next 30 seconds.
 
@@ -49,10 +49,9 @@ Dueling Double DQN splits the network into value and advantage streams. Double D
 
 **Limitations:**
 
-- DQN trained only on SUMO simulation data — real deployment requires retraining on real sensor data
-- BiLSTM scaler fitted on Tahrir data — different city requires recalibration
-- YOLOv8s trained on 1,800 images — may degrade in extreme weather or night conditions
-- All models run on CPU — slower than GPU deployment
+- DQN trained only on SUMO simulation data, real deployment requires retraining on real sensor data
+- BiLSTM scaler fitted on Tahrir data, different city requires recalibration
+- YOLOv8s trained on 1,800 images, may degrade in extreme weather or night conditions
 
 **Key files:**
 - DQN architecture: `DeepQN/agent/network.py`
@@ -95,25 +94,26 @@ Tested in `DeepQN/tests/test_ai_behavior.py`. All-zero state, all-ones state, Na
 - Per-class AP for all 7 vehicle types
 
 **DQN primary KPIs:**
-- Average vehicle waiting time in seconds — measured per vehicle via TraCI getWaitingTime()
-- Total CO2 emissions in mg — measured per vehicle via TraCI getCO2Emission()
+- Average vehicle waiting time in seconds, measured per vehicle via TraCI getWaitingTime()
+- Total CO2 emissions in mg, measured per vehicle via TraCI getCO2Emission()
 
 **Baseline:** Standalone SUMO with original fixed-time signal plans, no Python. Results read from XML tripinfo files.
 
 **Results:**
 
-| Profile | Baseline Wait | DQN Wait | Wait Reduction | CO2 Reduction |
-|---|---|---|---|---|
-| Morning Rush | 626.6s | 46.7s | 92.6% | 90.3% |
-| Midday | 629.1s | 59.2s | 90.6% | 90.1% |
-| Evening Rush | 632.1s | 46.1s | 92.7% | 90.0% |
-| Night | 24.3s | 10.2s | 57.9% | 91.4% |
 
-All 8 KPIs (wait and CO2 for each of 4 profiles) passed.
+| Traffic Profile | Average Wait Time Change | CO₂ Emissions Change |
+| --------------- | ------------------------ | -------------------- |
+| Morning Rush    | ↓ 86.5%                  | ↓ 58.6%              |
+| Evening Rush    | ↑ 17.4%                  | ↑ 36.3%              |
+| Midday          | ↓ 17.3%                  | ↓ 14.2%              |
+| Night           | ↑ 14.2%                  | ↓ 9.1%               |
+| **Overall**     | **↓ 25.2%**              | **↓ 17.9%**          |
+
 
 **Key files:**
 - Baseline XML: `simulation/maps/baseline_outputs/`
-- Evaluation report: `DeepQN/results/evaluation_report.json`
+- Evaluation report: `DeepQN/results/evaluation_report_fair.json`
 - Evaluation script: `DeepQN/evaluation/evaluate.py`
 - Metrics parser: `DeepQN/evaluation/metrics.py`
 
@@ -128,14 +128,14 @@ Result: 12/12 tests passed.
 **Test groups:**
 
 Group 1 — State edge cases:
-- Empty network (all-zero state) — produces valid action
-- Maximum congestion (all-one state) — produces valid action
-- NaN/Inf injection — sanitized by guard, produces valid action
-- Random noise state — produces valid action
+- Empty network (all-zero state),produces valid action
+- Maximum congestion (all-one state), produces valid action
+- NaN/Inf injection, sanitized by guard, produces valid action
+- Random noise state, produces valid action
 
 Group 2 — BiLSTM input variations:
-- Zero prediction (no flow signal) — DQN handles gracefully
-- Maximum prediction (traffic spike) — DQN responds correctly
+- Zero prediction (no flow signal), DQN handles gracefully
+- Maximum prediction (traffic spike), DQN responds correctly
 
 Group 3 — Determinism and consistency:
 - Same input gives same output across 5 consecutive calls (epsilon=0 is fully deterministic)
@@ -146,8 +146,8 @@ Group 4 — Multi-agent independence:
 - Each agent outputs independent Q(keep) and Q(switch) values
 
 Group 5 — Failure recovery:
-- Missing junction in observation — filled with zeros, simulation continues
-- Wrong state vector size — padded or truncated to 37, produces valid action
+- Missing junction in observation, filled with zeros, simulation continues
+- Wrong state vector size, padded or truncated to 37, produces valid action
 
 **Key file:** `DeepQN/tests/test_ai_behavior.py`
 
@@ -174,7 +174,7 @@ Group 5 — Failure recovery:
 
 **PII:** No personal data collected. SUMO generates synthetic vehicle IDs (vehicle_0, vehicle_1). No real people tracked.
 
-**Harmful content:** Not applicable — this is a traffic signal optimizer.
+**Harmful content:** Not applicable. this is a traffic signal optimizer.
 
 **Input filtering:** NaN/Inf guard in state builder prevents corrupted data from reaching the DQN.
 
@@ -199,12 +199,12 @@ Not applicable. This project does not use any Large Language Model, generative A
 
 ```
 SUMO Simulation
-    → TraCI (synchronous, every 10 simulation steps)
-    → State collection (lane sensors + vehicle metrics)
-    → BiLSTM prediction (every 30 steps, ~5ms)
-    → DQN decision (7 agents, ~1ms each)
-    → TraCI phase apply
-    → SUMO advances 10 steps → repeat
+     TraCI (synchronous, every 10 simulation steps)
+     State collection (lane sensors + vehicle metrics)
+     BiLSTM prediction (every 30 steps, ~5ms)
+     DQN decision (7 agents, ~1ms each)
+     TraCI phase apply
+     SUMO advances 10 steps -> repeat
 ```
 
 DQN and BiLSTM inference are synchronous within the simulation loop. Inference is fast enough (~6ms total) that it does not delay the simulation perceptibly.
@@ -227,7 +227,7 @@ The FastAPI backend runs the DQN in a background thread so HTTP requests from th
 | BiLSTM (CPU) | ~5ms per call |
 | YOLOv8s (CPU) | ~50-100ms per frame |
 
-**Cost:** Zero. All models run locally on CPU. No cloud API, no tokens, no per-request cost.
+**Cost:** Zero. All models run locally on CPU/GPU. No cloud API, no tokens, no per-request cost.
 
 **Scalability:** Adding junctions requires only a YAML config file change. Confirmed by scaling from 7 agents (Tahrir) to 8 agents (Taksim) with zero code changes.
 
@@ -243,15 +243,15 @@ The DQNMonitor class runs automatically during every live DQN simulation session
 - Critical failure: average wait exceeds 110% of baseline
 
 **What is logged:**
-- `DeepQN/logs/monitor_metrics_TIMESTAMP.csv` — avg wait, CO2, n_switched per step
-- `DeepQN/logs/monitor_alerts_TIMESTAMP.csv` — all alerts with timestamp, level, and message
-- `logs/dqn_decisions_PROFILE_TIMESTAMP.csv` — full decision log per step
+- `DeepQN/logs/monitor_metrics_TIMESTAMP.csv` avg wait, CO2, n_switched per step
+- `DeepQN/logs/monitor_alerts_TIMESTAMP.csv`  all alerts with timestamp, level, and message
+- `logs/dqn_decisions_PROFILE_TIMESTAMP.csv`  full decision log per step
 
 **Verified output from live run:**
 ```
 DQN MONITORING SUMMARY
 Total alerts   : 1
-Warning alerts : 1  (CO2 spike at startup — expected)
+Warning alerts : 1  (CO2 spike at startup, expected)
 Final avg wait : 14.36s
 No degradation detected.
 ```
@@ -293,7 +293,7 @@ Reason: heavy queue on lane 228979748 (72% halting);
 
 **New profiles:** Add a new entry under profiles in dqn_config.yaml. The training loop rotates through all profiles automatically.
 
-**New maps:** Proven with Taksim Square — only a new YAML config file is needed. Run the net parser to extract junction IDs and lanes, fill the template, done.
+**New maps:** Proven with Taksim Square, only a new YAML config file is needed. Run the net parser to extract junction IDs and lanes, fill the template, done.
 
 **Data drift:** If real traffic patterns shift, re-run randomTrips.py on updated OSM data to regenerate routes, then retrain from scratch or from latest checkpoint.
 
@@ -320,7 +320,7 @@ reward = -1.0 * (change in total waiting time)
 ```
 All vehicles contribute equally to each term.
 
-**Wrong decisions:** Monitoring detects degradation in real time. Decision log provides full traceability per step. DQN output is restricted to pre-validated phase sequences — architecturally impossible to create a conflicting green signal. Automatic fallback to fixed-time signals if inference fails.
+**Wrong decisions:** Monitoring detects degradation in real time. Decision log provides full traceability per step. DQN output is restricted to pre-validated phase sequences. architecturally impossible to create a conflicting green signal. Automatic fallback to fixed-time signals if inference fails.
 
 **Key files:**
 - Reward function: `DeepQN/env/reward.py`
