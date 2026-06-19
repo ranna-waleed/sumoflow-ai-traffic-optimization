@@ -15,7 +15,7 @@ The DQN learns optimal switching policies directly from 350 episodes of simulate
 
 **What happens if you remove the AI component?**
 
-Waiting time returns to the fixed-time baseline: 626.6 seconds average per vehicle during morning rush hour. The 92.6% waiting time reduction and 90.3% CO2 reduction disappear entirely. Verified through controlled SUMO baseline experiments stored in `simulation/maps/baseline_outputs/`.
+Waiting time returns to the fixed-time baseline: 626.6 seconds average per vehicle during morning rush hour. The ↓ 25.2% waiting time reduction and 17.9% CO2 reduction disappear entirely. Verified through controlled SUMO baseline experiments stored in `simulation/maps/baseline_outputs/`.
 
 **Key files:**
 - Baseline results: `simulation/maps/baseline_outputs/tripinfo_morning.xml`
