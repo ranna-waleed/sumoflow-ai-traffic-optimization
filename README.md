@@ -1,7 +1,8 @@
 # Reducing Traffic Congestion and Estimations at Urban Intersections Through Deep Reinforcement Learning and Computer Vision
 
-Live demo: cute-entremet-5bea9e.netlify.app
-
+Live demo: [cute-entremet-5bea9e.netlify.app 
+](https://cute-entremet-5bea9e.netlify.app) 
+  
 ---
 
 ## Team Members
@@ -177,12 +178,19 @@ On Mac or Linux:
 export SUMO_HOME="/usr/share/sumo"
 ```
 
-### Step 3 — Create the conda environment
-
+### Step 3 — Create the environment
+Option 1 (using conda)
 ```bash
 conda create -n sumoflow_env python=3.12
 conda activate sumoflow_env
 ```
+
+Option 2 (using git)
+```bash
+python -m venv sumoflow_env
+sumoflow_env\Scripts\activate
+```
+
 
 ### Step 4 — Install Python packages
 
@@ -249,13 +257,14 @@ The `frontend/build/` folder is the production build. Drag it to Netlify to depl
 
 The baseline is a standalone SUMO run with the original fixed-time signal plans — no Python involved, just raw SUMO output read from XML files.
 
-| Profile |  Wait ↓ | CO₂ ↓ |
-|---|---|---|---|---|
-| Morning Rush  | 86.5% | 58.6% |
-| Evening Rush  | 17.4% | +36.3% |
-| Midday   | -17.3 | -14.2% |
-| Night  | 14.2% | -9.1% |
-| Overall | ↓25.2% | ↓17.9% |
+| Traffic Profile | Average Wait Time Change | CO₂ Emissions Change |
+| --------------- | ------------------------ | -------------------- |
+| Morning Rush    | ↓ 86.5%                  | ↓ 58.6%              |
+| Evening Rush    | ↑ 17.4%                  | ↑ 36.3%              |
+| Midday          | ↓ 17.3%                  | ↓ 14.2%              |
+| Night           | ↑ 14.2%                  | ↓ 9.1%               |
+| **Overall**     | **↓ 25.2%**              | **↓ 17.9%**          |
+
 
 All KPIs passed across all 4 profiles. DQN was trained for 350 episodes across all profiles.
 
@@ -342,19 +351,19 @@ react-router-dom 6.0+
 ## Screenshots
 
 **Dashboard**
-![Dashboard](docs/screenshots/dashboard.JPG)
+![Dashboard](docs/screenshots/dashboard.jpeg)
 
 **Live Simulation**
-![Live Simulation](docs/screenshots/live_simulation.JPG)
+![Live Simulation](docs/screenshots/live_simulation.jpeg)
 
 **Model Comparison**
-![Model Comparison](docs/screenshots/Model_comparison.JPG)
+![Model Comparison](docs/screenshots/Model_comparison.jpeg)
 
 **Before vs After**
-![Before vs After](docs/screenshots/Before_After.JPG)
+![Before vs After](docs/screenshots/Before_After.jpeg)
 
 **About**
-![About](docs/screenshots/about.JPG)
+![About](docs/screenshots/about.jpeg)
 
 ---
 
@@ -410,4 +419,6 @@ The Drive folder contains:
 ## Links
 
 GitHub: https://github.com/ranna-waleed/sumoflow-ai-traffic-optimization  
-Live demo: https://inquisitive-swan-9ffbe5.netlify.app
+Live demo: [cute-entremet-5bea9e.netlify.app 
+](https://cute-entremet-5bea9e.netlify.app) 
+  
