@@ -161,7 +161,11 @@ export default function Dashboard() {
           </div>
           {live && (
             <div style={{ position:"absolute", bottom:"10px", left:"10px", right:"10px", display:"flex", justifyContent:"space-between" }}>
-              {[`🚗 ${live.vehicles}`,`⏱ ${live.avg_wait_s}s`,`💨 ${(live.total_co2_mg/1000).toFixed(0)}k mg CO₂`].map(t => (
+              {[
+                `🚗 ${live.vehicles}`,
+                `⏱ ${live.avg_wait_s}s`,
+                `💨 ${(live.total_co2_mg/1000).toFixed(0)}k mg CO₂`
+              ].map(t => (
                 <span key={t} style={{ padding:"3px 8px", borderRadius:"99px", fontSize:"11px", fontFamily:"monospace", background:"rgba(0,0,0,0.75)", color:"#fff" }}>{t}</span>
               ))}
             </div>
@@ -235,13 +239,13 @@ export default function Dashboard() {
             accent="#1d4ed8"
           />
 
-          {/* Total CO2 */}
+          {/* Total CO2 — uses million mg during live, billion mg when static */}
           <MetricCard
             label="Total CO₂"
             value={run&&live
-              ? (live.total_co2_mg/1e9).toFixed(2)
-              : (met.total_co2_mg/1e9).toFixed(2)}
-            unit="billion mg"
+              ? (live.total_co2_mg / 1e6).toFixed(1)
+              : (met.total_co2_mg  / 1e9).toFixed(2)}
+            unit={run&&live ? "million mg" : "billion mg"}
             accent="#b45309"
           />
 

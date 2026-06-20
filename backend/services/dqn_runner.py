@@ -20,6 +20,7 @@ _multi_agent  = None
 _tls_config   = None
 _metrics      = {}
 _lock         = threading.Lock()
+_total_co2_accumulated = 0.0 
 
 _pipeline_state = {
     "sumo_vehicles":    0,
@@ -314,6 +315,8 @@ def _get_traffic_metrics():
             waiting.append(wait)
         except Exception:
             continue
+    co2_this_step = sum(co2_vals) if co2_vals else 0.0
+    _total_co2_accumulated += co2_this_step
 
     avg_wait  = sum(waiting)  / len(waiting)  if waiting  else 0.0
     total_co2 = sum(co2_vals) if co2_vals else 0.0
@@ -353,6 +356,7 @@ def start(profile: str) -> bool:
         _step         = 0
         _metrics      = {}
         _lstm_history = []
+        _total_co2_accumulated = 0.0 
 
         #  GUI setup: wait longer + retry to avoid black window 
         time.sleep(3.0)
@@ -580,7 +584,7 @@ def start(profile: str) -> bool:
                                     sum(speeds)/len(speeds) if speeds else 0.0, 2
                                 ),
                                 "total_co2_mg":   round(
-                                    sum(co2_vals) if co2_vals else 0.0, 1
+                                   _total_co2_accumulated, 1
                                 ),
                                 "current_action": _pipeline_state.get(
                                     "dqn_action_name", "—"

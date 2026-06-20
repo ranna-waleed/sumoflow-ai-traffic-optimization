@@ -115,6 +115,8 @@ def get_results():
     all_dqn_co2           = []
 
     for profile, data in report.items():
+        if "baseline" not in data:
+            continue
         base = data["baseline"]
         dqn  = data["dqn"]
         imp  = data["improvements"]

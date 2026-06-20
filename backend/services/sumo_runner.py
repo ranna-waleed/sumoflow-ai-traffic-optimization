@@ -24,15 +24,16 @@ MAP_CENTER_X = 3694.5
 MAP_CENTER_Y = 1539.5
 MAP_ZOOM     = 1500
 
-_running       = False
-_profile       = None
-_step          = 0
-_gui           = False
-_port          = 8813
-_view_id       = "View #0"
-_last_ss_error = None
-_first_frame   = None   # cached first frame for instant display
-_lstm_history  = []
+_running               = False
+_profile               = None
+_step                  = 0
+_gui                   = False
+_port                  = 8813
+_view_id               = "View #0"
+_last_ss_error         = None
+_first_frame           = None   # cached first frame for instant display
+_lstm_history          = []
+_total_co2_accumulated = 0.0    # accumulates CO2 across all steps
 
 
 def _angle_to_direction(angle: float) -> str:
@@ -123,7 +124,8 @@ def _setup_gui_view():
 
 
 def start(profile: str = "morning_rush", gui: bool = True) -> dict:
-    global _running, _profile, _step, _gui, _view_id, _first_frame, _lstm_history
+    global _running, _profile, _step, _gui, _view_id, _first_frame, \
+           _lstm_history, _total_co2_accumulated
 
     if _running:
         return {"status": "already_running", "profile": _profile, "step": _step}
@@ -152,12 +154,13 @@ def start(profile: str = "morning_rush", gui: bool = True) -> dict:
     ]
 
     traci.start(sumo_cmd, port=_port)
-    _running      = True
-    _profile      = profile
-    _gui          = True
-    _step         = 0
-    _first_frame  = None
-    _lstm_history = []
+    _running               = True
+    _profile               = profile
+    _gui                   = True
+    _step                  = 0
+    _first_frame           = None
+    _lstm_history          = []
+    _total_co2_accumulated = 0.0    # reset for new simulation
 
     # Set up GUI view and get first frame BEFORE returning
     # This is what prevents the black window on frontend
@@ -168,20 +171,23 @@ def start(profile: str = "morning_rush", gui: bool = True) -> dict:
 
 
 def stop() -> dict:
-    global _running, _profile, _step, _gui, _view_id, _first_frame, _lstm_history
+    global _running, _profile, _step, _gui, _view_id, _first_frame, \
+           _lstm_history, _total_co2_accumulated
+
     if not _running:
         return {"status": "not_running"}
     try:
         traci.close()
     except Exception:
         pass
-    _running      = False
-    _step         = 0
-    _gui          = False
-    _first_frame  = None
-    _lstm_history = []
-    profile       = _profile
-    _profile      = None
+    _running               = False
+    _step                  = 0
+    _gui                   = False
+    _first_frame           = None
+    _lstm_history          = []
+    _total_co2_accumulated = 0.0    # reset on stop
+    profile                = _profile
+    _profile               = None
     return {"status": "stopped", "profile": profile}
 
 
@@ -204,7 +210,7 @@ def run_steps_with_screenshot(n: int = 30) -> dict:
     if not image_b64 and _first_frame:
         image_b64 = _first_frame
 
-    state = _get_state_safe()
+    state       = _get_state_safe()
     yolo_counts = _run_yolo_on_frame()
 
     # Update LSTM history
@@ -241,6 +247,8 @@ def get_lstm_history() -> list:
 
 
 def _get_state_safe() -> dict:
+    global _total_co2_accumulated
+
     vehicle_ids  = traci.vehicle.getIDList()
     waiting_times, co2_values, speeds = [], [], []
     type_counts = {}
@@ -260,7 +268,8 @@ def _get_state_safe() -> dict:
 
     avg_wait  = round(sum(waiting_times)/len(waiting_times), 2) if waiting_times else 0.0
     max_wait  = round(max(waiting_times), 2)                    if waiting_times else 0.0
-    total_co2 = round(sum(co2_values), 2)
+    co2_step  = round(sum(co2_values), 2)
+    _total_co2_accumulated += co2_step   # accumulate across all steps
     avg_speed = round(sum(speeds)/len(speeds), 2)               if speeds        else 0.0
 
     tl_states = {}
@@ -277,7 +286,7 @@ def _get_state_safe() -> dict:
         "vehicles":         len(vehicle_ids),
         "avg_wait_s":       avg_wait,
         "max_wait_s":       max_wait,
-        "total_co2_mg":     total_co2,
+        "total_co2_mg":     round(_total_co2_accumulated, 2),  # accumulated total
         "avg_speed":        avg_speed,
         "type_counts":      type_counts,
         "direction_counts": dir_counts,
