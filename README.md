@@ -96,7 +96,7 @@ The frontend has two modes: live mode when the backend is running locally, and v
 - Uvicorn
 
 **AI and ML**
-- YOLOv8s (Ultralytics) — primary detection model, 71.2% mAP@0.5
+- YOLOv8s (Ultralytics) : primary detection model, 71.2% mAP@0.5
 - Faster R-CNN (PyTorch): 68.1% mAP@0.5, compared
 - RetinaNet (PyTorch): 65.8% mAP@0.5, compared
 - BiLSTM (PyTorch): 2 layers, 128 hidden units per direction
@@ -385,20 +385,20 @@ Full documentation is in `AI_GOVERNANCE.md`. Summary:
 
 | Point | Status | Key File |
 |---|---|---|
-| 0 — Why AI | Covered | AI_GOVERNANCE.md |
-| 1 — Model understanding | Covered | DeepQN/agent/network.py |
-| 2 — Data and inputs | Covered | DeepQN/env/sumo_env.py |
-| 3 — Evaluation and metrics | Covered | DeepQN/results/evaluation_report.json |
-| 4 — Testing AI behavior | 12/12 tests pass | DeepQN/tests/test_ai_behavior.py |
-| 5 — Reliability and failure handling | Covered | backend/services/dqn_runner.py |
-| 6 — Safety and governance | Covered | DeepQN/configs/dqn_config.yaml |
-| 7 — Prompt design | Not applicable — no LLM used | — |
-| 8 — System integration | Covered | backend/main.py |
-| 9 — Performance and cost | Covered | All inference runs locally on CPU |
-| 10 — Monitoring | Covered | DeepQN/monitoring/monitor.py |
-| 11 — Explainability | Covered | DeepQN/explainability/explainer.py |
-| 12 — Improvement strategy | Covered | DeepQN/training/train.py |
-| 13 — Ethical AI | Covered | DeepQN/env/reward.py |
+| 0 - Why AI | Covered | AI_GOVERNANCE.md |
+| 1 - Model understanding | Covered | DeepQN/agent/network.py |
+| 2 - Data and inputs | Covered | DeepQN/env/sumo_env.py |
+| 3 - Evaluation and metrics | Covered | DeepQN/results/evaluation_report.json |
+| 4 - Testing AI behavior | 12/12 tests pass | DeepQN/tests/test_ai_behavior.py |
+| 5 - Reliability and failure handling | Covered | backend/services/dqn_runner.py |
+| 6 - Safety and governance | Covered | DeepQN/configs/dqn_config.yaml |
+| 7 - Prompt design | Not applicable — no LLM used | — |
+| 8 - System integration | Covered | backend/main.py |
+| 9 - Performance and cost | Covered | All inference runs locally on CPU |
+| 10 - Monitoring | Covered | DeepQN/monitoring/monitor.py |
+| 11 - Explainability | Covered | DeepQN/explainability/explainer.py |
+| 12 - Improvement strategy | Covered | DeepQN/training/train.py |
+| 13 - Ethical AI | Covered | DeepQN/env/reward.py |
 
 ---
 
@@ -409,12 +409,12 @@ The following files are too large to store in the repository and are available o
 https://drive.google.com/drive/u/0/folders/1ULhxaaJfYKngSDmra5949AVY5koPnaeH
 
 The Drive folder contains:
-- Detection model outputs — YOLOv8s, Faster R-CNN, and RetinaNet training results, weights, and evaluation metrics
-- DQN checkpoints — trained model weights for all 7 junctions across 350 training episodes
-- DQN training logs — reward per episode, epsilon decay, and step-level decision logs
-- SUMO baseline outputs — tripinfo and emission XML files for all 4 Tahrir Square profiles
-- Taksim Square outputs — baseline simulation outputs and pipeline test results
-- Detector output XMLs — lane area detector data from the simulation runs
+- Detection model outputs: YOLOv8s, Faster R-CNN, and RetinaNet training results, weights, and evaluation metrics
+- DQN checkpoints: trained model weights for all 7 junctions across 350 training episodes
+- DQN training logs: reward per episode, epsilon decay, and step-level decision logs
+- SUMO baseline outputs: tripinfo and emission XML files for all 4 Tahrir Square profiles
+- Taksim Square outputs: baseline simulation outputs and pipeline test results
+- Detector output XMLs: lane area detector data from the simulation runs
   
 ## Links
 
