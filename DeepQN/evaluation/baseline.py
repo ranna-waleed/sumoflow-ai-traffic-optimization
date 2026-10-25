@@ -80,6 +80,8 @@ def run_fixed_time_episode(*, cfg: dict, profile: str, output_dir: Path,
             expected_begin_s=manifest.simulation_begin_s,
             expected_end_s=manifest.simulation_end_s,
             emission_step_scaled=False,
+            route_paths=routes,
+            require_demand_contract=True,
         )
         capture_output_hashes(manifest)
         manifest.completion_status = "complete" if metrics.valid and metrics.reached_horizon else "incomplete"

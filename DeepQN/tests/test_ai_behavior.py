@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import sys
 import logging
+import unittest
 import numpy as np
 from pathlib import Path
 
@@ -46,7 +47,7 @@ def record(name: str, passed: bool, detail: str = ""):
         print(f"         {detail}")
 
 
-def load_agents():
+def load_agents(checkpoint_episode: int):
     """Load trained agents from Tahrir checkpoints."""
     import yaml
     with open("DeepQN/configs/dqn_config.yaml") as f:
@@ -54,7 +55,7 @@ def load_agents():
     from DeepQN.agent.dqn_agent import MultiAgentDQN
     tls_ids = list(cfg["tls_junctions"].keys())
     agents  = MultiAgentDQN(tls_ids, cfg["dqn"])
-    agents.load_latest("DeepQN/checkpoints")
+    agents.load_for_evaluation("DeepQN/checkpoints", checkpoint_episode)
     return agents, tls_ids, cfg
 
 
@@ -79,6 +80,17 @@ def make_obs_with_nan(tls_ids: list) -> dict:
     return obs
 
 
+if __name__ != "__main__":
+    raise unittest.SkipTest(
+        "legacy interactive diagnostic; run explicitly with a checkpoint episode"
+    )
+
+if len(sys.argv) != 2 or not sys.argv[1].isdigit():
+    raise SystemExit(
+        "usage: python -m DeepQN.tests.test_ai_behavior CHECKPOINT_EPISODE"
+    )
+checkpoint_episode = int(sys.argv[1])
+
 
 print("\n" + "=" * 60)
 print("  SUMOFlow AI : Behavior & Edge Case Tests")
@@ -87,7 +99,7 @@ print("=" * 60 + "\n")
 #  Load agents 
 print("Loading agents...")
 try:
-    agents, tls_ids, cfg = load_agents()
+    agents, tls_ids, cfg = load_agents(checkpoint_episode)
     print(f"  Loaded {len(tls_ids)} agents from checkpoints.\n")
 except Exception as e:
     print(f"  ERROR loading agents: {e}")

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <vType id="queued" accel="1.0" decel="4.5" sigma="0" length="7.5" minGap="2.5" maxSpeed="4" emissionClass="HBEFA3/PC_G_EU4">
+        <param key="has.emissions.device" value="true"/>
+    </vType>
+    <route id="north_south" edges="n_in s_out"/>
+    <vehicle id="due00" type="queued" route="north_south" depart="0"/>
+    <vehicle id="due01" type="queued" route="north_south" depart="0"/>
+    <vehicle id="due02" type="queued" route="north_south" depart="0"/>
+    <vehicle id="due03" type="queued" route="north_south" depart="0"/>
+    <vehicle id="due04" type="queued" route="north_south" depart="0"/>
+    <vehicle id="due05" type="queued" route="north_south" depart="0"/>
+    <vehicle id="due06" type="queued" route="north_south" depart="0"/>
+    <vehicle id="due07" type="queued" route="north_south" depart="0"/>
+    <vehicle id="due08" type="queued" route="north_south" depart="0"/>
+    <vehicle id="due09" type="queued" route="north_south" depart="0"/>
+    <vehicle id="future" type="queued" route="north_south" depart="20"/>
+</routes>

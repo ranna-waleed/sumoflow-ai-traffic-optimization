@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <input>
+        <net-file value="../tiny_sumo/tiny.net.xml"/>
+        <route-files value="backlog.rou.xml"/>
+        <additional-files value="../tiny_sumo/tiny.add.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+        <end value="8"/>
+        <step-length value="1"/>
+    </time>
+    <random_number><seed value="23"/></random_number>
+</configuration>

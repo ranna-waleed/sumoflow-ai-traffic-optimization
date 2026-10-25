@@ -1,0 +1,31 @@
+simulation:
+  net_file: "DeepQN/tests/fixtures/tiny_sumo/tiny.net.xml"
+  add_file: "DeepQN/tests/fixtures/tiny_sumo/tiny.add.xml"
+  step_length: 1
+  decision_interval: 3
+  sumo_binary: "sumo"
+profiles:
+  backlog:
+    config: "DeepQN/tests/fixtures/congested_sumo/backlog.sumocfg"
+    begin: 0
+    end: 8
+tls_junctions:
+  center:
+    green_phases: [0, 2]
+    green_to_yellow: {"0": 1, "2": 3}
+    yellow_to_next: {"1": 2, "3": 0}
+    yellow_duration: 3
+    min_green: 2
+    max_green: 10
+    incoming_lanes: ["n_in_0", "e_in_0", "s_in_0", "w_in_0"]
+state:
+  state_dim: 37
+  max_lanes: 10
+  features_per_lane: 3
+  max_queue: 20
+  max_wait: 60
+  max_phase_elapsed: 30
+dqn:
+  state_dim: 37
+  action_dim: 2
+  hidden_dims: [16, 16]

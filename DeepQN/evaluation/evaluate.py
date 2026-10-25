@@ -63,6 +63,7 @@ def _patch_sumocfg(original_path: str | Path, outputs: Dict[str, Path], seed: in
     for key, tag in tags.items():
         _set_or_create(output, tag, str(outputs[key].resolve()))
     _set_or_create(output, "tripinfo-output.write-unfinished", "true")
+    _set_or_create(output, "tripinfo-output.write-undeparted", "true")
     _set_or_create(output, "emission-output.step-scaled", "false")
     random_number = root.find("random_number")
     if random_number is None:
@@ -101,6 +102,11 @@ def _ensure_outputs_available(paths: Iterable[Path]) -> None:
     collisions = [str(path) for path in paths if path.exists()]
     if collisions:
         raise FileExistsError("refusing to overwrite existing evaluation artifacts: " + ", ".join(collisions))
+
+
+def _paired_baseline_manifest_path(directory, profile, seed, run_index):
+    """Return the exact non-overwriting filename emitted by baseline.py."""
+    return Path(directory) / f"manifest_fixed_time_{profile}_seed{seed}_run{run_index}.json"
 
 
 def _fixed_horizon_config(cfg: dict, profile: str, patched_path: Path) -> dict:
@@ -196,6 +202,8 @@ def run_controlled_episode(
             expected_begin_s=manifest.simulation_begin_s,
             expected_end_s=manifest.simulation_end_s,
             emission_step_scaled=bool(manifest.emission_step_scaled),
+            route_paths=route_paths,
+            require_demand_contract=True,
         )
         manifest.controller_diagnostics = {
             "decision_count": decision_count,
@@ -229,6 +237,10 @@ def _aggregate(runs: Iterable[EpisodeMetrics]) -> dict:
     fields = (
         "tripinfo_records", "successful_arrivals", "removed_or_vaporized",
         "teleport_or_vaporization_tagged_arrivals", "unfinished_tripinfo_records",
+        "scheduled_demand", "inserted_vehicles", "undeparted_vehicles",
+        "demand_normalized_waiting_s", "censored_preinsertion_delay_per_due_vehicle_s",
+        "mean_departure_delay_inserted_s", "insertion_rate", "completion_rate",
+        "conditional_completion_rate", "arrival_throughput_veh_per_hour",
         "avg_waiting_time_s", "avg_travel_time_s", "avg_time_loss_s",
         "total_co2_mg", "network_co2_per_successful_arrival_mg", "mean_successful_trip_co2_mg", "throughput",
         "unfinished_vehicles", "teleports", "collisions", "avg_speed_ms",
@@ -306,7 +318,9 @@ def evaluate(
             run_metrics.append(metrics)
             run_manifests.append(manifest)
             if baseline_manifest_dir:
-                baseline_path = Path(baseline_manifest_dir) / f"manifest_fixed_time_{profile}_seed{run_seed}.json"
+                baseline_path = _paired_baseline_manifest_path(
+                    baseline_manifest_dir, profile, run_seed, run_index
+                )
                 baseline_manifest = RunManifest.read(baseline_path)
                 validate_comparability(baseline_manifest, manifest)
                 baseline_metrics = load_metrics_from_paths(
@@ -319,6 +333,8 @@ def evaluate(
                     expected_begin_s=baseline_manifest.simulation_begin_s,
                     expected_end_s=baseline_manifest.simulation_end_s,
                     emission_step_scaled=bool(baseline_manifest.emission_step_scaled),
+                    route_paths=list(baseline_manifest.route_files),
+                    require_demand_contract=True,
                 )
                 comparisons.append(metrics.improvement_vs(baseline_metrics))
         report["profiles"][profile] = {

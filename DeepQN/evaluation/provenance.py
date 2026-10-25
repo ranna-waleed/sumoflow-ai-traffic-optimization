@@ -181,7 +181,8 @@ def hash_effective_sumocfg(path: str | Path) -> str:
             continue
         for child in section:
             if child.tag.endswith("-output") and child.tag not in {
-                "tripinfo-output.write-unfinished", "emission-output.step-scaled"
+                "tripinfo-output.write-unfinished", "tripinfo-output.write-undeparted",
+                "emission-output.step-scaled"
             }:
                 child.set("value", "<OUTPUT_DESTINATION>")
     payload = ET.tostring(root, encoding="utf-8")

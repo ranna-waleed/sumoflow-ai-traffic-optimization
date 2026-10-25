@@ -1,0 +1,12 @@
+<configuration>
+    <input>
+        <net-file value="../tiny_sumo/tiny.net.xml"/>
+        <route-files value="window.rou.xml"/>
+    </input>
+    <time>
+        <begin value="5"/>
+        <end value="10"/>
+        <step-length value="1"/>
+    </time>
+    <processing><random value="false"/><seed value="41"/></processing>
+</configuration>

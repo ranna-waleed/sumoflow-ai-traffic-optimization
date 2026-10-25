@@ -1,0 +1,14 @@
+{
+  "schema_version": "junction-approach-arrivals-v1",
+  "network": "tahrirupdated.net.xml",
+  "direction_convention": "SUMO travel heading: north=[315,45), east=[45,135), south=[135,225), west=[225,315)",
+  "tls": {
+    "315744796": {"north": ["690516091#0"], "south": [], "east": [], "west": ["28718647#3"]},
+    "96621100": {"north": ["690516091#1", "10873186#8"], "south": [], "east": [], "west": []},
+    "2031414903": {"north": [], "south": ["10873186#5"], "east": ["50211834#1"], "west": []},
+    "2031414899": {"north": ["10873191#3"], "south": [], "east": [], "west": []},
+    "6288771431": {"north": ["10873191#4"], "south": [], "east": [], "west": []},
+    "271064234": {"north": ["10873193#1"], "south": [], "east": [], "west": []},
+    "315743335": {"north": [], "south": [], "east": ["28718874#1"], "west": []}
+  }
+}
