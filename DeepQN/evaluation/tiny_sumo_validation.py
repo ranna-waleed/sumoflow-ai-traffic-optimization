@@ -39,7 +39,8 @@ def run_validation(output_root: str | Path, seed: int = 17, repeat: int = 2,
         pair_dir = output_root / f"repeat_{index}"
         fixed, fixed_manifest = run_fixed_time_episode(
             cfg=cfg, profile="tiny", output_dir=pair_dir / "fixed_time",
-            run_index=index, seed=seed, config_path=DEFAULT_CONFIG)
+            run_index=index, seed=seed, config_path=DEFAULT_CONFIG,
+            wall_clock_timeout_s=30.0)
         random, random_manifest = run_controlled_episode(
             cfg=cfg, profile="tiny", agents=agents, controller="random",
             output_dir=pair_dir / "random", run_index=index, seed=seed,

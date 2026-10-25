@@ -1,6 +1,7 @@
 """Fixed-time SUMO baseline using the common Phase 1 evaluation contract."""
 from __future__ import annotations
 
+import math
 import subprocess
 from pathlib import Path
 
@@ -11,10 +12,39 @@ from DeepQN.evaluation.provenance import (
 )
 
 
+def _validate_wall_clock_timeout(value: float | None) -> float | None:
+    if value is None:
+        return None
+    timeout = float(value)
+    if not math.isfinite(timeout) or timeout <= 0:
+        raise ValueError("wall_clock_timeout_s must be finite and greater than zero")
+    return timeout
+
+
+def _run_sumo_command(command: list[str], wall_clock_timeout_s: float | None):
+    """Run SUMO with an optional wall-clock guard and diagnostic failure."""
+    try:
+        return subprocess.run(
+            command, cwd=PROJECT_ROOT, capture_output=True, text=True,
+            timeout=wall_clock_timeout_s,
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout.decode(errors="replace") if isinstance(exc.stdout, bytes) else (exc.stdout or "")
+        stderr = exc.stderr.decode(errors="replace") if isinstance(exc.stderr, bytes) else (exc.stderr or "")
+        detail = (stderr or stdout).strip()
+        suffix = f"; output: {detail}" if detail else ""
+        raise RuntimeError(
+            f"fixed-time SUMO exceeded wall-clock timeout "
+            f"{wall_clock_timeout_s:g}s; command: {command!r}{suffix}"
+        ) from exc
+
+
 def run_fixed_time_episode(*, cfg: dict, profile: str, output_dir: Path,
-                           run_index: int, seed: int, config_path: str | Path
+                           run_index: int, seed: int, config_path: str | Path,
+                           wall_clock_timeout_s: float | None = None,
                            ) -> tuple[EpisodeMetrics, RunManifest]:
     """Run SUMO without a TraCI controller, preserving its fixed TLS program."""
+    wall_clock_timeout_s = _validate_wall_clock_timeout(wall_clock_timeout_s)
     output_dir.mkdir(parents=True, exist_ok=True)
     run_id = f"fixed_time_{profile}_seed{seed}_run{run_index}"
     outputs = {kind: (output_dir / f"{kind}_{run_id}.xml").resolve()
@@ -41,7 +71,7 @@ def run_fixed_time_episode(*, cfg: dict, profile: str, output_dir: Path,
         patched = _patch_sumocfg(source, outputs, seed)
         manifest.effective_simulation_config_sha256 = hash_effective_sumocfg(patched)
         command = [cfg["simulation"].get("sumo_binary", "sumo"), "-c", str(patched), "--no-step-log"]
-        result = subprocess.run(command, cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30)
+        result = _run_sumo_command(command, wall_clock_timeout_s)
         if result.returncode:
             raise RuntimeError(f"fixed-time SUMO exited {result.returncode}: {(result.stderr or result.stdout).strip()}")
         metrics = load_metrics_from_outputs(

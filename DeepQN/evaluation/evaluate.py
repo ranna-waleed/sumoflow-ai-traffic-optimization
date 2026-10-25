@@ -103,6 +103,14 @@ def _ensure_outputs_available(paths: Iterable[Path]) -> None:
         raise FileExistsError("refusing to overwrite existing evaluation artifacts: " + ", ".join(collisions))
 
 
+def _fixed_horizon_config(cfg: dict, profile: str, patched_path: Path) -> dict:
+    """Return an isolated evaluation config that cannot stop on empty demand."""
+    run_cfg = copy.deepcopy(cfg)
+    run_cfg.setdefault("simulation", {})["terminate_on_empty"] = False
+    run_cfg["profiles"][profile]["config"] = str(patched_path)
+    return run_cfg
+
+
 def run_controlled_episode(
     *,
     cfg: dict,
@@ -158,8 +166,7 @@ def run_controlled_episode(
 
         patched_path = _patch_sumocfg(original_sumocfg, outputs, seed)
         manifest.effective_simulation_config_sha256 = hash_effective_sumocfg(patched_path)
-        run_cfg = copy.deepcopy(cfg)
-        run_cfg["profiles"][profile]["config"] = str(patched_path)
+        run_cfg = _fixed_horizon_config(cfg, profile, patched_path)
         env = SumoEnv(run_cfg, profile=profile, port=port)
         if environment_mutator is not None:
             environment_mutator(env)

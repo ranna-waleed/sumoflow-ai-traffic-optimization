@@ -368,9 +368,12 @@ class SumoEnv:
 
         #  2. Advance simulation step-by-step 
         step_arrived = 0
+        interval_start_time = float(traci.simulation.getTime())
+        interval_steps = 0
         for _ in range(self.decision_int):
             traci.simulationStep()
             self._step_count += 1
+            interval_steps += 1
             # Accumulate arrivals every SUMO step (not just the last one)
             step_arrived += traci.simulation.getArrivedNumber()
             # Tick every phase controller once per SUMO step
@@ -378,8 +381,16 @@ class SumoEnv:
                 ctrl.tick()
             # Update BiLSTM history buffer every step
             self._bilstm.tick()
-            # Exit early if simulation ends mid-interval
-            if self.terminate_on_empty and traci.simulation.getMinExpectedNumber() == 0:
+            # Avoid advancing a full decision interval beyond the configured
+            # horizon. Empty-demand termination remains the training default;
+            # fixed-horizon evaluation disables it explicitly.
+            if (
+                traci.simulation.getTime() >= self.sim_end
+                or (
+                    self.terminate_on_empty
+                    and traci.simulation.getMinExpectedNumber() == 0
+                )
+            ):
                 break
 
         #  3. Collect reward 
@@ -400,6 +411,8 @@ class SumoEnv:
             "sim_time":     sim_time,
             "step_count":   self._step_count,
             "step_arrived": step_arrived,   # arrivals this decision interval
+            "interval_steps": interval_steps,
+            "interval_duration_s": sim_time - interval_start_time,
             "profile":      self.profile,
             **self._reward_fn.get_metrics(),
         }
