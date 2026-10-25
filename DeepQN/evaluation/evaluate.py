@@ -1,313 +1,357 @@
-"""
-DeepQN/evaluation/evaluate.py:
-Before/after comparison , supports both Tahrir and Taksim configs.
-
-BASELINE: read from XML files whose path comes from the config YAML
-          (evaluation.baseline_output_dir) , not hardcoded.
-
-DQN:      collect live from TraCI per-vehicle metrics.
-          If no checkpoints exist, runs a RANDOM policy (Option A test).
-"""
+"""Provenance-aware SUMO evaluation using one XML metric pipeline."""
 
 from __future__ import annotations
 
 import argparse
+import copy
+import hashlib
 import json
 import logging
-import sys
+import tempfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, List, Optional
+from statistics import mean, stdev
+from typing import Dict, Iterable, Optional
 
 import numpy as np
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
-
-from DeepQN.agent.dqn_agent import MultiAgentDQN
-from DeepQN.env.sumo_env import SumoEnv
-from DeepQN.evaluation.metrics import EpisodeMetrics, load_metrics_from_outputs
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    datefmt="%H:%M:%S",
+from DeepQN.agent.dqn_agent import CheckpointManifest, MultiAgentDQN
+from DeepQN.evaluation.metrics import (
+    EpisodeMetrics,
+    load_metrics_from_outputs,
+    load_metrics_from_paths,
+)
+from DeepQN.evaluation.provenance import (
+    RunManifest,
+    build_run_manifest,
+    capture_output_hashes,
+    hash_effective_sumocfg,
+    validate_comparability,
 )
 
-
-# Helpers
-
-def _baseline_dir(cfg: dict) -> Path:
-    """Read baseline output dir from config , works for any map."""
-    ev = cfg.get("evaluation", {})
-    d  = ev.get("baseline_output_dir", "simulation/maps/baseline_outputs")
-    return Path(d)
+logger = logging.getLogger(__name__)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
-def _suffix_map(cfg: dict) -> dict:
-    """Map profile names to XML file suffixes."""
-    # Custom map from config (e.g. taksim_morning -> taksim)
-    sm = cfg.get("baseline_suffix_map", {})
-    # Tahrir defaults
-    defaults = {
-        "morning_rush": "morning",
-        "midday":       "midday",
-        "evening_rush": "evening",
-        "night":        "night",
+def _set_or_create(parent: ET.Element, tag: str, value: str) -> None:
+    child = parent.find(tag)
+    if child is None:
+        child = ET.SubElement(parent, tag)
+    child.set("value", value)
+
+
+def _patch_sumocfg(original_path: str | Path, outputs: Dict[str, Path], seed: int) -> Path:
+    """Create a temporary config beside the original; never alter the source."""
+    original = Path(original_path).resolve()
+    tree = ET.parse(original)
+    root = tree.getroot()
+    output = root.find("output")
+    if output is None:
+        output = root.find("o")
+    if output is None:
+        output = ET.SubElement(root, "output")
+    tags = {
+        "tripinfo": "tripinfo-output",
+        "emission": "emission-output",
+        "summary": "summary-output",
     }
-    defaults.update(sm)
-    return defaults
-
-
-# Baseline
-
-def get_baseline_metrics(cfg: dict, profile: str) -> EpisodeMetrics:
-    """Read baseline KPIs from SUMO XML files — no re-run needed."""
-    base_dir = _baseline_dir(cfg)
-    smap     = _suffix_map(cfg)
-    suffix   = smap.get(profile, profile)
-
-    logger.info("[BASELINE] Reading XML files for profile: %s (suffix: %s)", profile, suffix)
-    m = load_metrics_from_outputs(base_dir, profile, "fixed_time", suffix_override=suffix)
-    logger.info(
-        "[BASELINE] %s — avg_wait=%.1fs  total_co2=%.0fmg  throughput=%d",
-        profile, m.avg_waiting_time_s, m.total_co2_mg, m.throughput,
+    retained_tags = set(tags.values())
+    for child in list(output):
+        if child.tag.endswith("-output") and child.tag not in retained_tags:
+            output.remove(child)
+    for key, tag in tags.items():
+        _set_or_create(output, tag, str(outputs[key].resolve()))
+    _set_or_create(output, "tripinfo-output.write-unfinished", "true")
+    _set_or_create(output, "emission-output.step-scaled", "false")
+    random_number = root.find("random_number")
+    if random_number is None:
+        random_number = ET.SubElement(root, "random_number")
+    _set_or_create(random_number, "seed", str(seed))
+    temporary = tempfile.NamedTemporaryFile(
+        suffix=".sumocfg", mode="wb", dir=original.parent, delete=False
     )
-    return m
+    tree.write(temporary, encoding="utf-8", xml_declaration=True)
+    temporary.close()
+    return Path(temporary.name)
 
 
-# DQN / random runner 
-
-def run_dqn(
-    cfg:        dict,
-    profile:    str,
-    agents:     MultiAgentDQN,
-    port:       int  = 8813,
-    random_policy: bool = False,
-) -> EpisodeMetrics:
-    """
-    Run one episode. If random_policy=True, actions are random (no trained weights).
-    Metrics collected per-vehicle to match baseline XML.
-    """
-    mode_label = "RANDOM" if random_policy else "DQN"
-    logger.info("[%s] Running profile: %s", mode_label, profile)
-
-    try:
-        import traci
-    except ImportError:
-        raise ImportError("TraCI not found. Check SUMO_HOME and PYTHONPATH.")
-
-    env  = SumoEnv(cfg, profile=profile, port=port)
-    obs  = env.reset()
-    done = False
-
-    total_co2_mg    = 0.0
-    total_arrived   = 0
-    vehicle_waits: Dict[str, float] = {}
-    steps = 0
-
-    while not done:
-        try:
-            active_vids = traci.vehicle.getIDList()
-        except Exception:
-            active_vids = []
-
-        for vid in active_vids:
-            try:
-                vehicle_waits[vid] = traci.vehicle.getWaitingTime(vid)
-            except Exception:
-                pass
-
-        for vid in active_vids:
-            try:
-                total_co2_mg += traci.vehicle.getCO2Emission(vid)
-            except Exception:
-                pass
-
-        try:
-            total_arrived += traci.simulation.getArrivedNumber()
-        except Exception:
-            pass
-
-        if random_policy:
-            actions = {tid: np.random.randint(0, 2) for tid in agents.agents}
-        else:
-            actions = agents.act(obs, eval_mode=True)
-
-        obs, rewards, done, info = env.step(actions)
-        steps += 1
-
-    env.close()
-
-    wait_values = list(vehicle_waits.values())
-    avg_wait = float(np.mean(wait_values)) if wait_values else 0.0
-
-    m = EpisodeMetrics(
-        profile            = profile,
-        mode               = "dqn_adaptive",
-        avg_waiting_time_s = avg_wait,
-        total_co2_mg       = total_co2_mg,
-        throughput         = total_arrived,
-    )
-    logger.info(
-        "[%s] %s done — avg_wait=%.1fs  total_co2=%.0fmg  throughput=%d  steps=%d",
-        mode_label, profile, avg_wait, total_co2_mg, total_arrived, steps,
-    )
-    return m
-
-
-# Comparison
-
-def compare(
-    config_path:    str                 = "DeepQN/configs/dqn_config.yaml",
-    checkpoint_dir: str                 = "DeepQN/checkpoints",
-    profiles:       Optional[List[str]] = None,
-    n_runs:         int                 = 3,
-    output_dir:     str                 = "DeepQN/results",
-    port:           int                 = 8813,
-) -> Dict[str, dict]:
-
-    with open(config_path) as f:
-        cfg = yaml.safe_load(f)
-
-    all_profiles = profiles or list(cfg["profiles"].keys())
-    tls_ids      = list(cfg["tls_junctions"].keys())
-    out_dir      = Path(output_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    # Try to load checkpoints , fall back to random policy if none exist
-    agents = MultiAgentDQN(tls_ids, cfg["dqn"])
-    try:
-        agents.load_latest(checkpoint_dir)
-        random_policy = False
-        logger.info("Loaded trained checkpoints from %s", checkpoint_dir)
-    except Exception as e:
-        random_policy = True
-        logger.warning("No checkpoints found (%s) — using RANDOM policy", e)
-        logger.warning("Results show pipeline functionality, not trained performance.")
-
-    results: Dict[str, dict] = {}
-
-    for profile in all_profiles:
-        logger.info("=" * 60)
-        logger.info(
-            "Evaluating profile: %s  (%d runs, %s)",
-            profile, n_runs, "RANDOM" if random_policy else "DQN"
-        )
-        logger.info("=" * 60)
-
-        base_m = get_baseline_metrics(cfg, profile)
-
-        dqn_waits, dqn_co2s, dqn_thrus = [], [], []
-        for run in range(n_runs):
-            logger.info("  Run %d/%d", run + 1, n_runs)
-            dm = run_dqn(cfg, profile, agents, port=port, random_policy=random_policy)
-            dqn_waits.append(dm.avg_waiting_time_s)
-            dqn_co2s.append(dm.total_co2_mg)
-            dqn_thrus.append(dm.throughput)
-
-        def _avg(lst): return float(np.mean(lst)) if lst else 0.0
-
-        dqn_avg = EpisodeMetrics(
-            profile            = profile,
-            mode               = "dqn_adaptive" if not random_policy else "random_policy",
-            avg_waiting_time_s = _avg(dqn_waits),
-            total_co2_mg       = _avg(dqn_co2s),
-            throughput         = int(_avg(dqn_thrus)),
-        )
-
-        improvements  = dqn_avg.improvement_vs(base_m)
-        kpi_wait_pass = improvements["avg_wait_pct"] > 0
-        kpi_co2_pass  = improvements["total_co2_pct"] > 0
-
-        results[profile] = {
-            "baseline":      base_m.to_dict(),
-            "dqn":           dqn_avg.to_dict(),
-            "improvements":  improvements,
-            "kpi_wait_pass": kpi_wait_pass,
-            "kpi_co2_pass":  kpi_co2_pass,
-            "random_policy": random_policy,
-        }
-
-        _print_profile_table(profile, base_m, dqn_avg, improvements, random_policy)
-
-    report_path = out_dir / "evaluation_report.json"
-    with open(report_path, "w") as f:
-        json.dump(results, f, indent=2)
-    logger.info("Report saved: %s", report_path)
-
-    _print_final_summary(results, random_policy)
-    return results
-
-
-# Print helpers
-
-def _print_profile_table(
-    profile:       str,
-    base:          EpisodeMetrics,
-    dqn:           EpisodeMetrics,
-    imp:           dict,
-    random_policy: bool = False,
-):
-    label = "RANDOM" if random_policy else "DQN"
-    print(f"\n  Profile: {profile.upper()}  [{label}]")
-    print(f"  {'Metric':<30} {'Baseline':>16} {label:>16} {'Change':>9}")
-    print("  " + "─" * 72)
-
-    rows = [
-        ("Avg waiting time (s)",  base.avg_waiting_time_s, dqn.avg_waiting_time_s, imp.get("avg_wait_pct")),
-        ("Avg travel time (s)",   base.avg_travel_time_s,  dqn.avg_travel_time_s,  imp.get("avg_travel_pct")),
-        ("Total CO2 (mg)",        base.total_co2_mg,       dqn.total_co2_mg,       imp.get("total_co2_pct")),
-        ("Throughput (vehicles)", float(base.throughput),  float(dqn.throughput),  None),
+def _sumocfg_inputs(config_path: str | Path) -> tuple[Path, list[Path], list[Path]]:
+    config = Path(config_path).resolve()
+    root = ET.parse(config).getroot()
+    input_section = root.find("input")
+    if input_section is None:
+        raise ValueError(f"SUMO config has no input section: {config}")
+    net = input_section.find("net-file")
+    routes = input_section.find("route-files")
+    if net is None or not net.get("value"):
+        raise ValueError(f"SUMO config has no net-file: {config}")
+    if routes is None or not routes.get("value"):
+        raise ValueError(f"SUMO config has no route-files: {config}")
+    network_path = config.parent / net.get("value")
+    route_paths = [config.parent / item.strip() for item in routes.get("value").split(",")]
+    additional = input_section.find("additional-files")
+    additional_paths = [] if additional is None or not additional.get("value") else [
+        config.parent / item.strip() for item in additional.get("value").split(",") if item.strip()
     ]
-    for name, bv, dv, pct in rows:
-        if pct is not None:
-            pct_str = f"{pct:+.1f}%"
-            arrow   = "PASS" if pct > 0 else "FAIL"
+    return network_path, route_paths, additional_paths
+
+
+def _ensure_outputs_available(paths: Iterable[Path]) -> None:
+    collisions = [str(path) for path in paths if path.exists()]
+    if collisions:
+        raise FileExistsError("refusing to overwrite existing evaluation artifacts: " + ", ".join(collisions))
+
+
+def run_controlled_episode(
+    *,
+    cfg: dict,
+    profile: str,
+    agents: MultiAgentDQN,
+    controller: str,
+    output_dir: Path,
+    run_index: int,
+    seed: int,
+    checkpoint_manifest: Optional[CheckpointManifest],
+    model_mode: str,
+    config_path: str | Path,
+    port: int,
+    environment_mutator=None,
+) -> tuple[EpisodeMetrics, RunManifest]:
+    """Run one explicit DQN or random controller and parse only SUMO XML."""
+    if controller not in {"dqn", "random"}:
+        raise ValueError("controller must be 'dqn' or 'random'")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    run_id = f"{controller}_{profile}_seed{seed}_run{run_index}"
+    outputs = {
+        kind: (output_dir / f"{kind}_{run_id}.xml").resolve()
+        for kind in ("tripinfo", "emission", "summary")
+    }
+    original_sumocfg = Path(cfg["profiles"][profile]["config"])
+    network_path, route_paths, additional_paths = _sumocfg_inputs(original_sumocfg)
+    manifest_path = output_dir / f"manifest_{run_id}.json"
+    _ensure_outputs_available([*outputs.values(), manifest_path])
+    manifest = build_run_manifest(
+        project_root=PROJECT_ROOT,
+        run_id=run_id,
+        controller=controller,
+        scenario=profile,
+        seed=seed,
+        simulation_begin_s=float(cfg["profiles"][profile]["begin"]),
+        simulation_end_s=float(cfg["profiles"][profile]["end"]),
+        step_length_s=float(cfg.get("simulation", {}).get("step_length", 1.0)),
+        config_path=config_path,
+        simulation_config_path=original_sumocfg,
+        network_path=network_path,
+        route_paths=route_paths,
+        additional_paths=additional_paths,
+        output_paths={key: str(value) for key, value in outputs.items()},
+        model_mode=model_mode,
+        checkpoint_manifest=(checkpoint_manifest.to_dict() if checkpoint_manifest else None),
+        emission_step_scaled=False,
+        sumo_binary=cfg.get("simulation", {}).get("sumo_binary", "sumo"),
+    )
+    patched_path: Optional[Path] = None
+    env = None
+    try:
+        from DeepQN.env.sumo_env import SumoEnv
+
+        patched_path = _patch_sumocfg(original_sumocfg, outputs, seed)
+        manifest.effective_simulation_config_sha256 = hash_effective_sumocfg(patched_path)
+        run_cfg = copy.deepcopy(cfg)
+        run_cfg["profiles"][profile]["config"] = str(patched_path)
+        env = SumoEnv(run_cfg, profile=profile, port=port)
+        if environment_mutator is not None:
+            environment_mutator(env)
+        obs = env.reset()
+        done = False
+        rng = np.random.default_rng(seed)
+        decision_count = 0
+        requested_switches = 0
+        action_trace = []
+        while not done:
+            if controller == "random":
+                actions = {tls_id: int(rng.integers(0, 2)) for tls_id in agents.agents}
+            else:
+                actions = agents.act(obs, eval_mode=True)
+            decision_count += 1
+            requested_switches += sum(int(action == 1) for action in actions.values())
+            action_trace.append({tls_id: int(action) for tls_id, action in sorted(actions.items())})
+            obs, _, done, _ = env.step(actions)
+        env.close()
+        env = None
+        metrics = load_metrics_from_outputs(
+            output_dir,
+            profile,
+            controller,
+            run_id,
+            step_length_s=manifest.step_length_s,
+            expected_begin_s=manifest.simulation_begin_s,
+            expected_end_s=manifest.simulation_end_s,
+            emission_step_scaled=bool(manifest.emission_step_scaled),
+        )
+        manifest.controller_diagnostics = {
+            "decision_count": decision_count,
+            "requested_switches": requested_switches,
+            "controlled_tls_ids": sorted(agents.agents),
+            "action_trace_sha256": hashlib.sha256(
+                json.dumps(action_trace, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            ).hexdigest(),
+        }
+        capture_output_hashes(manifest)
+        manifest.completion_status = "complete" if metrics.valid and metrics.reached_horizon else "incomplete"
+        if not metrics.valid:
+            manifest.errors.extend(metrics.errors)
+        elif not metrics.reached_horizon:
+            manifest.errors.append("SUMO terminated before the configured horizon")
+    except Exception as exc:
+        manifest.completion_status = "failed"
+        manifest.errors.append(str(exc))
+        raise
+    finally:
+        if env is not None:
+            env.close()
+        if patched_path is not None:
+            patched_path.unlink(missing_ok=True)
+        manifest.write(manifest_path)
+    return metrics, manifest
+
+
+def _aggregate(runs: Iterable[EpisodeMetrics]) -> dict:
+    records = list(runs)
+    fields = (
+        "tripinfo_records", "successful_arrivals", "removed_or_vaporized",
+        "teleport_or_vaporization_tagged_arrivals", "unfinished_tripinfo_records",
+        "avg_waiting_time_s", "avg_travel_time_s", "avg_time_loss_s",
+        "total_co2_mg", "network_co2_per_successful_arrival_mg", "mean_successful_trip_co2_mg", "throughput",
+        "unfinished_vehicles", "teleports", "collisions", "avg_speed_ms",
+    )
+    result: dict = {"n_runs": len(records), "all_valid": all(run.valid for run in records)}
+    for field_name in fields:
+        values = [getattr(run, field_name) for run in records]
+        if not values or any(value is None for value in values):
+            result[field_name] = {"mean": None, "stddev": None}
         else:
-            delta   = imp.get("throughput_delta", 0)
-            pct_str = f"Δ{delta:+d}"
-            arrow   = "PASS" if delta >= 0 else "FAIL"
-        print(f"  {name:<30} {bv:>16.1f} {dv:>16.1f} {pct_str:>9} {arrow}")
+            numeric = [float(value) for value in values]
+            result[field_name] = {
+                "mean": mean(numeric),
+                "stddev": stdev(numeric) if len(numeric) > 1 else 0.0,
+            }
+    return result
 
 
-def _print_final_summary(results: dict, random_policy: bool = False):
-    label = "RANDOM POLICY" if random_policy else "DQN"
-    print("\n" + "=" * 60)
-    print(f"  SUMMARY [{label}]")
-    print("=" * 60)
-    print(f"  {'Profile':<22} {'Wait ↓':>10} {'CO2 ↓':>10}")
-    print("  " + "─" * 44)
-    for profile, r in results.items():
-        w = "PASS" if r["kpi_wait_pass"] else "FAIL"
-        c = "PASS" if r["kpi_co2_pass"]  else "FAIL"
-        print(f"  {profile:<22} {w:>10} {c:>10}")
-    print("=" * 60)
-    if random_policy:
-        print("  ℹ Pipeline test complete. Train DQN for real results.")
-    print()
+def evaluate(
+    *,
+    config_path: str,
+    checkpoint_dir: str,
+    checkpoint_episode: Optional[int],
+    controller: str,
+    profiles: Optional[list[str]],
+    runs: int,
+    seed: int,
+    output_dir: str,
+    baseline_manifest_dir: Optional[str],
+    model_mode: str,
+    port: int,
+) -> dict:
+    with Path(config_path).open(encoding="utf-8") as stream:
+        cfg = yaml.safe_load(stream)
+    selected_profiles = profiles or list(cfg["profiles"])
+    unknown = sorted(set(selected_profiles) - set(cfg["profiles"]))
+    if unknown:
+        raise ValueError(f"unknown profiles: {unknown}")
+    agents = MultiAgentDQN(list(cfg["tls_junctions"]), cfg["dqn"])
+    checkpoint_manifest = None
+    if controller == "dqn":
+        if checkpoint_episode is None:
+            raise ValueError("trained DQN evaluation requires --checkpoint-episode")
+        checkpoint_manifest = agents.load_for_evaluation(checkpoint_dir, checkpoint_episode)
+    elif checkpoint_episode is not None:
+        raise ValueError("--checkpoint-episode is not valid for random evaluation")
 
+    destination = Path(output_dir)
+    report_path = destination / f"evaluation_{controller}_report.json"
+    _ensure_outputs_available([report_path])
+    report: dict = {
+        "controller": controller,
+        "checkpoint_manifest": checkpoint_manifest.to_dict() if checkpoint_manifest else None,
+        "profiles": {},
+    }
+    for profile in selected_profiles:
+        run_metrics: list[EpisodeMetrics] = []
+        run_manifests: list[RunManifest] = []
+        comparisons: list[dict] = []
+        for run_index in range(runs):
+            run_seed = seed + run_index
+            metrics, manifest = run_controlled_episode(
+                cfg=cfg,
+                profile=profile,
+                agents=agents,
+                controller=controller,
+                output_dir=destination,
+                run_index=run_index,
+                seed=run_seed,
+                checkpoint_manifest=checkpoint_manifest,
+                model_mode=model_mode,
+                config_path=config_path,
+                port=port,
+            )
+            run_metrics.append(metrics)
+            run_manifests.append(manifest)
+            if baseline_manifest_dir:
+                baseline_path = Path(baseline_manifest_dir) / f"manifest_fixed_time_{profile}_seed{run_seed}.json"
+                baseline_manifest = RunManifest.read(baseline_path)
+                validate_comparability(baseline_manifest, manifest)
+                baseline_metrics = load_metrics_from_paths(
+                    tripinfo_path=baseline_manifest.output_paths["tripinfo"],
+                    emission_path=baseline_manifest.output_paths["emission"],
+                    summary_path=baseline_manifest.output_paths["summary"],
+                    profile=profile,
+                    mode="fixed_time",
+                    step_length_s=baseline_manifest.step_length_s,
+                    expected_begin_s=baseline_manifest.simulation_begin_s,
+                    expected_end_s=baseline_manifest.simulation_end_s,
+                    emission_step_scaled=bool(baseline_manifest.emission_step_scaled),
+                )
+                comparisons.append(metrics.improvement_vs(baseline_metrics))
+        report["profiles"][profile] = {
+            "runs": [item.to_dict() for item in run_metrics],
+            "manifests": [item.to_dict() for item in run_manifests],
+            "aggregate": _aggregate(run_metrics),
+            "paired_improvements": comparisons,
+        }
+    destination.mkdir(parents=True, exist_ok=True)
+    with report_path.open("w", encoding="utf-8") as stream:
+        json.dump(report, stream, indent=2)
+        stream.write("\n")
+    return report
 
-# CLI
 
 if __name__ == "__main__":
-    p = argparse.ArgumentParser(
-        description="Evaluate SUMOFlow AI DQN vs fixed-time baseline"
-    )
-    p.add_argument("--config",     default="DeepQN/configs/dqn_config.yaml")
-    p.add_argument("--checkpoint", default="DeepQN/checkpoints")
-    p.add_argument("--profiles",   nargs="+", default=None)
-    p.add_argument("--runs",  type=int, default=1)
-    p.add_argument("--output", default="DeepQN/results")
-    p.add_argument("--port",   type=int, default=8813)
-    args = p.parse_args()
-
-    compare(
-        config_path    = args.config,
-        checkpoint_dir = args.checkpoint,
-        profiles       = args.profiles,
-        n_runs         = args.runs,
-        output_dir     = args.output,
-        port           = args.port,
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", default="DeepQN/configs/dqn_config.yaml")
+    parser.add_argument("--controller", choices=("dqn", "random"), required=True)
+    parser.add_argument("--checkpoint-dir", default="DeepQN/checkpoints")
+    parser.add_argument("--checkpoint-episode", type=int)
+    parser.add_argument("--profiles", nargs="+")
+    parser.add_argument("--runs", type=int, default=1)
+    parser.add_argument("--seed", type=int, required=True)
+    parser.add_argument("--output-dir", default="DeepQN/results/phase1a")
+    parser.add_argument("--baseline-manifest-dir")
+    parser.add_argument("--model-mode", default="as_configured")
+    parser.add_argument("--port", type=int, default=8813)
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO)
+    evaluate(
+        config_path=args.config,
+        checkpoint_dir=args.checkpoint_dir,
+        checkpoint_episode=args.checkpoint_episode,
+        controller=args.controller,
+        profiles=args.profiles,
+        runs=args.runs,
+        seed=args.seed,
+        output_dir=args.output_dir,
+        baseline_manifest_dir=args.baseline_manifest_dir,
+        model_mode=args.model_mode,
+        port=args.port,
     )

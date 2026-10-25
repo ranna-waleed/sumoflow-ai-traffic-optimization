@@ -24,10 +24,8 @@ Usage:
 from __future__ import annotations
 
 import logging
-import os
-import subprocess
-import sys
-import time
+import socket
+import tempfile
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -270,6 +268,7 @@ class SumoEnv:
         self.port           = port
         self.step_length: float = config["simulation"].get("step_length", 1.0)
         self.decision_int:  int = config["simulation"].get("decision_interval", 10)
+        self.terminate_on_empty: bool = config["simulation"].get("terminate_on_empty", True)
 
         sim_cfg             = config["simulation"]
         self.sumo_binary    = sim_cfg.get("sumo_binary", "sumo")
@@ -380,7 +379,7 @@ class SumoEnv:
             # Update BiLSTM history buffer every step
             self._bilstm.tick()
             # Exit early if simulation ends mid-interval
-            if traci.simulation.getMinExpectedNumber() == 0:
+            if self.terminate_on_empty and traci.simulation.getMinExpectedNumber() == 0:
                 break
 
         #  3. Collect reward 
@@ -393,7 +392,7 @@ class SumoEnv:
         # 5. Termination check 
         sim_time = traci.simulation.getTime()
         done = (
-            traci.simulation.getMinExpectedNumber() == 0
+            (self.terminate_on_empty and traci.simulation.getMinExpectedNumber() == 0)
             or sim_time >= self.sim_end
         )
 
@@ -411,9 +410,9 @@ class SumoEnv:
         """Close the TraCI connection and terminate SUMO."""
         if self._connected:
             try:
-                traci.close()
-            except Exception:
-                pass
+                traci.close(wait=True)
+            except Exception as exc:
+                logger.warning("Failed to close TraCI/SUMO cleanly: %s", exc)
             self._connected = False
             logger.info("SUMO environment closed.")
 
@@ -480,15 +479,37 @@ class SumoEnv:
         cmd = [
             self.sumo_binary,
             "-c", profile_config,
-            "--start",
-            "--quit-on-end",
             "--no-step-log",
-            "--remote-port", str(self.port),
         ]
-        logger.info("Launching SUMO: %s", " ".join(cmd))
-        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        time.sleep(3.0)  # let SUMO initialise
-        traci.init(self.port)
+        # Fail before spawning when the explicitly assigned port is occupied.
+        probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            probe.bind(("127.0.0.1", self.port))
+        except OSError as exc:
+            raise RuntimeError(f"TraCI port {self.port} is unavailable: {exc}") from exc
+        finally:
+            probe.close()
+
+        diagnostic = tempfile.NamedTemporaryFile(
+            prefix="sumoflow-sumo-", suffix=".log", mode="w+", encoding="utf-8", delete=False
+        )
+        self._sumo_diagnostic_path = Path(diagnostic.name)
+        logger.info("Launching headless SUMO: %s (diagnostic log: %s)", " ".join(cmd), self._sumo_diagnostic_path)
+        try:
+            # traci.start owns the child process and retries the connection rather
+            # than relying on a fixed startup sleep. The configured port ties this
+            # connection to this exact process.
+            traci.start(cmd, port=self.port, numRetries=30, stdout=diagnostic)
+        except Exception as exc:
+            diagnostic.flush()
+            diagnostic.seek(0)
+            output = diagnostic.read().strip()
+            raise RuntimeError(
+                f"SUMO failed to start on TraCI port {self.port}: {exc}. "
+                f"Diagnostic output: {output or '<empty>'}"
+            ) from exc
+        finally:
+            diagnostic.close()
         logger.info(
             "TraCI connected (port %d)  profile=%s  t=[%d, %d]",
             self.port, self.profile, self.sim_begin, self.sim_end,

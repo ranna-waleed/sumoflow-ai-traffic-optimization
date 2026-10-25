@@ -8,16 +8,18 @@ Features:
 - Soft or hard target-network update.
 - Epsilon-greedy exploration with linear or exponential decay.
 - Works with both UniformReplayBuffer and PrioritisedReplayBuffer.
-- Each of the 7 TLS junctions gets its own DQNAgent instance that shares
+- Each configured TLS junction gets its own DQNAgent instance that shares
   the same DuelingQNetwork *architecture* but has independent weights.
 """
 
 from __future__ import annotations
 
 import copy
+import hashlib
 import logging
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import numpy as np
 import torch
@@ -33,6 +35,38 @@ from DeepQN.agent.replay_buffer import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class CheckpointValidationError(RuntimeError):
+    """The requested trained ensemble is absent, inconsistent, or incompatible."""
+
+
+@dataclass(frozen=True)
+class CheckpointRecord:
+    tls_id: str
+    episode: int
+    path: str
+    sha256: str
+
+
+@dataclass(frozen=True)
+class CheckpointManifest:
+    episode: int
+    checkpoints: tuple[CheckpointRecord, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "episode": self.episode,
+            "checkpoints": [asdict(item) for item in self.checkpoints],
+        }
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 class DQNAgent:
@@ -232,7 +266,10 @@ class DQNAgent:
 
     def load(self, checkpoint_path: str):
         """Load weights from a previously saved checkpoint."""
-        ckpt = torch.load(checkpoint_path, map_location=self.device)
+        try:
+            ckpt = torch.load(checkpoint_path, map_location=self.device, weights_only=True)
+        except TypeError:  # PyTorch versions before weights_only was introduced
+            ckpt = torch.load(checkpoint_path, map_location=self.device)
         self.online_net.load_state_dict(ckpt["online"])
         self.target_net.load_state_dict(ckpt["target"])
         self.epsilon     = ckpt.get("epsilon", self.epsilon_end)
@@ -247,7 +284,7 @@ class DQNAgent:
 
 class MultiAgentDQN:
     """
-    Container for all 7 per-junction DQN agents.
+    Container for the configured per-junction DQN agents.
     Wraps act / push / update / save / load for convenience.
     """
 
@@ -298,7 +335,7 @@ class MultiAgentDQN:
             agent.save(directory, episode)
 
     def load_latest(self, directory: str):
-        """Load the most recent checkpoint per agent from ``directory``."""
+        """Best-effort per-agent loading retained for explicit training resume."""
         ckpt_dir = Path(directory)
         if not ckpt_dir.exists():
             logger.warning("Checkpoint dir '%s' not found; starting fresh.", directory)
@@ -309,3 +346,69 @@ class MultiAgentDQN:
                 agent.load(str(checkpoints[-1]))
             else:
                 logger.info("No checkpoint for %s; starting fresh.", tid)
+
+    def load_for_evaluation(self, directory: str, episode: int) -> CheckpointManifest:
+        """Atomically validate and load one complete trained ensemble.
+
+        Unlike :meth:`load_latest`, this method is exclusively for trained
+        evaluation and never accepts a missing or partially compatible set.
+        """
+        if not isinstance(episode, int) or isinstance(episode, bool) or episode < 0:
+            raise CheckpointValidationError("checkpoint episode must be a non-negative integer")
+        checkpoint_dir = Path(directory)
+        if not checkpoint_dir.is_dir():
+            raise CheckpointValidationError(f"checkpoint directory not found: {checkpoint_dir}")
+
+        prepared: Dict[str, Dict[str, Any]] = {}
+        records: list[CheckpointRecord] = []
+        for tls_id, agent in self.agents.items():
+            path = checkpoint_dir / f"{tls_id}_ep{episode:04d}.pt"
+            if not path.is_file():
+                raise CheckpointValidationError(
+                    f"missing checkpoint for TLS {tls_id}, episode {episode}: {path}"
+                )
+            try:
+                try:
+                    checkpoint = torch.load(path, map_location=agent.device, weights_only=True)
+                except TypeError:  # compatibility with older supported PyTorch
+                    checkpoint = torch.load(path, map_location=agent.device)
+            except Exception as exc:
+                raise CheckpointValidationError(f"cannot read checkpoint {path}: {exc}") from exc
+            if not isinstance(checkpoint, dict):
+                raise CheckpointValidationError(f"checkpoint is not a mapping: {path}")
+            missing_keys = {"online", "target", "episode"} - set(checkpoint)
+            if missing_keys:
+                raise CheckpointValidationError(
+                    f"checkpoint {path} is missing keys: {sorted(missing_keys)}"
+                )
+            if checkpoint["episode"] != episode:
+                raise CheckpointValidationError(
+                    f"checkpoint {path} records episode {checkpoint['episode']!r}, expected {episode}"
+                )
+            try:
+                online_probe = copy.deepcopy(agent.online_net)
+                target_probe = copy.deepcopy(agent.target_net)
+                online_probe.load_state_dict(checkpoint["online"], strict=True)
+                target_probe.load_state_dict(checkpoint["target"], strict=True)
+            except Exception as exc:
+                raise CheckpointValidationError(
+                    f"checkpoint {path} is incompatible with TLS {tls_id}: {exc}"
+                ) from exc
+            prepared[tls_id] = checkpoint
+            records.append(
+                CheckpointRecord(
+                    tls_id=tls_id,
+                    episode=episode,
+                    path=str(path.resolve()),
+                    sha256=_sha256(path),
+                )
+            )
+
+        # Mutation begins only after every checkpoint has passed validation.
+        for tls_id, checkpoint in prepared.items():
+            agent = self.agents[tls_id]
+            agent.online_net.load_state_dict(checkpoint["online"], strict=True)
+            agent.target_net.load_state_dict(checkpoint["target"], strict=True)
+            agent.epsilon = checkpoint.get("epsilon", agent.epsilon_end)
+            agent.total_steps = checkpoint.get("steps", 0)
+        return CheckpointManifest(episode=episode, checkpoints=tuple(records))

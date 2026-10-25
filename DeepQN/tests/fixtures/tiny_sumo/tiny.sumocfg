@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <input>
+        <net-file value="tiny.net.xml"/>
+        <route-files value="tiny.rou.xml"/>
+        <additional-files value="tiny.add.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+        <end value="40"/>
+        <step-length value="1"/>
+    </time>
+    <random_number>
+        <seed value="17"/>
+    </random_number>
+</configuration>

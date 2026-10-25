@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <vType id="passenger" accel="2.6" decel="4.5" sigma="0" length="5" minGap="2.5" maxSpeed="13.9" emissionClass="HBEFA3/PC_G_EU4">
+        <param key="has.emissions.device" value="true"/>
+    </vType>
+    <route id="north_south" edges="n_in s_out"/>
+    <route id="south_north" edges="s_in n_out"/>
+    <route id="east_west" edges="e_in w_out"/>
+    <route id="west_east" edges="w_in e_out"/>
+    <vehicle id="ns0" type="passenger" route="north_south" depart="0"/>
+    <vehicle id="ew0" type="passenger" route="east_west" depart="1"/>
+    <vehicle id="sn0" type="passenger" route="south_north" depart="4"/>
+    <vehicle id="we0" type="passenger" route="west_east" depart="7"/>
+</routes>
