@@ -1,0 +1,12 @@
+{
+  "schema_version": "junction-approach-arrivals-v1",
+  "network": "tiny.net.xml",
+  "tls": {
+    "center": {
+      "north": ["s_in"],
+      "south": ["n_in"],
+      "east": ["w_in"],
+      "west": ["e_in"]
+    }
+  }
+}

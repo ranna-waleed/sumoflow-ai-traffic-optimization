@@ -61,7 +61,7 @@ def _source(source_id: str, partition: str, crossing_time: int) -> SequenceSourc
         partition=partition,
         snapshots=tuple(snapshots),
         demand_seed={"train": 1, "validation": 2, "test": 3}[partition],
-        sumo_config_sha256=f"config-{partition}",
+        sumo_config_sha256=hashlib.sha256(f"config-{partition}".encode()).hexdigest(),
         source_sha256=hashlib.sha256(source_id.encode()).hexdigest(),
         demand_realization_id=f"demand-{source_id}",
         demand_sha256=hashlib.sha256(f"demand-{source_id}".encode()).hexdigest(),

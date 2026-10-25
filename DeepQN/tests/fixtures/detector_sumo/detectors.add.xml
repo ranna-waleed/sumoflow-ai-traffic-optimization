@@ -1,0 +1,10 @@
+<additional>
+    <inductionLoop id="e1__center__north__s_in_0" lane="s_in_0" pos="0.1" period="1" file="detector-aggregate.xml" friendlyPos="false"/>
+    <inductionLoop id="e1__center__south__n_in_0" lane="n_in_0" pos="0.1" period="1" file="detector-aggregate.xml" friendlyPos="false"/>
+    <inductionLoop id="e1__center__east__w_in_0" lane="w_in_0" pos="0.1" period="1" file="detector-aggregate.xml" friendlyPos="false"/>
+    <inductionLoop id="e1__center__west__e_in_0" lane="e_in_0" pos="0.1" period="1" file="detector-aggregate.xml" friendlyPos="false"/>
+    <instantInductionLoop id="instant_s" lane="s_in_0" pos="0.1" file="detector-instant.xml" friendlyPos="false"/>
+    <instantInductionLoop id="instant_n" lane="n_in_0" pos="0.1" file="detector-instant.xml" friendlyPos="false"/>
+    <instantInductionLoop id="instant_w" lane="w_in_0" pos="0.1" file="detector-instant.xml" friendlyPos="false"/>
+    <instantInductionLoop id="instant_e" lane="e_in_0" pos="0.1" file="detector-instant.xml" friendlyPos="false"/>
+</additional>

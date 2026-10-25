@@ -1,0 +1,9 @@
+<configuration>
+    <input>
+        <net-file value="../tiny_sumo/tiny.net.xml"/>
+        <route-files value="detector.rou.xml"/>
+        <additional-files value="detectors.add.xml"/>
+    </input>
+    <time><begin value="0"/><end value="8"/><step-length value="1"/></time>
+    <processing><seed value="71"/><random value="false"/><waiting-time-memory value="100"/></processing>
+</configuration>

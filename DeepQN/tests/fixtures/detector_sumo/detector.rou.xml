@@ -1,0 +1,10 @@
+<routes>
+    <vType id="car" accel="10" decel="10" sigma="0" length="5" minGap="1" maxSpeed="13.9"/>
+    <route id="sn" edges="s_in n_out"/><route id="ns" edges="n_in s_out"/>
+    <route id="we" edges="w_in e_out"/><route id="ew" edges="e_in w_out"/>
+    <vehicle id="south0" type="car" route="sn" depart="0" departSpeed="max"/>
+    <vehicle id="north0" type="car" route="ns" depart="0" departSpeed="max"/>
+    <vehicle id="west0" type="car" route="we" depart="0" departSpeed="max"/>
+    <vehicle id="east0" type="car" route="ew" depart="0" departSpeed="max"/>
+    <vehicle id="at_end" type="car" route="sn" depart="8" departSpeed="max"/>
+</routes>
