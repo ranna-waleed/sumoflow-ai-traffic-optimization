@@ -1,0 +1,22 @@
+{
+  "engineering_prerequisites": {
+    "demand_normalized_metric_parser": "verified_bounded_tests",
+    "explicit_demand_expansion": "verified_bounded_tests",
+    "forecast_contract_v2_dataset_v4": "verified_bounded_tests",
+    "interval_reward_accumulator": "verified_bounded_tests",
+    "physical_tls_trace": "verified_bounded_tests",
+    "research_checkpoint_contract": "verified_bounded_tests"
+  },
+  "artifacts": {
+    "experiment_manifest_candidate": {"path": "research/2026-10-27-phase3c-experiment-manifest-candidate.json", "sha256": "3ee843fc44f9c79213c6944e9c125daba41c87e91bf6d5d98b45001c9b3ba82c"},
+    "network": {"path": "simulation/maps/tahrirupdated.net.xml", "sha256": "a7f25235f208db932735983653e00b3af659d09d04169ef5807265433c2db708"},
+    "reward_calibration": {"path": null, "sha256": null},
+    "reward_calibration_protocol": {"path": "research/2026-10-27-phase3c-reward-calibration-protocol.json", "sha256": "0bf45ff5bcb2f265227178b9f3aa425a7948fc1366173079c4f9e3ae1ae51740"},
+    "split_registry": {"path": null, "sha256": null}
+  },
+  "phase3_authorized": false,
+  "publication_approved": false,
+  "scientific_blockers": ["approved five-pool split registry absent", "publication reward traces and calibration manifest absent", "Tahrir detector boundary approval absent", "TLS 96621100 sequence review unresolved", "trained seven-input forecast checkpoint absent", "five-seed DQN ensembles absent", "held-out evaluation outputs absent", "forecast likelihood validation absent", "empirical Tahrir calibration absent"],
+  "schema": "sumoflow-phase3c-readiness-v1",
+  "trust_roots": []
+}

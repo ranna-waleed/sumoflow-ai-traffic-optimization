@@ -1,0 +1,45 @@
+{
+  "arms": {
+    "fixed_time_secondary": {"classification": "secondary_full_operation"},
+    "no_forecast_dqn": {"forecast_slots": "four_explicit_zeros"},
+    "verified_forecast_dqn": {"forecast_mode": "verified_model_only"}
+  },
+  "artifacts": {
+    "explicit_demand_registry": {"sha256": null},
+    "forecast_checkpoint": {"sha256": null},
+    "reward_calibration": {"sha256": null},
+    "reward_calibration_protocol": {"path": "research/2026-10-27-phase3c-reward-calibration-protocol.json", "sha256": "0bf45ff5bcb2f265227178b9f3aa425a7948fc1366173079c4f9e3ae1ae51740"},
+    "split_registry": {"sha256": null}
+  },
+  "contracts": {
+    "forecast_dataset": "causal-junction-arrivals-60s-to-30s-v4-right-closed",
+    "forecast_inference": "junction-bilstm-60s-to-30s-v2-nonnegative-counts",
+    "metrics": "sumo-xml-demand-normalized-horizon-wait-v5",
+    "observation": "sumoflow-dqn-observation-v3-lane-occupancy-fraction",
+    "reward": "interval-global-reward-v1"
+  },
+  "controlled_tls": ["315744796", "96621100", "2031414903", "2031414899", "6288771431", "271064234", "315743335"],
+  "decision_interval_s": 10,
+  "effective_configuration": {
+    "path": "DeepQN/configs/dqn_config.yaml",
+    "sha256": "eb60241f8433c2f72667c3f15c2f7df4c91d78b2ce6d1a64a989ca46efd3a8f4",
+    "status": "provisional_not_effective_for_publication"
+  },
+  "demand": {"contract": "explicit-id", "partition": "controller_evaluation"},
+  "evaluation": {"paired_demands_per_profile": 10, "sumo_seeds": "independent", "outputs": ["tripinfo", "emission", "summary", "statistic", "manifest"]},
+  "failure_policy": {"collision": "report_and_prespecified_sensitivity", "population_reconciliation": "invalidate", "premature_termination": "invalidate", "sensor": "invalidate", "teleport": "invalidate", "trace": "invalidate", "unfinished": "measure"},
+  "network": {"path": "simulation/maps/tahrirupdated.net.xml", "sha256": "a7f25235f208db932735983653e00b3af659d09d04169ef5807265433c2db708"},
+  "phase3_authorized": false,
+  "policy": {"action": "binary-request", "architecture": "dueling-double-dqn-v3", "optimizer": {"batch_size": 64, "discount": 0.95, "discount_mode": "decision_step", "learning_rate": 0.0005, "minimum_replay_size": 1000, "replay_capacity": 50000, "target_update_interval": 200}},
+  "profiles": {
+    "evening": {"begin_s": 54000, "end_s": 72000},
+    "midday": {"begin_s": 43200, "end_s": 54000},
+    "morning": {"begin_s": 27000, "end_s": 37800},
+    "night": {"begin_s": 79200, "end_s": 86400}
+  },
+  "publication_approved": false,
+  "schema": "sumoflow-publication-experiment-candidate-v1",
+  "simulation_step_s": 1,
+  "training": {"budget": "unresolved_training_only_pilot", "pairing_rule": null, "seeds_per_arm": 5, "selection": "validation_only"},
+  "warmup": {"duration_s": 60, "included_in_outcomes": true, "protocol": "phase_controller_keep_v1"}
+}
