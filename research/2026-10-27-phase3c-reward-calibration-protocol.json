@@ -1,0 +1,20 @@
+{
+  "eligible_partitions": [
+    "training",
+    "calibration"
+  ],
+  "estimator": "positive_quantile",
+  "numpy_method": "linear",
+  "pooling_rule": "separate_reference_per_profile",
+  "publication_approved": false,
+  "quantile": 0.95,
+  "required_profiles": [
+    "morning",
+    "midday",
+    "evening",
+    "night"
+  ],
+  "schema": "sumoflow-reward-calibration-protocol-v1",
+  "trace_generation_protocol": "frozen_non_evaluation_controller_diagnostic_v1",
+  "zero_policy": "retain_in_trace_exclude_from_scale"
+}
