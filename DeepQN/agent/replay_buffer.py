@@ -30,7 +30,9 @@ class Transition:
     action:     int
     reward:     float
     next_state: np.ndarray
-    done:       bool
+    terminated: bool
+    truncated:  bool = False
+    interval_duration_s: float = 0.0
 
 
 @dataclass
@@ -39,9 +41,16 @@ class Batch:
     actions:     np.ndarray   # (B,)
     rewards:     np.ndarray   # (B,)
     next_states: np.ndarray   # (B, state_dim)
-    dones:       np.ndarray   # (B,)
+    terminated:  np.ndarray   # (B,) bootstrap is disabled only here
+    truncated:   np.ndarray   # (B,) horizon/time-limit diagnostic
+    interval_durations_s: np.ndarray
     weights:     np.ndarray   # (B,)   importance weights (ones for uniform)
     indices:     np.ndarray   # (B,)   for PER priority updates
+
+    @property
+    def dones(self) -> np.ndarray:
+        """Historical alias: only true environmental termination stops bootstrap."""
+        return self.terminated
 
 
 #  Uniform replay buffer
@@ -58,7 +67,7 @@ class UniformReplayBuffer:
     def __init__(self, capacity: int = 50_000, seed: int = 42):
         self.capacity = capacity
         self._buffer: Deque[Transition] = deque(maxlen=capacity)
-        random.seed(seed)
+        self._rng = random.Random(seed)
 
     def push(
         self,
@@ -66,15 +75,25 @@ class UniformReplayBuffer:
         action:     int,
         reward:     float,
         next_state: np.ndarray,
-        done:       bool,
+        done:       bool | None = None,
+        *, terminated: bool | None = None, truncated: bool = False,
+        valid: bool = True, interval_duration_s: float = 0.0,
     ) -> None:
+        if not valid:
+            raise ValueError("invalid simulation transitions must not enter replay")
+        terminal = bool(done) if terminated is None else bool(terminated)
+        if done is not None and terminated is not None and bool(done) != terminal:
+            raise ValueError("done and terminated disagree")
+        if interval_duration_s < 0 or not np.isfinite(interval_duration_s):
+            raise ValueError("interval duration must be finite and nonnegative")
         self._buffer.append(
             Transition(
                 state      = np.array(state,      dtype=np.float32),
                 action     = int(action),
                 reward     = float(reward),
                 next_state = np.array(next_state, dtype=np.float32),
-                done       = bool(done),
+                terminated=terminal, truncated=bool(truncated),
+                interval_duration_s=float(interval_duration_s),
             )
         )
 
@@ -83,7 +102,7 @@ class UniformReplayBuffer:
             raise ValueError(
                 f"Buffer has {len(self)} transitions; requested {batch_size}."
             )
-        transitions = random.sample(self._buffer, batch_size)
+        transitions = self._rng.sample(list(self._buffer), batch_size)
         return self._collate(transitions, np.ones(batch_size, dtype=np.float32))
 
     def __len__(self) -> int:
@@ -96,7 +115,9 @@ class UniformReplayBuffer:
             actions     = np.array([t.action     for t in transitions], dtype=np.int64),
             rewards     = np.array([t.reward     for t in transitions], dtype=np.float32),
             next_states = np.stack([t.next_state for t in transitions]),
-            dones       = np.array([t.done       for t in transitions], dtype=np.float32),
+            terminated  = np.array([t.terminated for t in transitions], dtype=np.float32),
+            truncated   = np.array([t.truncated for t in transitions], dtype=np.float32),
+            interval_durations_s=np.array([t.interval_duration_s for t in transitions], dtype=np.float32),
             weights     = weights,
             indices     = np.zeros(len(transitions), dtype=np.int64),
         )
@@ -133,7 +154,7 @@ class PrioritisedReplayBuffer:
         self.beta     = beta
         self.beta_inc = beta_inc
         self.eps      = eps
-        np.random.seed(seed)
+        self._rng = np.random.default_rng(seed)
 
         self._buffer:     List[Optional[Transition]] = [None] * capacity
         self._priorities: np.ndarray                 = np.zeros(capacity, dtype=np.float32)
@@ -146,15 +167,25 @@ class PrioritisedReplayBuffer:
         action:     int,
         reward:     float,
         next_state: np.ndarray,
-        done:       bool,
+        done:       bool | None = None,
+        *, terminated: bool | None = None, truncated: bool = False,
+        valid: bool = True, interval_duration_s: float = 0.0,
     ) -> None:
+        if not valid:
+            raise ValueError("invalid simulation transitions must not enter replay")
+        terminal = bool(done) if terminated is None else bool(terminated)
+        if done is not None and terminated is not None and bool(done) != terminal:
+            raise ValueError("done and terminated disagree")
+        if interval_duration_s < 0 or not np.isfinite(interval_duration_s):
+            raise ValueError("interval duration must be finite and nonnegative")
         max_p = self._priorities[:self._size].max() if self._size > 0 else 1.0
         self._buffer[self._ptr] = Transition(
             state      = np.array(state,      dtype=np.float32),
             action     = int(action),
             reward     = float(reward),
             next_state = np.array(next_state, dtype=np.float32),
-            done       = bool(done),
+            terminated=terminal, truncated=bool(truncated),
+            interval_duration_s=float(interval_duration_s),
         )
         self._priorities[self._ptr] = max_p
         self._ptr  = (self._ptr + 1) % self.capacity
@@ -167,7 +198,7 @@ class PrioritisedReplayBuffer:
         probs = self._priorities[:self._size] ** self.alpha
         probs /= probs.sum()
 
-        indices = np.random.choice(self._size, batch_size, replace=False, p=probs)
+        indices = self._rng.choice(self._size, batch_size, replace=False, p=probs)
         transitions = [self._buffer[i] for i in indices]
 
         # IS weights
@@ -180,7 +211,9 @@ class PrioritisedReplayBuffer:
             actions     = np.array([t.action     for t in transitions], dtype=np.int64),
             rewards     = np.array([t.reward     for t in transitions], dtype=np.float32),
             next_states = np.stack([t.next_state for t in transitions]),
-            dones       = np.array([t.done       for t in transitions], dtype=np.float32),
+            terminated  = np.array([t.terminated for t in transitions], dtype=np.float32),
+            truncated   = np.array([t.truncated for t in transitions], dtype=np.float32),
+            interval_durations_s=np.array([t.interval_duration_s for t in transitions], dtype=np.float32),
             weights     = weights.astype(np.float32),
             indices     = indices,
         )

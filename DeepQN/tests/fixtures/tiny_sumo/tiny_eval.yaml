@@ -5,6 +5,10 @@ simulation:
   decision_interval: 5
   terminate_on_empty: false
   sumo_binary: sumo
+  physical_trace_mode: research_fail_closed
+  lane_observation_mode: research_fail_closed
+  waiting_time_memory_s: 100
+  comparative_research: false
 profiles:
   tiny:
     config: DeepQN/tests/fixtures/tiny_sumo/tiny.sumocfg
@@ -20,6 +24,7 @@ tls_junctions:
     max_green: 20
     incoming_lanes: [n_in_0, s_in_0, e_in_0, w_in_0]
 state:
+  observation_contract: sumoflow-dqn-observation-v2-occupancy-percent
   max_lanes: 10
   features_per_lane: 3
   state_dim: 37
@@ -27,6 +32,8 @@ state:
   max_wait: 40
   max_phase_elapsed: 40
 bilstm:
+  mode: no_forecast
+  history_warmup_seconds: 0
   use_real_model: false
   max_flow_per_edge: 10
 reward:

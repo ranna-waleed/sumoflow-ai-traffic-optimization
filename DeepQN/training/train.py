@@ -41,6 +41,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from DeepQN.agent.dqn_agent import MultiAgentDQN
 from DeepQN.env.sumo_env import SumoEnv
 from DeepQN.training.callbacks import TrainingLogger, EpisodeCallback
+from DeepQN.training.reproducibility import seed_all
 
 logging.basicConfig(
     level=logging.INFO,
@@ -88,8 +89,8 @@ def train(
     rotation = train_cfg.get("profile_rotation", "sequential")
 
     #  Reproducibility 
-    random.seed(seed)
-    np.random.seed(seed)
+    seed_record = seed_all(seed, deterministic_torch=True)
+    logger.info("Explicit RNG seeds: %s", seed_record)
 
     #  Agents 
     multi_agent = MultiAgentDQN(tls_ids, dqn_cfg)
@@ -130,7 +131,13 @@ def train(
             next_obs, rewards, done, info = env.step(actions)
 
             # Store experience
-            multi_agent.push(obs, actions, rewards, next_obs, done)
+            multi_agent.push(
+                obs, actions, rewards, next_obs,
+                terminated=info.get("terminated", done),
+                truncated=info.get("truncated", False),
+                valid=info.get("transition_valid", True),
+                interval_duration_s=info.get("interval_duration_s", 0.0),
+            )
 
             # Update all agents
             multi_agent.update()

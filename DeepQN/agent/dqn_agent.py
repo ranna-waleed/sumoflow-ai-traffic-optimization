@@ -16,7 +16,10 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import json
 import logging
+import random
+import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -53,11 +56,19 @@ class CheckpointRecord:
 class CheckpointManifest:
     episode: int
     checkpoints: tuple[CheckpointRecord, ...]
+    schema_version: str = "legacy-strict-ensemble-v1"
+    ensemble_manifest_path: str | None = None
+    ensemble_manifest_sha256: str | None = None
+    run_manifest_sha256: str | None = None
 
     def to_dict(self) -> dict:
         return {
             "episode": self.episode,
             "checkpoints": [asdict(item) for item in self.checkpoints],
+            "schema_version": self.schema_version,
+            "ensemble_manifest_path": self.ensemble_manifest_path,
+            "ensemble_manifest_sha256": self.ensemble_manifest_sha256,
+            "run_manifest_sha256": self.run_manifest_sha256,
         }
 
 
@@ -104,6 +115,11 @@ class DQNAgent:
 
         #  Hyper-params 
         self.gamma      = cfg.get("gamma", 0.95)
+        self.discount_mode = cfg.get("discount_mode", "decision_step_v1")
+        if self.discount_mode != "decision_step_v1":
+            raise ValueError(
+                "unsupported discount_mode; Phase 2B.2B uses one gamma per decision transition"
+            )
         self.grad_clip  = cfg.get("grad_clip", 10.0)
         self.tau        = cfg.get("tau", 0.005)
         self.target_update_freq = cfg.get("target_update_freq", 200)
@@ -151,10 +167,14 @@ class DQNAgent:
         action:     int,
         reward:     float,
         next_state: np.ndarray,
-        done:       bool,
+        done:       bool | None = None,
+        *, terminated: bool | None = None, truncated: bool = False,
+        valid: bool = True, interval_duration_s: float = 0.0,
     ) -> None:
         """Store a transition in the replay buffer."""
-        self.replay.push(state, action, reward, next_state, done)
+        self.replay.push(state, action, reward, next_state, done,
+                         terminated=terminated, truncated=truncated, valid=valid,
+                         interval_duration_s=interval_duration_s)
         self.total_steps += 1
 
         # Decay epsilon after each step
@@ -202,7 +222,7 @@ class DQNAgent:
         a  = torch.LongTensor(batch.actions).to(self.device)
         r  = torch.FloatTensor(batch.rewards).to(self.device)
         s2 = torch.FloatTensor(batch.next_states).to(self.device)
-        d  = torch.FloatTensor(batch.dones).to(self.device)
+        d  = torch.FloatTensor(batch.terminated).to(self.device)
         w  = torch.FloatTensor(batch.weights).to(self.device)
 
         # Current Q-values
@@ -212,6 +232,9 @@ class DQNAgent:
         with torch.no_grad():
             next_actions = self.online_net(s2).argmax(dim=1, keepdim=True)
             next_q = self.target_net(s2).gather(1, next_actions).squeeze(1)
+            # Preregistered convention: one gamma per policy decision. Actual
+            # interval duration remains recorded for audit/truncation but does
+            # not exponentiate gamma, including the shortened final interval.
             targets = r + (1.0 - d) * self.gamma * next_q
 
         td_errors = targets - q_values
@@ -316,12 +339,16 @@ class MultiAgentDQN:
         actions:  Dict[str, int],
         rewards:  Dict[str, float],
         next_obs: Dict[str, np.ndarray],
-        done:     bool,
+        done:     bool | None = None,
+        *, terminated: bool | None = None, truncated: bool = False,
+        valid: bool = True, interval_duration_s: float = 0.0,
     ):
         for tid, agent in self.agents.items():
             if tid in obs and tid in actions:
                 agent.push(
-                    obs[tid], actions[tid], rewards[tid], next_obs[tid], done
+                    obs[tid], actions[tid], rewards[tid], next_obs[tid], done,
+                    terminated=terminated, truncated=truncated, valid=valid,
+                    interval_duration_s=interval_duration_s,
                 )
 
     def update(self) -> Dict[str, Optional[float]]:
@@ -333,6 +360,77 @@ class MultiAgentDQN:
     def save(self, directory: str, episode: int):
         for agent in self.agents.values():
             agent.save(directory, episode)
+
+    def save_research_ensemble(self, directory: str, episode: int,
+                               run_manifest_sha256: str) -> CheckpointManifest:
+        """Write a complete provenance-bearing ensemble without overwrites.
+
+        Historical ``save``/``load_latest`` remain available solely for legacy
+        resume behavior. Future research runs use this schema and immutable
+        explicitly selected episodes.
+        """
+        if len(run_manifest_sha256) != 64:
+            raise ValueError("run manifest SHA-256 is required")
+        root = Path(directory); root.mkdir(parents=True, exist_ok=True)
+        targets = {tid: root / f"{tid}_ep{episode:04d}.pt" for tid in self.agents}
+        ensemble_path = root / f"ensemble_ep{episode:04d}.json"
+        collisions = [str(path) for path in (*targets.values(), ensemble_path) if path.exists()]
+        if collisions:
+            raise FileExistsError("refusing to overwrite research checkpoints: " + ", ".join(collisions))
+        cfg_hashes = {tid: hashlib.sha256(json.dumps(
+            agent.cfg, sort_keys=True, separators=(",", ":")
+        ).encode()).hexdigest() for tid, agent in self.agents.items()}
+        published: list[Path] = []
+        try:
+            with tempfile.TemporaryDirectory(prefix=f".ensemble-ep{episode:04d}-", dir=root) as staging:
+                staging_root = Path(staging)
+                staged = {}
+                for tid, agent in self.agents.items():
+                    tmp = staging_root / targets[tid].name
+                    numpy_state = np.random.get_state()
+                    payload = {
+                        "checkpoint_schema": "sumoflow-dqn-checkpoint-v2",
+                        "online": agent.online_net.state_dict(), "target": agent.target_net.state_dict(),
+                        "optimizer": agent.optimiser.state_dict(), "episode": episode,
+                        "epsilon": agent.epsilon, "steps": agent.total_steps,
+                        "updates": agent.total_updates, "tls_id": tid,
+                        "architecture_config_sha256": cfg_hashes[tid],
+                        "run_manifest_sha256": run_manifest_sha256,
+                        "python_rng_state": random.getstate(),
+                        "numpy_rng_state": {
+                            "bit_generator": numpy_state[0],
+                            "state": numpy_state[1].tolist(), "position": numpy_state[2],
+                            "has_gauss": numpy_state[3], "cached_gaussian": numpy_state[4],
+                        },
+                        "torch_rng_state": torch.get_rng_state(),
+                    }
+                    torch.save(payload, tmp); staged[tid] = tmp
+                checkpoint_rows = [{"tls_id": tid, "episode": episode,
+                    "filename": targets[tid].name, "sha256": _sha256(staged[tid]),
+                    "architecture_config_sha256": cfg_hashes[tid]}
+                    for tid in sorted(staged)]
+                ensemble_payload = {
+                    "schema_version": "sumoflow-dqn-ensemble-v2", "episode": episode,
+                    "run_manifest_sha256": run_manifest_sha256,
+                    "tls_ids": sorted(self.agents), "checkpoints": checkpoint_rows,
+                }
+                ensemble_raw = (json.dumps(ensemble_payload, indent=2, sort_keys=True) + "\n").encode()
+                staged_manifest = staging_root / ensemble_path.name
+                staged_manifest.write_bytes(ensemble_raw)
+                for tid in sorted(staged):
+                    staged[tid].replace(targets[tid]); published.append(targets[tid])
+                staged_manifest.replace(ensemble_path); published.append(ensemble_path)
+        except Exception:
+            for path in published:
+                path.unlink(missing_ok=True)
+            raise
+        return CheckpointManifest(episode, tuple(
+            CheckpointRecord(tid, episode, str(path.resolve()), _sha256(path))
+            for tid, path in targets.items()
+        ), schema_version="sumoflow-dqn-ensemble-v2",
+            ensemble_manifest_path=str(ensemble_path.resolve()),
+            ensemble_manifest_sha256=_sha256(ensemble_path),
+            run_manifest_sha256=run_manifest_sha256)
 
     def load_latest(self, directory: str):
         """Best-effort per-agent loading retained for explicit training resume."""
@@ -347,11 +445,94 @@ class MultiAgentDQN:
             else:
                 logger.info("No checkpoint for %s; starting fresh.", tid)
 
-    def load_for_evaluation(self, directory: str, episode: int) -> CheckpointManifest:
-        """Atomically validate and load one complete trained ensemble.
+    def load_for_research_evaluation(self, directory: str, episode: int) -> CheckpointManifest:
+        """Require and atomically load a complete immutable v2 ensemble."""
+        if not isinstance(episode, int) or isinstance(episode, bool) or episode < 0:
+            raise CheckpointValidationError("checkpoint episode must be a non-negative integer")
+        root = Path(directory)
+        ensemble_path = root / f"ensemble_ep{episode:04d}.json"
+        if not ensemble_path.is_file():
+            raise CheckpointValidationError(f"research ensemble manifest not found: {ensemble_path}")
+        try:
+            manifest = json.loads(ensemble_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise CheckpointValidationError(f"cannot read ensemble manifest: {exc}") from exc
+        expected_ids = sorted(self.agents)
+        if (manifest.get("schema_version") != "sumoflow-dqn-ensemble-v2"
+                or manifest.get("episode") != episode
+                or manifest.get("tls_ids") != expected_ids):
+            raise CheckpointValidationError("research ensemble manifest is incompatible")
+        run_hash = manifest.get("run_manifest_sha256")
+        if not isinstance(run_hash, str) or len(run_hash) != 64:
+            raise CheckpointValidationError("research ensemble lacks a valid run manifest hash")
+        rows = manifest.get("checkpoints")
+        if (not isinstance(rows, list) or len(rows) != len(expected_ids)
+                or {row.get("tls_id") for row in rows} != set(expected_ids)):
+            raise CheckpointValidationError("research ensemble checkpoint membership is incomplete")
 
-        Unlike :meth:`load_latest`, this method is exclusively for trained
-        evaluation and never accepts a missing or partially compatible set.
+        prepared: Dict[str, Dict[str, Any]] = {}
+        records = []
+        for row in rows:
+            tls_id = row["tls_id"]; agent = self.agents[tls_id]
+            expected_name = f"{tls_id}_ep{episode:04d}.pt"
+            if row.get("filename") != expected_name or row.get("episode") != episode:
+                raise CheckpointValidationError(f"invalid checkpoint identity for TLS {tls_id}")
+            path = root / expected_name
+            if not path.is_file() or _sha256(path) != row.get("sha256"):
+                raise CheckpointValidationError(f"checkpoint hash mismatch for TLS {tls_id}")
+            try:
+                checkpoint = torch.load(path, map_location=agent.device, weights_only=True)
+            except Exception as exc:
+                raise CheckpointValidationError(f"cannot read research checkpoint {path}: {exc}") from exc
+            cfg_hash = hashlib.sha256(json.dumps(
+                agent.cfg, sort_keys=True, separators=(",", ":")
+            ).encode()).hexdigest()
+            required = {"online", "target", "optimizer", "episode", "tls_id",
+                        "checkpoint_schema", "architecture_config_sha256",
+                        "run_manifest_sha256", "python_rng_state", "numpy_rng_state",
+                        "torch_rng_state"}
+            if (required - set(checkpoint)
+                    or checkpoint.get("checkpoint_schema") != "sumoflow-dqn-checkpoint-v2"
+                    or checkpoint.get("tls_id") != tls_id
+                    or checkpoint.get("episode") != episode
+                    or checkpoint.get("run_manifest_sha256") != run_hash
+                    or checkpoint.get("architecture_config_sha256") != cfg_hash
+                    or row.get("architecture_config_sha256") != cfg_hash):
+                raise CheckpointValidationError(f"research checkpoint provenance is incompatible for TLS {tls_id}")
+            try:
+                online_probe = copy.deepcopy(agent.online_net)
+                target_probe = copy.deepcopy(agent.target_net)
+                online_probe.load_state_dict(checkpoint["online"], strict=True)
+                target_probe.load_state_dict(checkpoint["target"], strict=True)
+            except Exception as exc:
+                raise CheckpointValidationError(
+                    f"research checkpoint architecture is incompatible for TLS {tls_id}: {exc}"
+                ) from exc
+            prepared[tls_id] = checkpoint
+            records.append(CheckpointRecord(tls_id, episode, str(path.resolve()), row["sha256"]))
+
+        # No live model mutation occurs before the complete manifest and every
+        # constituent file, hash, provenance field, and tensor shape validates.
+        for tls_id, checkpoint in prepared.items():
+            agent = self.agents[tls_id]
+            agent.online_net.load_state_dict(checkpoint["online"], strict=True)
+            agent.target_net.load_state_dict(checkpoint["target"], strict=True)
+            agent.epsilon = checkpoint.get("epsilon", agent.epsilon_end)
+            agent.total_steps = checkpoint.get("steps", 0)
+        return CheckpointManifest(
+            episode, tuple(records), "sumoflow-dqn-ensemble-v2",
+            str(ensemble_path.resolve()), _sha256(ensemble_path), run_hash,
+        )
+
+    def load_legacy_for_evaluation(self, directory: str, episode: int) -> CheckpointManifest:
+        """Explicit historical strict loader; never valid for new research runs."""
+        return self.load_for_evaluation(directory, episode)
+
+    def load_for_evaluation(self, directory: str, episode: int) -> CheckpointManifest:
+        """Atomically load a complete historical ensemble.
+
+        This compatibility path predates v2 ensemble manifests. New research
+        evaluation must call :meth:`load_for_research_evaluation`.
         """
         if not isinstance(episode, int) or isinstance(episode, bool) or episode < 0:
             raise CheckpointValidationError("checkpoint episode must be a non-negative integer")
@@ -384,6 +565,10 @@ class MultiAgentDQN:
             if checkpoint["episode"] != episode:
                 raise CheckpointValidationError(
                     f"checkpoint {path} records episode {checkpoint['episode']!r}, expected {episode}"
+                )
+            if "checkpoint_schema" in checkpoint:
+                raise CheckpointValidationError(
+                    "schema-declared checkpoints require the research ensemble loader"
                 )
             try:
                 online_probe = copy.deepcopy(agent.online_net)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import socket
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -36,6 +37,18 @@ class TinySumoIntegrationTests(unittest.TestCase):
             self.assertEqual(record["random_manifest"]["controller"], "random")
             self.assertIsNone(record["random_manifest"]["checkpoint_manifest"])
             self.assertGreater(record["random_manifest"]["controller_diagnostics"]["decision_count"], 0)
+            trace_path = Path(record["random_manifest"]["controller_diagnostics"]
+                              ["physical_action_trace_path"])
+            trace = json.loads(trace_path.read_text(encoding="utf-8"))
+            self.assertTrue(trace["physical"])
+            samples = [sample for decision in trace["physical"]
+                       for rows in decision["physical_steps"].values() for sample in rows]
+            self.assertTrue(samples)
+            self.assertTrue(all(sample["start_boundary"]["source"] == "traci_physical_query"
+                                and sample["end_boundary_before_controller"]["source"] == "traci_physical_query"
+                                and sample["after_controller_update"]["source"] == "traci_physical_query"
+                                for sample in samples))
+            self.assertTrue(any(sample["executed_state"] is not None for sample in samples))
             for mode in ("fixed_time", "random"):
                 self.assertTrue(record[mode]["valid"])
                 self.assertTrue(record[mode]["reached_horizon"])

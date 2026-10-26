@@ -9,6 +9,10 @@ simulation:
   decision_interval: 10     # SUMO steps between DQN decisions
   sumo_binary: "sumo"       # use "sumo-gui" for visual debugging
   port: 8813                # TraCI port (incremented per parallel env)
+  seed: 42                  # explicit SUMO seed; research runs override and record this
+  physical_trace_mode: "research_fail_closed"
+  lane_observation_mode: "research_fail_closed"
+  waiting_time_memory_s: 100 # explicitly passed to SUMO for research collection
 
 profiles:
   morning_rush:
@@ -169,6 +173,7 @@ tls_junctions:
 
 #  State Space 
 state:
+  observation_contract: "sumoflow-dqn-observation-v2-occupancy-percent"
   max_lanes:         10      # pad all junctions to this many lanes
   features_per_lane: 3       # [halt_count, wait_time, occupancy]
   junction_features: 2       # [phase_idx_norm, phase_elapsed_norm]
@@ -184,6 +189,13 @@ state:
 
 #  BiLSTM Integration 
 bilstm:
+  # Phase 2B research modes: no_forecast | verified_model.
+  # Historical weights are incompatible; no fallback/proxy is permitted.
+  mode: "no_forecast"
+  # Both future DQN comparison conditions use this identical observed warm-up.
+  # Its traffic remains inside the frozen [begin, end) evaluation outcomes.
+  history_warmup_seconds: 60
+  initial_control_protocol: "phase_controller_keep_v1"
   # Edges used as proxies for each cardinal direction
   north_edges: ["690516091#0", "690516091#1"]
   south_edges: ["10873191#3",  "10873191#4",  "10873191#5"]
@@ -206,6 +218,7 @@ dqn:
   # Training
   learning_rate:      0.0005
   gamma:              0.95
+  discount_mode:      "decision_step_v1"  # one gamma per stored decision transition
   batch_size:         64
   replay_buffer_size: 50000
   min_replay_size:    1000
@@ -233,12 +246,17 @@ training:
 
 #  Reward 
 reward:
+  contract: "interval_v1"
   wait_time_weight:  1.0
-  co2_weight:        0.001     # scale: CO2 in mg/s vs wait in seconds
+  co2_weight:        0.001
   throughput_weight: 0.5       # bonus per completed vehicle
   pressure_weight:   0.0       # optional queue-balance pressure term
   clip_min:         -200.0
   clip_max:          10.0
+  delay_reference_vehicle_s: 100.0
+  co2_reference_mg: 10000.0
+  arrivals_reference_vehicles: 1.0
+  pressure_reference_vehicle_s: 10.0
 
 #  Evaluation
 evaluation:

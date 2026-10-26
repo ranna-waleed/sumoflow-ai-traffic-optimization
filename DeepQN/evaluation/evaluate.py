@@ -109,10 +109,14 @@ def _paired_baseline_manifest_path(directory, profile, seed, run_index):
     return Path(directory) / f"manifest_fixed_time_{profile}_seed{seed}_run{run_index}.json"
 
 
-def _fixed_horizon_config(cfg: dict, profile: str, patched_path: Path) -> dict:
+def _fixed_horizon_config(cfg: dict, profile: str, patched_path: Path,
+                          *, require_forecast_protocol: bool = False) -> dict:
     """Return an isolated evaluation config that cannot stop on empty demand."""
     run_cfg = copy.deepcopy(cfg)
     run_cfg.setdefault("simulation", {})["terminate_on_empty"] = False
+    run_cfg["simulation"]["research_evaluation"] = True
+    run_cfg["simulation"]["comparative_research"] = require_forecast_protocol
+    run_cfg["simulation"]["require_matched_forecast_warmup"] = require_forecast_protocol
     run_cfg["profiles"][profile]["config"] = str(patched_path)
     return run_cfg
 
@@ -172,16 +176,25 @@ def run_controlled_episode(
 
         patched_path = _patch_sumocfg(original_sumocfg, outputs, seed)
         manifest.effective_simulation_config_sha256 = hash_effective_sumocfg(patched_path)
-        run_cfg = _fixed_horizon_config(cfg, profile, patched_path)
+        run_cfg = _fixed_horizon_config(
+            cfg, profile, patched_path, require_forecast_protocol=(controller == "dqn")
+        )
         env = SumoEnv(run_cfg, profile=profile, port=port)
         if environment_mutator is not None:
             environment_mutator(env)
         obs = env.reset()
+        warmup_diagnostics = env._warmup_diagnostics
+        warmup_trace = env._warmup_trace
+        detector_preflight = env._detector_preflight
+        waiting_time_memory_s = env._waiting_time_memory_s
+        observation_contract = env.observation_contract
+        comparative_research = env.comparative_research
         done = False
         rng = np.random.default_rng(seed)
         decision_count = 0
         requested_switches = 0
-        action_trace = []
+        requested_action_trace = []
+        physical_action_trace = []
         while not done:
             if controller == "random":
                 actions = {tls_id: int(rng.integers(0, 2)) for tls_id in agents.agents}
@@ -189,8 +202,13 @@ def run_controlled_episode(
                 actions = agents.act(obs, eval_mode=True)
             decision_count += 1
             requested_switches += sum(int(action == 1) for action in actions.values())
-            action_trace.append({tls_id: int(action) for tls_id, action in sorted(actions.items())})
-            obs, _, done, _ = env.step(actions)
+            requested_action_trace.append({tls_id: int(action) for tls_id, action in sorted(actions.items())})
+            obs, _, done, step_info = env.step(actions)
+            physical_action_trace.append({
+                "decisions": step_info.get("action_decisions", {}),
+                "physical_steps": step_info.get("action_trace", {}),
+                "interval_duration_s": step_info.get("interval_duration_s"),
+            })
         env.close()
         env = None
         metrics = load_metrics_from_outputs(
@@ -205,13 +223,30 @@ def run_controlled_episode(
             route_paths=route_paths,
             require_demand_contract=True,
         )
+        trace_path = Path(output_dir) / f"action_trace_{run_id}.json"
+        if trace_path.exists():
+            raise FileExistsError(f"refusing to overwrite action trace: {trace_path}")
+        trace_payload = {
+            "initial_control_warmup": warmup_trace,
+            "requested": requested_action_trace,
+            "physical": physical_action_trace,
+        }
+        trace_raw = (json.dumps(trace_payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        trace_path.write_bytes(trace_raw)
         manifest.controller_diagnostics = {
             "decision_count": decision_count,
             "requested_switches": requested_switches,
             "controlled_tls_ids": sorted(agents.agents),
-            "action_trace_sha256": hashlib.sha256(
-                json.dumps(action_trace, sort_keys=True, separators=(",", ":")).encode("utf-8")
-            ).hexdigest(),
+            "requested_action_trace_sha256": hashlib.sha256(json.dumps(
+                requested_action_trace, sort_keys=True, separators=(",", ":")
+            ).encode("utf-8")).hexdigest(),
+            "physical_action_trace_path": str(trace_path.resolve()),
+            "physical_action_trace_sha256": hashlib.sha256(trace_raw).hexdigest(),
+            "initial_control_warmup": warmup_diagnostics,
+            "detector_runtime_preflight": detector_preflight,
+            "waiting_time_memory_s": waiting_time_memory_s,
+            "observation_contract": observation_contract,
+            "comparative_research": comparative_research,
         }
         capture_output_hashes(manifest)
         manifest.completion_status = "complete" if metrics.valid and metrics.reached_horizon else "incomplete"
@@ -284,7 +319,9 @@ def evaluate(
     if controller == "dqn":
         if checkpoint_episode is None:
             raise ValueError("trained DQN evaluation requires --checkpoint-episode")
-        checkpoint_manifest = agents.load_for_evaluation(checkpoint_dir, checkpoint_episode)
+        checkpoint_manifest = agents.load_for_research_evaluation(
+            checkpoint_dir, checkpoint_episode
+        )
     elif checkpoint_episode is not None:
         raise ValueError("--checkpoint-episode is not valid for random evaluation")
 
