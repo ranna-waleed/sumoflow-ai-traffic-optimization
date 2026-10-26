@@ -1,0 +1,116 @@
+{
+  "candidate_execution_manifest_status": "documentation_only_not_runtime_authority",
+  "head": "895ebb8a664b1979d137b54ccb07b6e4af6375e4",
+  "interfaces": [
+    {
+      "blocker": true,
+      "consumer": "five-pool realization generator",
+      "contract": "sumoflow-number-flow-expansion-v1",
+      "corrective_requirement": "Create and externally freeze per-profile expansion specifications and generated realization manifests; historical route bytes remain templates, not independent demands.",
+      "evidence": "Deterministic expansion and independent regeneration are tested; no approved Tahrir expansion specifications or five-pool outputs exist.",
+      "producer": "historical fixed-number-flow route XML",
+      "severity": "critical",
+      "sources": ["DeepQN/evaluation/demand_expansion.py:151", "DeepQN/evaluation/demand_expansion.py:336", "research/2026-10-27-phase3a-demand-readiness-ledger.md"]
+    },
+    {
+      "blocker": true,
+      "consumer": "training/calibration/validation/forecast-test/controller-evaluation stages",
+      "contract": "five scientifically disjoint demand pools",
+      "corrective_requirement": "Generate, hash, review and freeze distinct physical realizations and partition membership before model fitting.",
+      "evidence": "Generation, canonical fingerprinting and registry verification exist; the scientific registry identity is null.",
+      "producer": "explicit demand realization manifests",
+      "severity": "critical",
+      "sources": ["DeepQN/evaluation/demand_provenance.py:260", "DeepQN/evaluation/demand_provenance.py:493", "DeepQN/evaluation/demand_provenance.py:564"]
+    },
+    {
+      "blocker": true,
+      "consumer": "live verified forecast adapter",
+      "contract": "hash-bound network/additional files, installed E1 mapping, SUMO 1.26, one-second sampling",
+      "corrective_requirement": "Obtain independent approval of the exact Tahrir detector mapping and load the generated detector additional file in every effective configuration.",
+      "evidence": "Runtime detector IDs/lane/position fail closed and bounded E1 cases pass; Tahrir mapping approval trust roots remain empty and several physical edge cases remain unresolved.",
+      "producer": "effective SUMO configuration and E1 installation",
+      "severity": "critical",
+      "sources": ["DeepQN/forecasting/inference.py:157", "DeepQN/forecasting/detector_events.py:142", "research/2026-10-26-phase2c1-scientific-readiness.md"]
+    },
+    {
+      "blocker": false,
+      "consumer": "causal window builder",
+      "contract": "junction-approach-arrivals-v1; one-second E1 observations",
+      "corrective_requirement": "Retain fail-closed duplicate, teleport and source-identity rules; do not generalize bounded fixture results to unapproved Tahrir geometry.",
+      "evidence": "Bounded real-SUMO E1 collection, duplicate rejection and teleport rejection are regression tested.",
+      "producer": "E1 approach-entry events and seven-feature rows",
+      "severity": "high",
+      "sources": ["DeepQN/forecasting/detector_events.py:56", "DeepQN/forecasting/detector_events.py:259", "DeepQN/forecasting/inference.py:127"]
+    },
+    {
+      "blocker": false,
+      "consumer": "research count BiLSTM",
+      "contract": "causal-junction-arrivals-60s-to-30s-v4-right-closed",
+      "corrective_requirement": "Generate a hash-bound approved dataset; preserve right-closed target timing and training-only scaler fitting.",
+      "evidence": "Window causality, exact/adjacent boundary binning, feature order and disjoint pools are tested; no publication dataset exists.",
+      "producer": "60 one-second histories and following 30-second directional counts",
+      "severity": "high",
+      "sources": ["lstm/research_data.py:221", "DeepQN/forecasting/research_contract.py:14", "DeepQN/forecasting/research_contract.py:15"]
+    },
+    {
+      "blocker": true,
+      "consumer": "verified_model forecast adapter",
+      "contract": "junction-bilstm-count-mean-v2",
+      "corrective_requirement": "Allocate forecast-training seeds, train only on the approved training pool, select through validation, and publish a compatible checkpoint/scaler/dataset manifest.",
+      "evidence": "Nonnegative architecture and strict artifact loading are tested; the historical checkpoint has the wrong input shape and the compatible checkpoint identity is null.",
+      "producer": "nonnegative seven-input research BiLSTM",
+      "severity": "critical",
+      "sources": ["DeepQN/forecasting/inference.py:49", "DeepQN/forecasting/research_contract.py:16", "research/2026-10-27-phase3b-forecast-readiness-ledger.md"]
+    },
+    {
+      "blocker": false,
+      "consumer": "Dueling Double DQN",
+      "contract": "sumoflow-dqn-observation-v3-lane-occupancy-fraction; 37 values",
+      "corrective_requirement": "Use one frozen effective YAML and identical 60-second phase_controller_keep_v1 initialization for both learned arms.",
+      "evidence": "Dimension arithmetic, lane occupancy semantics, strict sensor behavior, action completeness and first-decision timing are tested.",
+      "producer": "lane/phase/forecast/time observations",
+      "severity": "high",
+      "sources": ["DeepQN/env/sumo_env.py:54", "DeepQN/env/sumo_env.py:515", "DeepQN/env/sumo_env.py:786"]
+    },
+    {
+      "blocker": true,
+      "consumer": "DQN training",
+      "contract": "interval-global-reward-v1 plus per-profile calibration v3",
+      "corrective_requirement": "Generate four-profile training/calibration-only traces and freeze positive reference values under the committed 0.95 protocol before training.",
+      "evidence": "Units, interval accumulation, held-out exclusion and protocol hash are enforced; no empirical calibration artifact exists.",
+      "producer": "delay, CO2, arrival and pressure intervals",
+      "severity": "critical",
+      "sources": ["DeepQN/env/reward.py:77", "DeepQN/evaluation/research_protocol.py:54", "research/2026-10-27-phase3c-reward-calibration-protocol.json"]
+    },
+    {
+      "blocker": true,
+      "consumer": "paired controller analysis",
+      "contract": "five policy replicates, ten physical demands/profile, two arms",
+      "corrective_requirement": "Freeze the seed-pairing/crossing rule and exact policy/checkpoint/demand schedule before evaluation; bind it at runtime.",
+      "evidence": "Complete-coverage validation exists, but uses ambiguous training_seed integers; the candidate pairing rule and all checkpoint identities are unresolved.",
+      "producer": "research checkpoints and controller-evaluation runs",
+      "severity": "critical",
+      "sources": ["DeepQN/evaluation/research_protocol.py:327", "research/2026-10-27-phase3d-seed-allocation-candidate.json", "research/2026-10-27-phase3c-experiment-manifest-candidate.json"]
+    },
+    {
+      "blocker": true,
+      "consumer": "publication tables and hierarchical inference",
+      "contract": "sumo-xml-demand-normalized-horizon-wait-v5 and valid physical traces",
+      "corrective_requirement": "Implement an authorized runner that verifies the complete immutable execution manifest before startup, preserves every valid/adverse result, and exports analysis-ready policy/demand clusters.",
+      "evidence": "XML reconciliation, output hashes and pairwise comparability exist; the Phase 3.0C manifest validator is not called by production evaluation and hierarchical inference is specified only in documentation.",
+      "producer": "SUMO XML, run manifests and paired outcomes",
+      "severity": "critical",
+      "sources": ["DeepQN/evaluation/metrics.py:268", "DeepQN/evaluation/provenance.py:208", "DeepQN/evaluation/provenance.py:218", "DeepQN/evaluation/evaluate.py:134"]
+    }
+  ],
+  "publication_approved": false,
+  "readiness_classes": {
+    "bounded_software_integrity": "ready_for_existing_bounded_regressions",
+    "field_calibrated_tahrir_case_study": "not_ready",
+    "real_world_deployment": "not_ready",
+    "synthetic_simulation_study": "conditionally_ready_after_demand_detector_calibration_and_runner_prerequisites"
+  },
+  "schema": "sumoflow-phase3d-integration-readiness-matrix-v1",
+  "seed_allocation_candidate_sha256": "dbaf6fa3e16548773489b26f36cf53f90295e930f71e380689222896eb9da192",
+  "trust_roots": []
+}
