@@ -125,7 +125,7 @@ def run_controlled_episode(
     *,
     cfg: dict,
     profile: str,
-    agents: MultiAgentDQN,
+    agents: Optional[MultiAgentDQN],
     controller: str,
     output_dir: Path,
     run_index: int,
@@ -135,10 +135,17 @@ def run_controlled_episode(
     config_path: str | Path,
     port: int,
     environment_mutator=None,
+    action_provider=None,
 ) -> tuple[EpisodeMetrics, RunManifest]:
-    """Run one explicit DQN or random controller and parse only SUMO XML."""
-    if controller not in {"dqn", "random"}:
-        raise ValueError("controller must be 'dqn' or 'random'")
+    """Run one explicit learned, random, or validated rule-based controller."""
+    if controller not in {"dqn", "random", "max_pressure"}:
+        raise ValueError("controller must be 'dqn', 'random', or 'max_pressure'")
+    if controller == "max_pressure" and action_provider is None:
+        raise ValueError("max_pressure requires an explicit validated action provider")
+    if controller == "max_pressure" and (checkpoint_manifest is not None or model_mode != "not_applicable"):
+        raise ValueError("max_pressure must not use a DQN checkpoint or forecast model")
+    if controller in {"dqn", "random"} and agents is None:
+        raise ValueError(f"{controller} requires an explicit agent ensemble")
     output_dir.mkdir(parents=True, exist_ok=True)
     run_id = f"{controller}_{profile}_seed{seed}_run{run_index}"
     outputs = {
@@ -177,7 +184,8 @@ def run_controlled_episode(
         patched_path = _patch_sumocfg(original_sumocfg, outputs, seed)
         manifest.effective_simulation_config_sha256 = hash_effective_sumocfg(patched_path)
         run_cfg = _fixed_horizon_config(
-            cfg, profile, patched_path, require_forecast_protocol=(controller == "dqn")
+            cfg, profile, patched_path,
+            require_forecast_protocol=(controller in {"dqn", "max_pressure"})
         )
         env = SumoEnv(run_cfg, profile=profile, port=port)
         if environment_mutator is not None:
@@ -198,6 +206,8 @@ def run_controlled_episode(
         while not done:
             if controller == "random":
                 actions = {tls_id: int(rng.integers(0, 2)) for tls_id in agents.agents}
+            elif controller == "max_pressure":
+                actions = action_provider.actions(env, obs)
             else:
                 actions = agents.act(obs, eval_mode=True)
             decision_count += 1
@@ -236,7 +246,8 @@ def run_controlled_episode(
         manifest.controller_diagnostics = {
             "decision_count": decision_count,
             "requested_switches": requested_switches,
-            "controlled_tls_ids": sorted(agents.agents),
+            "controlled_tls_ids": (list(action_provider.tls_ids) if action_provider is not None
+                                   else sorted(agents.agents)),
             "requested_action_trace_sha256": hashlib.sha256(json.dumps(
                 requested_action_trace, sort_keys=True, separators=(",", ":")
             ).encode("utf-8")).hexdigest(),
@@ -248,6 +259,8 @@ def run_controlled_episode(
             "observation_contract": observation_contract,
             "comparative_research": comparative_research,
         }
+        if action_provider is not None:
+            manifest.controller_diagnostics["rule_based_controller"] = action_provider.diagnostics()
         capture_output_hashes(manifest)
         manifest.completion_status = "complete" if metrics.valid and metrics.reached_horizon else "incomplete"
         if not metrics.valid:

@@ -65,6 +65,17 @@ class ActionDecision:
     transition_started: bool
 
 
+@dataclass(frozen=True)
+class PhaseControllerState:
+    """Read-only baseline view of safety-controller state at a decision boundary."""
+    tls_id: str
+    current_green_phase: int
+    green_phases: tuple[int, ...]
+    in_yellow: bool
+    in_red_hold: bool
+    red_hold_phase: Optional[int]
+
+
 class _PhaseController:
     """
     Manages green/yellow/red phase transitions for a single TLS junction.
@@ -575,6 +586,21 @@ class SumoEnv:
             "included_in_evaluation_outputs": True,
             "demand_window_begin_s": float(self.sim_begin),
             "demand_window_end_s": float(self.sim_end),
+        }
+
+    def phase_controller_states(self) -> Dict[str, PhaseControllerState]:
+        """Return immutable safety-controller state at a decision boundary.
+
+        A baseline-selected target remains a request. Physical execution is
+        established only by ``step`` diagnostics and its TraCI trace.
+        """
+        return {
+            tid: PhaseControllerState(
+                tls_id=tid, current_green_phase=ctrl.current_green_phase,
+                green_phases=tuple(ctrl.green_phases), in_yellow=ctrl.in_yellow,
+                in_red_hold=ctrl.in_red_hold, red_hold_phase=ctrl.red_hold_phase,
+            )
+            for tid, ctrl in self._phase_controllers.items()
         }
 
     def step(

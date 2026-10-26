@@ -15,6 +15,7 @@ Both expose the same interface:
 from __future__ import annotations
 
 import random
+import copy
 from collections import deque
 from dataclasses import dataclass
 from typing import Deque, List, Optional, Tuple
@@ -107,6 +108,26 @@ class UniformReplayBuffer:
 
     def __len__(self) -> int:
         return len(self._buffer)
+
+    def state_dict(self) -> dict:
+        """Return a complete, isolated sampling/resume state."""
+        return {"schema": "sumoflow-uniform-replay-v1", "capacity": self.capacity,
+                "transitions": copy.deepcopy(list(self._buffer)),
+                "rng_state": self._rng.getstate()}
+
+    def load_state_dict(self, state: dict) -> None:
+        if state.get("schema") != "sumoflow-uniform-replay-v1":
+            raise ValueError("unsupported uniform replay state schema")
+        if int(state.get("capacity", -1)) != self.capacity:
+            raise ValueError("uniform replay capacity mismatch")
+        transitions = copy.deepcopy(state.get("transitions"))
+        if not isinstance(transitions, list) or len(transitions) > self.capacity or any(
+                not isinstance(item, Transition) for item in transitions):
+            raise ValueError("invalid uniform replay transitions")
+        candidate_rng = random.Random()
+        candidate_rng.setstate(state["rng_state"])
+        self._buffer = deque(transitions, maxlen=self.capacity)
+        self._rng = candidate_rng
 
     @staticmethod
     def _collate(transitions: List[Transition], weights: np.ndarray) -> Batch:
@@ -226,6 +247,36 @@ class PrioritisedReplayBuffer:
 
     def __len__(self) -> int:
         return self._size
+
+    def state_dict(self) -> dict:
+        """Return transitions, priorities, cursor, annealing and isolated RNG."""
+        return {"schema": "sumoflow-prioritised-replay-v1", "capacity": self.capacity,
+                "alpha": self.alpha, "beta": self.beta, "beta_inc": self.beta_inc,
+                "eps": self.eps, "buffer": copy.deepcopy(self._buffer),
+                "priorities": self._priorities.copy(), "ptr": self._ptr,
+                "size": self._size, "rng_state": copy.deepcopy(self._rng.bit_generator.state)}
+
+    def load_state_dict(self, state: dict) -> None:
+        if state.get("schema") != "sumoflow-prioritised-replay-v1":
+            raise ValueError("unsupported prioritised replay state schema")
+        if int(state.get("capacity", -1)) != self.capacity:
+            raise ValueError("prioritised replay capacity mismatch")
+        for name in ("alpha", "beta_inc", "eps"):
+            if not np.isclose(float(state.get(name, np.nan)), getattr(self, name)):
+                raise ValueError(f"prioritised replay {name} mismatch")
+        buffer = copy.deepcopy(state.get("buffer"))
+        priorities = np.asarray(state.get("priorities"), dtype=np.float32)
+        size, ptr = int(state.get("size", -1)), int(state.get("ptr", -1))
+        if (not isinstance(buffer, list) or len(buffer) != self.capacity or
+                priorities.shape != (self.capacity,) or not 0 <= size <= self.capacity or
+                not 0 <= ptr < self.capacity or
+                any(item is not None and not isinstance(item, Transition) for item in buffer)):
+            raise ValueError("invalid prioritised replay state")
+        candidate_rng = np.random.default_rng()
+        candidate_rng.bit_generator.state = copy.deepcopy(state["rng_state"])
+        self._buffer, self._priorities = buffer, priorities.copy()
+        self._size, self._ptr, self.beta = size, ptr, float(state["beta"])
+        self._rng = candidate_rng
 
 
 # Factory 

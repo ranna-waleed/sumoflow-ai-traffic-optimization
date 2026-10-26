@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<additional>
+    <tlLogic id="center" type="actuated" programID="actuated_fixture" offset="0">
+        <phase duration="10" minDur="5" maxDur="20" state="GGggrrrrGGggrrrr"/>
+        <phase duration="3" state="yyyyrrrryyyyrrrr"/>
+        <phase duration="10" minDur="5" maxDur="20" state="rrrrGGggrrrrGGgg"/>
+        <phase duration="3" state="rrrryyyyrrrryyyy"/>
+        <param key="max-gap" value="3.0"/>
+        <param key="detector-gap" value="2.0"/>
+        <param key="passing-time" value="1.9"/>
+    </tlLogic>
+</additional>
