@@ -57,7 +57,7 @@ def calibrate_reward_references(sample_files: list[str | Path], output: str | Pa
         if not isinstance(rows, list) or not rows:
             raise ValueError("split registry contains no realizations")
         registry_entries = {}
-        demand_partitions = {}
+        demand_owners = {}
         for row in rows:
             identity = row.get("realization_id")
             if not isinstance(identity, str) or not identity or identity in registry_entries:
@@ -73,9 +73,13 @@ def calibrate_reward_references(sample_files: list[str | Path], output: str | Pa
                 raise ValueError(f"demand artifact hash mismatch for {identity}")
             if not sample_path.is_file() or _hash(sample_path) != sample_hash:
                 raise ValueError(f"calibration source hash mismatch for {identity}")
-            previous = demand_partitions.setdefault(demand_hash, partition)
-            if previous != partition:
-                raise ValueError("a demand artifact overlaps conflicting split partitions")
+            previous = demand_owners.get(demand_hash)
+            if previous is not None:
+                raise ValueError(
+                    "byte-identical demand artifact is assigned to multiple realization "
+                    f"identities: {previous!r} and {identity!r}"
+                )
+            demand_owners[demand_hash] = identity
             registry_entries[identity] = {
                 "partition": partition, "demand_path": str(demand_path),
                 "demand_sha256": demand_hash, "sample_path": str(sample_path),

@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import multiprocessing
 import uuid
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -162,6 +163,67 @@ def verify_loaded_signal_programs(sumocfg_path: str | Path,
     finally:
         if connection is not None:
             connection.close(True)
+
+
+def _verify_loaded_signal_programs_worker(pipe, sumocfg_path: str,
+                                           programs: list[SignalProgram],
+                                           sumo_binary: str) -> None:
+    """Isolated worker so a stuck SUMO/TraCI preflight can be terminated."""
+    try:
+        pipe.send((True, verify_loaded_signal_programs(
+            sumocfg_path, programs, sumo_binary)))
+    except BaseException as exc:  # propagate a stable diagnostic across processes
+        pipe.send((False, f"{type(exc).__name__}: {exc}"))
+    finally:
+        pipe.close()
+
+
+def verify_loaded_signal_programs_bounded(
+        sumocfg_path: str | Path, programs: list[SignalProgram],
+        sumo_binary: str = "sumo", *, wall_clock_timeout_s: float) -> list[dict]:
+    """Verify live programs in a killable process with an explicit wall limit."""
+    timeout = float(wall_clock_timeout_s)
+    if not math.isfinite(timeout) or timeout <= 0:
+        raise ValueError("live-program preflight timeout must be finite and positive")
+    context = multiprocessing.get_context("spawn")
+    parent, child = context.Pipe(duplex=False)
+    process = context.Process(
+        target=_verify_loaded_signal_programs_worker,
+        args=(child, str(Path(sumocfg_path).resolve()), programs, sumo_binary),
+        name="sumoflow-live-program-preflight",
+    )
+    process.start()
+    child.close()
+    try:
+        if not parent.poll(timeout):
+            process.terminate()
+            process.join(timeout=5)
+            if process.is_alive():
+                process.kill()
+                process.join(timeout=5)
+            raise TimeoutError(
+                f"live SUMO program preflight exceeded wall-clock timeout {timeout:g}s"
+            )
+        success, payload = parent.recv()
+        process.join(timeout=5)
+        if process.is_alive():
+            process.terminate()
+            process.join(timeout=5)
+            raise RuntimeError(
+                "live SUMO program preflight worker did not shut down cleanly"
+            )
+        if not success:
+            raise RuntimeError(f"live SUMO program preflight failed: {payload}")
+        if process.exitcode != 0:
+            raise RuntimeError(
+                f"live SUMO program preflight worker exited {process.exitcode}"
+            )
+        return payload
+    finally:
+        parent.close()
+        if process.is_alive():
+            process.terminate()
+            process.join(timeout=5)
 
 
 @dataclass(frozen=True)

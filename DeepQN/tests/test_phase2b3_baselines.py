@@ -17,7 +17,7 @@ from DeepQN.agent.replay_buffer import PrioritisedReplayBuffer, UniformReplayBuf
 from DeepQN.evaluation.compute_pilot import measure_callable, measure_traci_fixture
 from DeepQN.evaluation.controller_baselines import (
     MaxPressureActionProvider, MaxPressureController, load_max_pressure_definition,
-    load_signal_program,
+    load_signal_program, verify_loaded_signal_programs_bounded,
 )
 from DeepQN.evaluation.reward_calibration import calibrate_reward_references
 from DeepQN.evaluation.baseline import run_native_baseline_episode
@@ -61,6 +61,13 @@ class ControllerDefinitionTests(unittest.TestCase):
                 config_path=TINY / "tiny.sumocfg", controller_type="fixed_time",
                 tls_program_path=TINY / "tiny.add.xml", tls_ids=["center"],
                 comparison_scope="primary_matched_policy")
+
+    def test_native_baseline_requires_explicit_wall_clock_limit(self):
+        with self.assertRaisesRegex(ValueError, "explicit wall_clock_timeout_s"):
+            run_native_baseline_episode(
+                cfg={}, profile="tiny", output_dir=Path("unused"), run_index=0, seed=17,
+                config_path=TINY / "tiny.sumocfg", controller_type="fixed_time",
+                tls_program_path=TINY / "tiny.add.xml", tls_ids=["center"])
 
     def test_max_pressure_rejects_ai_artifact_labels(self):
         provider = type("Provider", (), {})()
@@ -220,7 +227,8 @@ class CalibrationTests(unittest.TestCase):
             base = {"realization_id":"a","partition":"calibration","demand_path":"demand",
                     "demand_sha256":demand_hash,"sample_path":"sample","sample_sha256":sample_hash}
             for rows, pattern in (([base, dict(base)], "duplicate"),
-                                  ([base, {**base, "realization_id":"held", "partition":"test"}], "overlaps")):
+                                  ([base, {**base, "realization_id":"held", "partition":"test"}], "byte-identical"),
+                                  ([base, {**base, "realization_id":"second"}], "byte-identical")):
                 registry = root / f"{pattern}.json"
                 registry.write_text(json.dumps({"schema":"sumoflow-calibration-split-registry-v1",
                                                 "realizations":rows}), encoding="utf-8")
@@ -275,6 +283,13 @@ class ComputePilotTests(unittest.TestCase):
 
 @unittest.skipUnless(shutil.which("sumo"), "SUMO executable is unavailable")
 class RealActuatedActivationTests(unittest.TestCase):
+    def test_live_program_preflight_has_enforceable_wall_timeout(self):
+        program = load_signal_program(TINY / "tiny.add.xml", "center", "static",
+                                      TINY / "tiny.net.xml")
+        with self.assertRaisesRegex(TimeoutError, "exceeded wall-clock timeout"):
+            verify_loaded_signal_programs_bounded(
+                TINY / "tiny.sumocfg", [program], "sumo", wall_clock_timeout_s=0.001)
+
     def test_sumo_uses_actuated_program(self):
         import traci
         import traci.constants as tc

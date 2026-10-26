@@ -11,7 +11,8 @@ from DeepQN.evaluation.provenance import (
     RunManifest, build_run_manifest, capture_output_hashes, hash_effective_sumocfg,
 )
 from DeepQN.evaluation.controller_baselines import (
-    CONTROLLER_CONTRACT_VERSION, load_signal_program, verify_loaded_signal_programs,
+    CONTROLLER_CONTRACT_VERSION, load_signal_program,
+    verify_loaded_signal_programs_bounded,
 )
 
 
@@ -59,6 +60,11 @@ def run_native_baseline_episode(*, cfg: dict, profile: str, output_dir: Path,
             "DQN handoff; use secondary_full_operation or an approved matched protocol"
         )
     wall_clock_timeout_s = _validate_wall_clock_timeout(wall_clock_timeout_s)
+    if wall_clock_timeout_s is None:
+        raise ValueError(
+            "native publication baselines require an explicit wall_clock_timeout_s; "
+            "it is independent of simulated duration"
+        )
     output_dir.mkdir(parents=True, exist_ok=True)
     run_id = f"{controller_type}_{profile}_seed{seed}_run{run_index}"
     outputs = {kind: (output_dir / f"{kind}_{run_id}.xml").resolve()
@@ -84,6 +90,7 @@ def run_native_baseline_episode(*, cfg: dict, profile: str, output_dir: Path,
         "controller_contract": CONTROLLER_CONTRACT_VERSION,
         "initial_control_protocol": "native_full_operation_from_begin",
         "comparison_scope": comparison_scope,
+        "wall_clock_timeout_s": wall_clock_timeout_s,
         "phase_programs": [],
     }
     patched = None
@@ -108,8 +115,9 @@ def run_native_baseline_episode(*, cfg: dict, profile: str, output_dir: Path,
         patched = _patch_sumocfg(source, outputs, seed)
         manifest.effective_simulation_config_sha256 = hash_effective_sumocfg(patched)
         manifest.controller_diagnostics["live_program_preflight"] = (
-            verify_loaded_signal_programs(
-                patched, programs, cfg["simulation"].get("sumo_binary", "sumo")
+            verify_loaded_signal_programs_bounded(
+                patched, programs, cfg["simulation"].get("sumo_binary", "sumo"),
+                wall_clock_timeout_s=wall_clock_timeout_s,
             )
         )
         command = [cfg["simulation"].get("sumo_binary", "sumo"), "-c", str(patched), "--no-step-log"]
