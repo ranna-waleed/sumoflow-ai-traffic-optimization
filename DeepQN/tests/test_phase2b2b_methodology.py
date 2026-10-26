@@ -18,11 +18,13 @@ from DeepQN.env.reward import IntervalRewardFunction, RewardConfig
 from DeepQN.env.sumo_env import SumoEnv, _PhaseController
 from DeepQN.forecasting.contracts import FEATURE_NAMES, FEATURE_UNITS
 from DeepQN.forecasting.inference import (
-    ForecastIdentity, ForecastInferenceError, NoForecastAdapter,
+    FORECAST_INFERENCE_VERSION, RESEARCH_ARCHITECTURE, ForecastIdentity,
+    ForecastInferenceError, NoForecastAdapter,
     ResearchBiLSTM, StrictForecastAdapter,
 )
 from DeepQN.forecasting.contracts import load_approach_mapping
 from DeepQN.forecasting.detector_events import build_detector_mapping
+from DeepQN.forecasting.research_contract import DATASET_CONTRACT_VERSION, TIME_CONTRACT_VERSION
 from DeepQN.training.reproducibility import ResearchRunContract, seed_all
 
 
@@ -44,28 +46,41 @@ class StrictForecastTests(unittest.TestCase):
         scaler_path.write_text(json.dumps(scaler()), encoding="utf-8")
         model_path = root / "model.pt"
         if model_source is None:
-            torch.save(ResearchBiLSTM(4, 1, 0).state_dict(), model_path)
+            torch.save(ResearchBiLSTM(
+                RESEARCH_ARCHITECTURE["hidden_size"],
+                RESEARCH_ARCHITECTURE["num_layers"],
+                RESEARCH_ARCHITECTURE["dropout"],
+                RESEARCH_ARCHITECTURE["bidirectional"],
+            ).state_dict(), model_path)
         else:
             shutil.copyfile(model_source, model_path)
         dataset = root / "dataset.json"
-        dataset.write_text(json.dumps({"mapping_sha256": approach.sha256,
+        dataset.write_text(json.dumps({"dataset_contract_version": DATASET_CONTRACT_VERSION,
+            "feature_schema_version": "junction-approach-arrivals-v1",
+            "time_contract_version": TIME_CONTRACT_VERSION,
+            "history_seconds": 60, "target_seconds": 30, "target_shape": [4],
+            "mapping_sha256": approach.sha256,
             "detector_mapping_sha256": detectors.sha256,
             "network_sha256": approach.network_sha256}), encoding="utf-8")
         def item(path):
             return {"path": path.name,
                     "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
         manifest = {
-            "inference_contract_version": "junction-bilstm-60s-to-30s-v1",
+            "inference_contract_version": FORECAST_INFERENCE_VERSION,
             "feature_schema_version": "junction-approach-arrivals-v1",
             "event_schema_version": "sumo-e1-approach-entry-v1",
             "features": list(FEATURE_NAMES), "units": list(FEATURE_UNITS),
             "history_seconds": 60, "target_seconds": 30, "waiting_time_memory_s": 100,
+            "target_shape": [4],
+            "target_units": "vehicles per following 30-second interval",
+            "output_activation": "softplus",
+            "training_loss": "poisson_nll_expected_count",
+            "time_contract_version": TIME_CONTRACT_VERSION,
             "mapping_sha256": approach.sha256,
             "detector_mapping_sha256": detectors.sha256,
             "network_sha256": approach.network_sha256,
             "dqn_state_forecast_scale": [10, 10, 10, 10],
-            "architecture": {"input_size": 7, "output_size": 4, "hidden_size": 4,
-                             "num_layers": 1, "dropout": 0, "bidirectional": True},
+            "architecture": dict(RESEARCH_ARCHITECTURE),
             "artifacts": {"model": item(model_path), "scaler": item(scaler_path),
                           "dataset_manifest": item(dataset), "mapping": item(mapping),
                           "network": item(network)},
@@ -104,7 +119,7 @@ class StrictForecastTests(unittest.TestCase):
     def test_missing_and_historical_six_input_checkpoint_are_incompatible(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            manifest = {"inference_contract_version": "junction-bilstm-60s-to-30s-v1"}
+            manifest = {"inference_contract_version": FORECAST_INFERENCE_VERSION}
             path = root / "manifest.json"; path.write_text(json.dumps(manifest))
             with self.assertRaises(ForecastInferenceError):
                 StrictForecastAdapter.from_manifest(path, ["tls"])

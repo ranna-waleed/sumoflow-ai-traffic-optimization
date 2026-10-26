@@ -216,12 +216,35 @@ class DetectorEventTests(unittest.TestCase):
         approaches = load_approach_mapping(FIXTURE / "mapping.json", NET)
         windows = build_causal_windows([train, validation, test], approaches, self.mapping)
         self.assertEqual(windows["train"].x[0, :3, :4].sum(), 4.0)
+        self.assertEqual(windows["train"].x[0, :3, :4].sum(axis=1).tolist(),
+                         [1.0, 2.0, 1.0])
         missing = ApproachEntryEvent(spec.detector_id, spec.tls_id, spec.direction,
             spec.lane_id, "outside", 94.1, 94.2)
         bad = self._file_backed_source("outside", 4, (missing,))
         bad = replace(bad, partition="train")
         with self.assertRaisesRegex(ForecastContractError, "no recorded sample bin"):
             build_causal_windows([bad, validation, test], approaches, self.mapping)
+
+    def test_history_target_cutoff_is_right_closed_and_causal(self):
+        spec = self.mapping.specs[0]
+        times = (59.0, 59.000001, 89.0, 89.000001)
+        events = tuple(ApproachEntryEvent(
+            spec.detector_id, spec.tls_id, spec.direction, spec.lane_id,
+            f"boundary-{index}", time_s, time_s + .0000001,
+        ) for index, time_s in enumerate(times))
+        train = self._file_backed_source("train", 1, events)
+        validation = self._file_backed_source("validation", 2, ())
+        test = self._file_backed_source("test", 3, ())
+        approaches = load_approach_mapping(FIXTURE / "mapping.json", NET)
+        first = build_causal_windows(
+            [train, validation, test], approaches, self.mapping
+        )["train"]
+        # Window 0 has reporting bins 0..59 and predicts physical entries in (59,89].
+        self.assertEqual(first.x[0, :, :4].sum(), 1.0)
+        self.assertEqual(first.y[0].sum(), 2.0)
+        self.assertEqual(first.windows[0].input_end_s, 59.0)
+        self.assertEqual(first.windows[0].target_start_s, 60.0)
+        self.assertEqual(first.windows[0].target_end_s, 89.0)
 
     def test_malformed_unsorted_duplicate_and_wrong_owner_events_are_rejected(self):
         spec = self.mapping.specs[0]

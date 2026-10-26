@@ -29,11 +29,13 @@ from DeepQN.forecasting.detector_events import (
     build_detector_mapping, detector_feature_row, load_detector_events,
     validate_detector_events,
 )
+from DeepQN.forecasting.research_contract import (
+    DATASET_CONTRACT_VERSION, TIME_CONTRACT_VERSION, reporting_sample_time,
+)
 
 HISTORY_SECONDS = 60
 TARGET_SECONDS = 30
 PARTITIONS = ("train", "validation", "test")
-DATASET_CONTRACT_VERSION = "causal-junction-arrivals-60s-to-30s-v3-detector-capable"
 
 # Deliberately empty until an independently reviewed approval record is added
 # by a separate, human-reviewed repository change. A caller-supplied boolean or
@@ -237,9 +239,13 @@ def build_causal_windows(
             validated_events = validate_detector_events(source.detector_events, detector_mapping)
             sample_times = {snapshot.time_s for snapshot in source.snapshots}
             for event in validated_events:
-                # SUMO reports E1 events after the step containing them. A row
-                # labelled t therefore represents entry times in [t-1, t).
-                sample_time = float(math.floor(event.entry_time_s) + 1)
+                # TraCI returns E1 data for the last completed step. A row labelled
+                # t therefore represents (t-1,t], with the first recorded interval
+                # alone including its left boundary.
+                sample_time = reporting_sample_time(
+                    event.entry_time_s, source.snapshots[0].time_s,
+                    source.snapshots[-1].time_s,
+                )
                 if sample_time not in sample_times:
                     raise ForecastContractError(
                         f"event {event.vehicle_id!r} at {event.entry_time_s} has no recorded sample bin {sample_time}"
@@ -356,6 +362,8 @@ def require_publication_training_ready(manifest: dict, manifest_path: str | Path
         "units": list(FEATURE_UNITS),
         "history_seconds": HISTORY_SECONDS,
         "target_seconds": TARGET_SECONDS,
+        "time_contract_version": TIME_CONTRACT_VERSION,
+        "target_shape": [4],
         "entry_event_definition": DETECTOR_EVENT_SCHEMA_VERSION,
         "waiting_time_memory_s": WAITING_TIME_MEMORY_S,
     }
@@ -521,7 +529,10 @@ def write_dataset(
         "units": list(FEATURE_UNITS),
         "history_seconds": HISTORY_SECONDS,
         "target_seconds": TARGET_SECONDS,
-        "target_definition": "directional E1 entries in [t,t+30), binned by reporting step, vehicles/30s",
+        "time_contract_version": TIME_CONTRACT_VERSION,
+        "history_definition": "60 post-step one-second bins ending at prediction boundary t",
+        "target_definition": "four directional E1 entry counts in (t,t+30], vehicles/30s",
+        "target_shape": [4],
         "entry_event_definition": (
             detector_mapping.schema_version if detector_backed and detector_mapping else ENTRY_EVENT_DEFINITION
         ),

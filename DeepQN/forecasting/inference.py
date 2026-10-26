@@ -20,8 +20,22 @@ from DeepQN.forecasting.detector_events import (
     DETECTOR_EVENT_SCHEMA_VERSION, E1EventCollector, build_detector_mapping,
     collect_approach_snapshot, detector_feature_row,
 )
+from DeepQN.forecasting.research_contract import (
+    DATASET_CONTRACT_VERSION, MODEL_CONTRACT_VERSION, TIME_CONTRACT_VERSION,
+)
 
-FORECAST_INFERENCE_VERSION = "junction-bilstm-60s-to-30s-v1"
+FORECAST_INFERENCE_VERSION = "junction-bilstm-60s-to-30s-v2-nonnegative-counts"
+RESEARCH_ARCHITECTURE = {
+    "contract_version": MODEL_CONTRACT_VERSION,
+    "input_size": 7,
+    "history_steps": 60,
+    "hidden_size": 128,
+    "num_layers": 2,
+    "dropout": 0.2,
+    "bidirectional": True,
+    "output_size": 4,
+    "output_activation": "softplus",
+}
 
 
 class ForecastInferenceError(RuntimeError):
@@ -45,7 +59,7 @@ class ResearchBiLSTM(nn.Module):
 
     def forward(self, values):
         encoded, _ = self.lstm(values)
-        return self.output(encoded[:, -1, :])
+        return torch.nn.functional.softplus(self.output(encoded[:, -1, :]))
 
 
 @dataclass(frozen=True)
@@ -202,6 +216,11 @@ class StrictForecastAdapter:
             "features": list(FEATURE_NAMES), "units": list(FEATURE_UNITS),
             "history_seconds": 60, "target_seconds": 30,
             "waiting_time_memory_s": 100,
+            "target_shape": [4],
+            "target_units": "vehicles per following 30-second interval",
+            "output_activation": "softplus",
+            "training_loss": "poisson_nll_expected_count",
+            "time_contract_version": TIME_CONTRACT_VERSION,
         }
         if any(manifest.get(k) != v for k, v in required.items()):
             raise ForecastInferenceError("forecast manifest contract is incompatible")
@@ -214,6 +233,16 @@ class StrictForecastAdapter:
                 raise ForecastInferenceError(f"{label} artifact is missing or altered")
             artifacts[label] = artifact
         dataset_manifest = json.loads(artifacts["dataset_manifest"].read_text(encoding="utf-8"))
+        dataset_required = {
+            "dataset_contract_version": DATASET_CONTRACT_VERSION,
+            "feature_schema_version": FEATURE_SCHEMA_VERSION,
+            "time_contract_version": TIME_CONTRACT_VERSION,
+            "history_seconds": 60,
+            "target_seconds": 30,
+            "target_shape": [4],
+        }
+        if any(dataset_manifest.get(key) != value for key, value in dataset_required.items()):
+            raise ForecastInferenceError("dataset manifest contract is incompatible")
         approach_mapping = load_approach_mapping(artifacts["mapping"], artifacts["network"])
         detector_mapping = build_detector_mapping(approach_mapping, artifacts["network"])
         for label, actual in (("mapping_sha256", approach_mapping.sha256),
@@ -223,8 +252,8 @@ class StrictForecastAdapter:
                 raise ForecastInferenceError(f"{label} is not bound to the verified dataset artifacts")
         scaler = json.loads(artifacts["scaler"].read_text(encoding="utf-8"))
         architecture = manifest.get("architecture", {})
-        if architecture.get("input_size") != 7 or architecture.get("output_size") != 4:
-            raise ForecastInferenceError("forecast architecture must be 7-input/4-output")
+        if architecture != RESEARCH_ARCHITECTURE:
+            raise ForecastInferenceError("forecast architecture contract is incompatible")
         model = ResearchBiLSTM(
             int(architecture["hidden_size"]), int(architecture["num_layers"]),
             float(architecture["dropout"]), bool(architecture.get("bidirectional", True)))
