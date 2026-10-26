@@ -42,6 +42,12 @@ from DeepQN.agent.dqn_agent import MultiAgentDQN
 from DeepQN.env.sumo_env import SumoEnv
 from DeepQN.training.callbacks import TrainingLogger, EpisodeCallback
 from DeepQN.training.reproducibility import seed_all
+from DeepQN.training.research_orchestration import (
+    ResearchSchedule, run_research_episode_transactions,
+)
+from DeepQN.training.research_resume import (
+    ResumeContracts, TrainingCursor, restore_training_snapshot,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -49,6 +55,50 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+# Scientific approval is intentionally not encoded as a mutable repository
+# boolean.  Publication training remains blocked until externally reviewed
+# detector/demand/calibration approvals are supplied by a future phase.
+RESEARCH_TRAINING_TRUST_ROOTS: tuple[str, ...] = ()
+
+
+def require_research_training_authority() -> None:
+    """Fail closed: restoration infrastructure is not training authorization."""
+    if not RESEARCH_TRAINING_TRUST_ROOTS:
+        raise RuntimeError(
+            "research training is prohibited: external publication approval trust roots are absent"
+        )
+
+
+def train_research(*, config_path: str, contracts: ResumeContracts,
+                   schedule: ResearchSchedule, initial_cursor: TrainingCursor,
+                   snapshot_root: str, episode_count: int, episode_runner,
+                   resume_snapshot: str | None = None,
+                   expected_resume_manifest_sha256: str | None = None):
+    """Authorized future research path; never uses legacy checkpoints.
+
+    Authority is checked before config loading, agent creation, restoration, or
+    an injected episode runner can start SUMO.  Current empty trust roots make
+    this path intentionally unreachable outside orchestration unit tests.
+    """
+    require_research_training_authority()
+    with open(config_path) as stream:
+        cfg = yaml.safe_load(stream)
+    agents = MultiAgentDQN(list(cfg["tls_junctions"]), cfg["dqn"])
+    cursor = initial_cursor
+    if resume_snapshot is not None:
+        if not expected_resume_manifest_sha256:
+            raise ValueError("research restoration requires an external manifest SHA-256")
+        cursor = restore_training_snapshot(resume_snapshot, agents, contracts,
+                                           expected_resume_manifest_sha256,
+                                           expected_schedule_sha256=schedule.sha256)
+    elif expected_resume_manifest_sha256 is not None:
+        raise ValueError("resume manifest identity supplied without a snapshot")
+    return run_research_episode_transactions(
+        agents=agents, initial_cursor=cursor, schedule=schedule,
+        contracts=contracts, snapshot_root=snapshot_root,
+        episode_runner=episode_runner, episode_count=episode_count,
+    )
 
 
 #  Training loop 
@@ -59,6 +109,7 @@ def train(
     num_episodes:     Optional[int]  = None,
     resume_dir:       Optional[str]  = None,
     port:             int             = 8813,
+    research_mode:    bool            = False,
 ):
     """
     Full training procedure.
@@ -70,6 +121,10 @@ def train(
     resume_dir       : load latest checkpoints from this directory
     port             : TraCI base port
     """
+    if research_mode:
+        require_research_training_authority()
+        raise RuntimeError("research mode requires train_research() with a complete frozen contract")
+
     #  Load config 
     with open(config_path) as f:
         cfg = yaml.safe_load(f)
@@ -204,6 +259,8 @@ def _parse_args():
                    help="TraCI TCP port")
     p.add_argument("--gui",      action="store_true",
                    help="Launch sumo-gui instead of headless sumo")
+    p.add_argument("--research-mode", action="store_true",
+                   help="Fail-closed publication pathway (currently unauthorized)")
     return p.parse_args()
 
 
@@ -230,4 +287,5 @@ if __name__ == "__main__":
         num_episodes     = args.episodes,
         resume_dir       = args.resume,
         port             = args.port,
+        research_mode    = args.research_mode,
     )
