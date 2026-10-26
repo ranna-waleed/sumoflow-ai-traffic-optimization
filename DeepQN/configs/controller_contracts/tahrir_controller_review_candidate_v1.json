@@ -1,0 +1,109 @@
+{
+  "schema": "sumoflow-tahrir-controller-review-candidate-v1",
+  "publication_approved": false,
+  "approval_trust_roots": [],
+  "sources": {
+    "network": {"path": "simulation/maps/tahrirupdated.net.xml", "sha256": "a7f25235f208db932735983653e00b3af659d09d04169ef5807265433c2db708"},
+    "dqn_config": {"path": "DeepQN/configs/dqn_config.yaml", "sha256": "c7f31e298d83f8402fd02df2dcb75d4efe9237e96952f10aaa90635f5833f83d"},
+    "forecast_mapping": {"path": "DeepQN/configs/forecast_mappings/tahrir_v1.json", "sha256": "275d8494f9a408ddee515b63402bdac27bba041730726231d35f428ac04c0f98"},
+    "additional_file": {"path": "simulation/maps/tahrir.add.xml", "sha256": "87125278f5f806a769e3223d70278adbc02c88010c4e80fc32813a6ae885eac5"}
+  },
+  "controller_candidate": {
+    "name": "tahrir_hybrid_pressure_fixed_restricted_candidate_v1",
+    "standard_all_junction_max_pressure": false,
+    "comparison_status": "not_approved",
+    "pressure_equation": "P(p)=sum_{m served by p} s_m(q_upstream_m-q_downstream_m)",
+    "queue_measurement": "TraCI lane.getLastStepHaltingNumber, vehicles",
+    "saturation_status": "all saturation weights require independent traffic-engineering approval"
+  },
+  "controlled_tls": {
+    "315744796": {
+      "program": {"id": "0", "type": "static", "phases": [{"index": 0, "duration_s": 39, "state": "GGGGrrrrrr"}, {"index": 1, "duration_s": 6, "state": "yyyyrrrrrr"}, {"index": 2, "duration_s": 39, "state": "rrrrGGGGGG"}, {"index": 3, "duration_s": 6, "state": "rrrryyyyyy"}]},
+      "service_groups": [{"phase": 0, "link_indices": [0,1,2,3], "saturation_weights": null}, {"phase": 2, "link_indices": [4,5,6,7,8,9], "saturation_weights": null}],
+      "configured_safety": {"minimum_green_s": 15, "maximum_green_s": 60, "yellow_s": 6, "all_red_s": 0},
+      "max_pressure_eligibility": "topology_eligible_pending_movement_and_saturation_review",
+      "actuated_eligibility": "candidate_only_parameters_and_detectors_unapproved"
+    },
+    "2031414903": {
+      "program": {"id": "0", "type": "static", "phases": [{"index": 0, "duration_s": 39, "state": "GGrr"}, {"index": 1, "duration_s": 6, "state": "yyrr"}, {"index": 2, "duration_s": 39, "state": "rrGG"}, {"index": 3, "duration_s": 6, "state": "rryy"}]},
+      "service_groups": [{"phase": 0, "link_indices": [0,1], "saturation_weights": null}, {"phase": 2, "link_indices": [2,3], "saturation_weights": null}],
+      "configured_safety": {"minimum_green_s": 15, "maximum_green_s": 60, "yellow_s": 6, "all_red_s": 0},
+      "max_pressure_eligibility": "topology_eligible_pending_movement_and_saturation_review",
+      "actuated_eligibility": "candidate_only_parameters_and_detectors_unapproved"
+    },
+    "96621100": {
+      "program": {"id": "0", "type": "static", "phases": [{"index": 0, "duration_s": 51, "state": "rrrrrrrrrr"}, {"index": 1, "duration_s": 3, "state": "yyyyyyyyyy"}, {"index": 2, "duration_s": 75, "state": "GGGGGGGGGG"}]},
+      "service_groups": [{"phase": 2, "link_indices": [0,1,2,3,4,5,6,7,8,9], "saturation_weights": null}],
+      "configured_safety": {"minimum_green_s": 20, "maximum_green_s": 90, "yellow_s": 3, "red_hold_phase": 0, "red_hold_maximum_s": null},
+      "max_pressure_eligibility": "ineligible_no_competing_service_phase",
+      "actuated_eligibility": "candidate_gate_control_only_maximum_red_and_gap_parameters_unapproved"
+    },
+    "2031414899": {
+      "program": {"id": "0", "type": "static", "phases": [{"index": 0, "duration_s": 46, "state": "GGGG"}, {"index": 1, "duration_s": 3, "state": "yyyy"}, {"index": 2, "duration_s": 81, "state": "rrrr"}]},
+      "service_groups": [{"phase": 0, "link_indices": [0,1,2,3], "saturation_weights": null}],
+      "configured_safety": {"minimum_green_s": 20, "maximum_green_s": 80, "yellow_s": 3, "red_hold_phase": 2, "red_hold_maximum_s": null},
+      "max_pressure_eligibility": "ineligible_no_competing_service_phase",
+      "actuated_eligibility": "candidate_gate_control_only_maximum_red_and_gap_parameters_unapproved"
+    },
+    "6288771431": {
+      "program": {"id": "0", "type": "static", "phases": [{"index": 0, "duration_s": 46, "state": "GGGG"}, {"index": 1, "duration_s": 3, "state": "yyyy"}, {"index": 2, "duration_s": 81, "state": "rrrr"}]},
+      "service_groups": [{"phase": 0, "link_indices": [0,1,2,3], "saturation_weights": null}],
+      "configured_safety": {"minimum_green_s": 20, "maximum_green_s": 80, "yellow_s": 3, "red_hold_phase": 2, "red_hold_maximum_s": null},
+      "max_pressure_eligibility": "ineligible_no_competing_service_phase",
+      "actuated_eligibility": "candidate_gate_control_only_maximum_red_and_gap_parameters_unapproved"
+    },
+    "271064234": {
+      "program": {"id": "0", "type": "static", "phases": [{"index": 0, "duration_s": 80, "state": "GGG"}, {"index": 1, "duration_s": 5, "state": "yyy"}, {"index": 2, "duration_s": 5, "state": "rrr"}]},
+      "service_groups": [{"phase": 0, "link_indices": [0,1,2], "saturation_weights": null}],
+      "configured_safety": {"minimum_green_s": 20, "maximum_green_s": 80, "yellow_s": 5, "red_hold_phase": 2, "red_hold_maximum_s": null},
+      "max_pressure_eligibility": "ineligible_no_competing_service_phase",
+      "actuated_eligibility": "candidate_gate_control_only_maximum_red_and_gap_parameters_unapproved"
+    },
+    "315743335": {
+      "program": {"id": "0", "type": "static", "phases": [{"index": 0, "duration_s": 80, "state": "GGG"}, {"index": 1, "duration_s": 5, "state": "yyy"}, {"index": 2, "duration_s": 5, "state": "rrr"}]},
+      "service_groups": [{"phase": 0, "link_indices": [0,1,2], "saturation_weights": null}],
+      "configured_safety": {"minimum_green_s": 20, "maximum_green_s": 80, "yellow_s": 5, "red_hold_phase": 2, "red_hold_maximum_s": null},
+      "max_pressure_eligibility": "ineligible_no_competing_service_phase",
+      "actuated_eligibility": "candidate_gate_control_only_maximum_red_and_gap_parameters_unapproved"
+    }
+  },
+  "unselected_tls": {
+    "6288771435": {"program": {"id": "0", "type": "static", "phases": [{"index": 0, "duration_s": 118, "state": "GGGGGGGG"}]}, "required_operation": "frozen_native_full_operation"},
+    "96621068": {"program": {"id": "0", "type": "static", "phases": [{"index": 0, "duration_s": 90, "state": "GGGG"}]}, "required_operation": "frozen_native_full_operation"}
+  },
+  "native_cycle_inventory": {
+    "2031414899": {"ordered_phases": [{"index": 0, "green_links": [0,1,2,3]}, {"index": 1, "green_links": []}, {"index": 2, "green_links": []}], "cyclic_transitions": ["0->1", "1->2", "2->0"], "review_status": "green-yellow-red-green_cycle_requires_external_clearance_review"},
+    "2031414903": {"ordered_phases": [{"index": 0, "green_links": [0,1]}, {"index": 1, "green_links": []}, {"index": 2, "green_links": [2,3]}, {"index": 3, "green_links": []}], "cyclic_transitions": ["0->1", "1->2", "2->3", "3->0"], "review_status": "alternating_green_yellow_cycle_has_no_explicit_all_red_clearance"},
+    "271064234": {"ordered_phases": [{"index": 0, "green_links": [0,1,2]}, {"index": 1, "green_links": []}, {"index": 2, "green_links": []}], "cyclic_transitions": ["0->1", "1->2", "2->0"], "review_status": "green-yellow-red-green_cycle_requires_external_clearance_review"},
+    "315743335": {"ordered_phases": [{"index": 0, "green_links": [0,1,2]}, {"index": 1, "green_links": []}, {"index": 2, "green_links": []}], "cyclic_transitions": ["0->1", "1->2", "2->0"], "review_status": "green-yellow-red-green_cycle_requires_external_clearance_review"},
+    "315744796": {"ordered_phases": [{"index": 0, "green_links": [0,1,2,3]}, {"index": 1, "green_links": []}, {"index": 2, "green_links": [4,5,6,7,8,9]}, {"index": 3, "green_links": []}], "cyclic_transitions": ["0->1", "1->2", "2->3", "3->0"], "review_status": "alternating_green_yellow_cycle_has_no_explicit_all_red_clearance"},
+    "6288771431": {"ordered_phases": [{"index": 0, "green_links": [0,1,2,3]}, {"index": 1, "green_links": []}, {"index": 2, "green_links": []}], "cyclic_transitions": ["0->1", "1->2", "2->0"], "review_status": "green-yellow-red-green_cycle_requires_external_clearance_review"},
+    "6288771435": {"ordered_phases": [{"index": 0, "green_links": [0,1,2,3,4,5,6,7]}], "cyclic_transitions": ["0->0"], "review_status": "permanent_green_source_program_requires_external_geometry_review"},
+    "96621068": {"ordered_phases": [{"index": 0, "green_links": [0,1,2,3]}], "cyclic_transitions": ["0->0"], "review_status": "permanent_green_source_program_requires_external_geometry_review"},
+    "96621100": {"ordered_phases": [{"index": 0, "green_links": []}, {"index": 1, "green_links": []}, {"index": 2, "green_links": [0,1,2,3,4,5,6,7,8,9]}], "cyclic_transitions": ["0->1", "1->2", "2->0"], "review_status": "anomaly_all_red_to_all_yellow_to_all_green_then_direct_all_red_external_decision_required", "commanded_controller_difference": "DQN phase controller commands 2->1->0 and 0->2, not the native 0->1->2->0 order", "decision_requirements": ["confirm intended yellow placement", "confirm green-to-red clearance", "confirm red-to-green startup clearance", "approve or correct source program externally before scientific use"]}
+  },
+  "detector_and_actuation_status": {
+    "effective_tahrir_additional_file_contains_traffic_detectors": false,
+    "forecast_mapping_is_detector_geometry_candidate_not_actuated_approval": true,
+    "approved_gap_parameters": null,
+    "approved_maximum_red_parameters": null,
+    "approved_detector_assignment": null
+  },
+  "comparison_contract": {
+    "dqn_and_two_green_pressure_candidate": "primary_only_after_mapping_saturation_and_protocol_approval_with_common_60s_initialization",
+    "native_fixed_and_future_native_actuated": "secondary_full_operation",
+    "hybrid_candidate": "separately_named_not_standard_all_junction_max_pressure",
+    "frozen_demand_network_vehicle_types_metrics_and_horizon_required": true
+  },
+  "external_review": {
+    "required_qualifications": ["traffic signal timing", "SUMO program and detector design", "Tahrir network geometry review"],
+    "decision": null,
+    "reviewer_identity": null,
+    "organization": null,
+    "date": null,
+    "signature_or_external_record": null,
+    "approved_mapping_sha256": null,
+    "approved_saturation_definition_sha256": null,
+    "approved_actuated_program_sha256": null
+  }
+}
