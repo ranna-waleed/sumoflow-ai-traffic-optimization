@@ -4,7 +4,7 @@
   "approval_trust_roots": [],
   "sources": {
     "network": {"path": "simulation/maps/tahrirupdated.net.xml", "sha256": "a7f25235f208db932735983653e00b3af659d09d04169ef5807265433c2db708"},
-    "dqn_config": {"path": "DeepQN/configs/dqn_config.yaml", "sha256": "c7f31e298d83f8402fd02df2dcb75d4efe9237e96952f10aaa90635f5833f83d"},
+    "dqn_config": {"path": "DeepQN/configs/dqn_config.yaml", "sha256": "eb60241f8433c2f72667c3f15c2f7df4c91d78b2ce6d1a64a989ca46efd3a8f4"},
     "forecast_mapping": {"path": "DeepQN/configs/forecast_mappings/tahrir_v1.json", "sha256": "275d8494f9a408ddee515b63402bdac27bba041730726231d35f428ac04c0f98"},
     "additional_file": {"path": "simulation/maps/tahrir.add.xml", "sha256": "87125278f5f806a769e3223d70278adbc02c88010c4e80fc32813a6ae885eac5"}
   },

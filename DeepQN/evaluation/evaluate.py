@@ -337,7 +337,10 @@ def evaluate(
     unknown = sorted(set(selected_profiles) - set(cfg["profiles"]))
     if unknown:
         raise ValueError(f"unknown profiles: {unknown}")
-    agents = MultiAgentDQN(list(cfg["tls_junctions"]), cfg["dqn"])
+    agents = MultiAgentDQN(
+        list(cfg["tls_junctions"]), cfg["dqn"],
+        observation_contract=cfg.get("state", {}).get("observation_contract"),
+    )
     checkpoint_manifest = None
     if controller == "dqn":
         if checkpoint_episode is None:

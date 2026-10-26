@@ -51,7 +51,7 @@ from DeepQN.forecasting.inference import NoForecastAdapter, StrictForecastAdapte
 from DeepQN.integration.bilstm_adapter import BiLSTMAdapter
 
 logger = logging.getLogger(__name__)
-DQN_OBSERVATION_CONTRACT_VERSION = "sumoflow-dqn-observation-v2-occupancy-percent"
+DQN_OBSERVATION_CONTRACT_VERSION = "sumoflow-dqn-observation-v3-lane-occupancy-fraction"
 
 
 #  Phase controller per junction 
@@ -802,17 +802,19 @@ class SumoEnv:
             wait = self._lane_measurement(
                 tid, lane, "waiting_time", traci.lane.getWaitingTime
             ) / self.max_wait
-            raw_occ_percent = self._lane_measurement(
+            # SUMO's lane-domain value is a lane-length ratio, unlike E1
+            # detector occupancy, which is reported as a percentage.
+            raw_occupancy_fraction = self._lane_measurement(
                 tid, lane, "occupancy", traci.lane.getLastStepOccupancy
             )
-            if raw_occ_percent < 0 or raw_occ_percent > 100:
+            if raw_occupancy_fraction < 0 or raw_occupancy_fraction > 1:
                 if self.lane_observation_mode == "research_fail_closed":
                     raise RuntimeError(
                         f"lane observation failed: TLS={tid}, lane={lane}, "
-                        f"measurement=occupancy: percentage outside [0, 100]: "
-                        f"{raw_occ_percent}"
+                        f"measurement=occupancy: fraction outside [0, 1]: "
+                        f"{raw_occupancy_fraction}"
                     )
-            occ = raw_occ_percent / 100.0
+            occ = raw_occupancy_fraction
             base = i * self.fperlane
             lane_feats[base]     = float(np.clip(halt, 0.0, 1.0))
             lane_feats[base + 1] = float(np.clip(wait, 0.0, 1.0))

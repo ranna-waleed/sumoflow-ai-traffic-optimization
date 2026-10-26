@@ -173,7 +173,7 @@ tls_junctions:
 
 #  State Space 
 state:
-  observation_contract: "sumoflow-dqn-observation-v2-occupancy-percent"
+  observation_contract: "sumoflow-dqn-observation-v3-lane-occupancy-fraction"
   max_lanes:         10      # pad all junctions to this many lanes
   features_per_lane: 3       # [halt_count, wait_time, occupancy]
   junction_features: 2       # [phase_idx_norm, phase_elapsed_norm]

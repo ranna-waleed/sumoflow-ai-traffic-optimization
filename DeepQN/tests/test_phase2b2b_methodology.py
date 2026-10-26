@@ -244,7 +244,7 @@ class StrictForecastStartupTests(unittest.TestCase):
             "profiles": {"tiny": {"config": "tiny.sumocfg", "begin": 0, "end": 120}},
             "tls_junctions": {},
             "state": {"state_dim": 37, "max_lanes": 10, "features_per_lane": 3,
-                "observation_contract": "sumoflow-dqn-observation-v2-occupancy-percent"},
+                "observation_contract": "sumoflow-dqn-observation-v3-lane-occupancy-fraction"},
             "bilstm": {"mode": "no_forecast", "history_warmup_seconds": 0},
             "reward": {},
         }
@@ -384,10 +384,10 @@ class ResearchLaneObservationTests(unittest.TestCase):
             state = env._junction_state("tls", np.zeros(5, dtype=np.float32))
         self.assertEqual(state[:3].tolist(), [0, 0, 0])
 
-    def test_raw_occupancy_percent_is_normalized_to_fraction(self):
+    def test_raw_lane_occupancy_fraction_is_preserved(self):
         for raw, expected in (
-            (0, 0), (.25, .0025), (1, .01), (5, .05),
-            (30, .30), (80, .80), (100, 1),
+            (0, 0), (.0025, .0025), (.01, .01), (.05, .05),
+            (.30, .30), (.80, .80), (1, 1),
         ):
             with self.subTest(raw=raw):
                 env = self._env()
@@ -400,7 +400,7 @@ class ResearchLaneObservationTests(unittest.TestCase):
                 self.assertAlmostEqual(float(state[2]), expected)
 
     def test_invalid_and_nonfinite_occupancy_are_rejected(self):
-        for raw in (-.01, 100.01, float("nan"), float("inf")):
+        for raw in (-.01, 1.0001, float("nan"), float("inf")):
             with self.subTest(raw=raw):
                 env = self._env()
                 fake = SimpleNamespace(lane=SimpleNamespace(
@@ -672,13 +672,14 @@ class ActionReplayReproducibilityTests(unittest.TestCase):
     def test_research_checkpoint_schema_is_complete_and_nonoverwriting(self):
         cfg = {"state_dim": 2, "action_dim": 2, "hidden_dims": [2],
                "min_replay_size": 99, "seed": 4}
-        ensemble = MultiAgentDQN(["a", "b"], cfg)
+        ensemble = MultiAgentDQN(["a", "b"], cfg,
+            observation_contract="sumoflow-dqn-observation-v3-lane-occupancy-fraction")
         with tempfile.TemporaryDirectory() as tmp:
             manifest = ensemble.save_research_ensemble(tmp, 3, "d" * 64)
             self.assertEqual({row.tls_id for row in manifest.checkpoints}, {"a", "b"})
             payload = torch.load(Path(tmp) / "a_ep0003.pt", map_location="cpu",
                                  weights_only=True)
-            self.assertEqual(payload["checkpoint_schema"], "sumoflow-dqn-checkpoint-v2")
+            self.assertEqual(payload["checkpoint_schema"], "sumoflow-dqn-checkpoint-v3")
             for key in ("optimizer", "architecture_config_sha256", "run_manifest_sha256",
                         "python_rng_state", "numpy_rng_state", "torch_rng_state"):
                 self.assertIn(key, payload)
@@ -688,12 +689,14 @@ class ActionReplayReproducibilityTests(unittest.TestCase):
     def test_research_checkpoint_manifest_load_and_hash_validation_are_atomic(self):
         cfg = {"state_dim": 2, "action_dim": 2, "hidden_dims": [2],
                "min_replay_size": 99, "seed": 4}
-        source = MultiAgentDQN(["a", "b"], cfg)
+        source = MultiAgentDQN(["a", "b"], cfg,
+            observation_contract="sumoflow-dqn-observation-v3-lane-occupancy-fraction")
         with tempfile.TemporaryDirectory() as tmp:
             source.save_research_ensemble(tmp, 3, "d" * 64)
-            target = MultiAgentDQN(["a", "b"], cfg)
+            target = MultiAgentDQN(["a", "b"], cfg,
+                observation_contract="sumoflow-dqn-observation-v3-lane-occupancy-fraction")
             loaded = target.load_for_research_evaluation(tmp, 3)
-            self.assertEqual(loaded.schema_version, "sumoflow-dqn-ensemble-v2")
+            self.assertEqual(loaded.schema_version, "sumoflow-dqn-ensemble-v3")
             before = {tid: {key: value.clone() for key, value in agent.online_net.state_dict().items()}
                       for tid, agent in target.agents.items()}
             checkpoint = Path(tmp) / "b_ep0003.pt"
@@ -709,7 +712,8 @@ class ActionReplayReproducibilityTests(unittest.TestCase):
                "min_replay_size": 99, "seed": 4}
         for mutation in ("missing_schema", "wrong_tls", "wrong_run"):
             with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as tmp:
-                ensemble = MultiAgentDQN(["a", "b"], cfg)
+                ensemble = MultiAgentDQN(["a", "b"], cfg,
+                    observation_contract="sumoflow-dqn-observation-v3-lane-occupancy-fraction")
                 ensemble.save_research_ensemble(tmp, 3, "d" * 64)
                 checkpoint_path = Path(tmp) / "b_ep0003.pt"
                 payload = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
@@ -729,7 +733,8 @@ class ActionReplayReproducibilityTests(unittest.TestCase):
     def test_research_checkpoint_publish_failure_leaves_no_complete_ensemble(self):
         cfg = {"state_dim": 2, "action_dim": 2, "hidden_dims": [2],
                "min_replay_size": 99, "seed": 4}
-        ensemble = MultiAgentDQN(["a", "b"], cfg)
+        ensemble = MultiAgentDQN(["a", "b"], cfg,
+            observation_contract="sumoflow-dqn-observation-v3-lane-occupancy-fraction")
         with tempfile.TemporaryDirectory() as tmp:
             original_replace = Path.replace; calls = {"count": 0}
             def fail_second(source, target):
@@ -745,6 +750,23 @@ class ActionReplayReproducibilityTests(unittest.TestCase):
             self.assertEqual(list(Path(tmp).glob("*_ep0003.pt")), [])
             with self.assertRaisesRegex(CheckpointValidationError, "manifest not found"):
                 ensemble.load_for_research_evaluation(tmp, 3)
+
+    def test_v2_research_ensemble_is_incompatible_with_v3_observation_contract(self):
+        cfg = {"state_dim": 2, "action_dim": 2, "hidden_dims": [2],
+               "min_replay_size": 99, "seed": 4}
+        ensemble = MultiAgentDQN(["a"], cfg,
+            observation_contract="sumoflow-dqn-observation-v3-lane-occupancy-fraction")
+        with tempfile.TemporaryDirectory() as tmp:
+            ensemble.save_research_ensemble(tmp, 1, "d" * 64)
+            path = Path(tmp) / "ensemble_ep0001.json"
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            payload["schema_version"] = "sumoflow-dqn-ensemble-v2"
+            payload["observation_contract"] = (
+                "sumoflow-dqn-observation-v2-occupancy-percent"
+            )
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(CheckpointValidationError, "incompatible"):
+                ensemble.load_for_research_evaluation(tmp, 1)
 
     def test_discount_mode_is_explicitly_decision_step_not_elapsed_time(self):
         cfg = {"state_dim": 1, "action_dim": 2, "hidden_dims": [2], "gamma": .5,

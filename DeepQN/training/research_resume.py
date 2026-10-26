@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
 import os
 import random
 import shutil
@@ -20,7 +21,7 @@ from typing import Any
 import numpy as np
 import torch
 
-from DeepQN.agent.dqn_agent import MultiAgentDQN
+from DeepQN.agent.dqn_agent import MultiAgentDQN, RESEARCH_OBSERVATION_CONTRACT
 from DeepQN.agent.replay_buffer import Transition
 
 SNAPSHOT_SCHEMA = "sumoflow-research-training-state-v1"
@@ -63,10 +64,15 @@ class ResumeContracts:
     checkpoint_contract: str = SNAPSHOT_SCHEMA
     git_commit: str = ""
     environment_sha256: str = ""
+    # Optional for generic interruption-equivalence fixtures. Publication-mode
+    # validation requires this binding to the effective observation config.
+    observation_config_sha256: str = ""
 
     def validate(self) -> None:
-        if not self.run_id or not all((self.observation_contract, self.reward_contract,
-                                       self.forecast_contract)):
+        identities = (self.run_id, self.observation_contract, self.reward_contract,
+                      self.forecast_contract)
+        if not all(isinstance(value, str) and value and value == value.strip()
+                   for value in identities):
             raise ValueError("run and semantic contract identities are required")
         if self.checkpoint_contract != SNAPSHOT_SCHEMA:
             raise ValueError("unsupported research-training checkpoint contract")
@@ -78,6 +84,124 @@ class ResumeContracts:
                 raise ValueError(f"{name} must be a SHA-256")
         if not _valid_hash(self.environment_sha256):
             raise ValueError("environment_sha256 must be a SHA-256")
+
+
+def observation_config_payload(config: dict) -> dict:
+    """Return the behavior-relevant v3 observation configuration.
+
+    This is deliberately narrower than a whole YAML hash: output destinations
+    and training budgets may change without redefining an observation, while
+    lane inventories, profile clocks, feature normalization, forecasts, and
+    simulator timing may not.
+    """
+    if not isinstance(config, dict):
+        raise ValueError("research configuration must be a mapping")
+    required = ("simulation", "profiles", "tls_junctions", "state", "bilstm", "dqn")
+    if any(not isinstance(config.get(name), dict) for name in required):
+        raise ValueError("research configuration lacks observation-defining sections")
+    simulation = config["simulation"]
+    return {
+        "schema": "sumoflow-observation-config-fingerprint-v1",
+        "simulation": {
+            "step_length": simulation.get("step_length"),
+            "waiting_time_memory_s": simulation.get("waiting_time_memory_s"),
+            "lane_observation_mode": simulation.get("lane_observation_mode"),
+        },
+        "profiles": config["profiles"],
+        "tls_junctions": config["tls_junctions"],
+        "state": config["state"],
+        "bilstm": config["bilstm"],
+        "dqn_state_dim": config["dqn"].get("state_dim"),
+    }
+
+
+def observation_config_sha256(config: dict) -> str:
+    return _canonical_hash(observation_config_payload(config))
+
+
+def validate_publication_observation_contract(config: dict,
+                                              contracts: ResumeContracts) -> str:
+    """Bind future publication training/resume to the exact v3 observation.
+
+    Generic snapshot machinery intentionally supports synthetic contract names;
+    this gate is mandatory in the production research-training entry point.
+    """
+    contracts.validate()
+    state = config.get("state") if isinstance(config, dict) else None
+    identifier = state.get("observation_contract") if isinstance(state, dict) else None
+    if identifier != RESEARCH_OBSERVATION_CONTRACT:
+        raise ResearchResumeError(
+            f"publication training requires {RESEARCH_OBSERVATION_CONTRACT}"
+        )
+    if contracts.observation_contract != identifier:
+        raise ResearchResumeError("resume and effective observation contracts differ")
+    if not _valid_hash(contracts.observation_config_sha256):
+        raise ResearchResumeError("publication resume lacks an observation-config SHA-256")
+    actual = observation_config_sha256(config)
+    if actual != contracts.observation_config_sha256:
+        raise ResearchResumeError("effective observation configuration hash mismatch")
+
+    simulation = config["simulation"]
+    forecast = config["bilstm"]
+    dqn = config["dqn"]
+
+    layout = {
+        "max_lanes": 10,
+        "features_per_lane": 3,
+        "junction_features": 2,
+        "global_features": 5,
+        "state_dim": 37,
+    }
+    for name, expected in layout.items():
+        value = state.get(name)
+        if not isinstance(value, int) or isinstance(value, bool) or value != expected:
+            raise ResearchResumeError(
+                f"v3 publication observation requires state.{name}={expected}"
+            )
+    calculated = (state["max_lanes"] * state["features_per_lane"]
+                  + state["junction_features"] + state["global_features"])
+    if calculated != state["state_dim"]:
+        raise ResearchResumeError("v3 publication observation feature arithmetic is inconsistent")
+    if state["state_dim"] != dqn.get("state_dim"):
+        raise ResearchResumeError("state and DQN dimensions differ")
+
+    if simulation.get("lane_observation_mode") != "research_fail_closed":
+        raise ResearchResumeError(
+            "publication observation requires lane_observation_mode=research_fail_closed"
+        )
+    step_length = simulation.get("step_length")
+    if (not isinstance(step_length, (int, float)) or isinstance(step_length, bool)
+            or not math.isfinite(step_length) or step_length != 1):
+        raise ResearchResumeError("publication observation requires a one-second timestep")
+    waiting_memory = simulation.get("waiting_time_memory_s")
+    if (not isinstance(waiting_memory, (int, float)) or isinstance(waiting_memory, bool)
+            or not math.isfinite(waiting_memory) or waiting_memory != 100):
+        raise ResearchResumeError("publication observation requires 100-second waiting memory")
+
+    for name in ("max_queue", "max_wait", "max_occupancy", "max_phase_elapsed"):
+        value = state.get(name)
+        if (not isinstance(value, (int, float)) or isinstance(value, bool)
+                or not math.isfinite(value) or value <= 0):
+            raise ResearchResumeError(
+                f"publication observation normalization state.{name} must be finite and positive"
+            )
+
+    mode = forecast.get("mode")
+    if mode not in {"no_forecast", "verified_model"}:
+        raise ResearchResumeError(
+            "publication comparison forecast mode must be no_forecast or verified_model"
+        )
+    warmup = forecast.get("history_warmup_seconds")
+    if (not isinstance(warmup, (int, float)) or isinstance(warmup, bool)
+            or not math.isfinite(warmup) or warmup != 60):
+        raise ResearchResumeError("publication comparison requires a 60-second shared warm-up")
+    if forecast.get("initial_control_protocol") != "phase_controller_keep_v1":
+        raise ResearchResumeError(
+            "publication comparison requires initial_control_protocol=phase_controller_keep_v1"
+        )
+    # Selecting verified_model is only a configuration identity. This validator
+    # does not approve, load, or authenticate any forecast checkpoint.
+    return actual
 
 
 @dataclass(frozen=True)

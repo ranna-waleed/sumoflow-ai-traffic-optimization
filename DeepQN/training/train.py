@@ -47,6 +47,7 @@ from DeepQN.training.research_orchestration import (
 )
 from DeepQN.training.research_resume import (
     ResumeContracts, TrainingCursor, restore_training_snapshot,
+    validate_publication_observation_contract,
 )
 
 logging.basicConfig(
@@ -84,7 +85,11 @@ def train_research(*, config_path: str, contracts: ResumeContracts,
     require_research_training_authority()
     with open(config_path) as stream:
         cfg = yaml.safe_load(stream)
-    agents = MultiAgentDQN(list(cfg["tls_junctions"]), cfg["dqn"])
+    validate_publication_observation_contract(cfg, contracts)
+    agents = MultiAgentDQN(
+        list(cfg["tls_junctions"]), cfg["dqn"],
+        observation_contract=cfg["state"]["observation_contract"],
+    )
     cursor = initial_cursor
     if resume_snapshot is not None:
         if not expected_resume_manifest_sha256:

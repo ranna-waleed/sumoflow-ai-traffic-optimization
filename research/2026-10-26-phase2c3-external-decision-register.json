@@ -1,0 +1,106 @@
+{
+  "schema": "sumoflow-phase2c3-external-decision-register-v1",
+  "generated_date": "2026-10-26",
+  "publication_approved": false,
+  "phase3_authorized": false,
+  "reviewers": [],
+  "decisions": [
+    {
+      "id": "detector-mapping",
+      "status": "unresolved",
+      "decision": null,
+      "reviewer": null,
+      "approval_evidence_sha256": null,
+      "question": "Are the exact junction approach-entry boundaries scientifically valid and acceptably disjoint?",
+      "required_evidence": "Independent traffic-engineering review bound to the exact network and detector-mapping hashes.",
+      "source_artifacts": [
+        {"path": "simulation/maps/tahrirupdated.net.xml", "sha256": "a7f25235f208db932735983653e00b3af659d09d04169ef5807265433c2db708"},
+        {"path": "DeepQN/configs/forecast_mappings/tahrir_v1.json", "sha256": "275d8494f9a408ddee515b63402bdac27bba041730726231d35f428ac04c0f98"},
+        {"path": "research/2026-10-26-phase2c2a-detector-validation.md", "sha256": "37bb5395d94758b716f7d46c1d54e5493b16c0b4082de799fde3c7e36b1b17e7"}
+      ]
+    },
+    {
+      "id": "tls-96621100-sequence",
+      "status": "unresolved",
+      "decision": null,
+      "reviewer": null,
+      "approval_evidence_sha256": null,
+      "question": "Is the all-red to all-yellow to all-green native cycle at TLS 96621100 intentional and safe for the modeled movements?",
+      "required_evidence": "Independent review of all link states, conflicts, intergreen requirements, and commanded versus native operation.",
+      "source_artifacts": [
+        {"path": "simulation/maps/tahrirupdated.net.xml", "sha256": "a7f25235f208db932735983653e00b3af659d09d04169ef5807265433c2db708"},
+        {"path": "DeepQN/configs/controller_contracts/tahrir_controller_review_candidate_v1.json", "sha256": "2ee35e47b01a9fa5c5866f3e829ccfaa12bdd2a018d39a77031fff73032d47dd"},
+        {"path": "research/2026-10-26-phase2c2d-tahrir-controller-readiness.md", "sha256": "d20590602116ccb779aaab5d78f59565703879b81ea63930aaffc79e09b2c143"}
+      ]
+    },
+    {
+      "id": "forecast-output-contract",
+      "status": "unresolved",
+      "decision": null,
+      "reviewer": null,
+      "approval_evidence_sha256": null,
+      "question": "Which nonnegative count-output model and loss are approved for the four 30-second targets?",
+      "required_evidence": "Frozen architecture/loss specification and leakage-free held-out baseline evaluation plan.",
+      "source_artifacts": [
+        {"path": "DeepQN/configs/forecast_mappings/tahrir_v1.json", "sha256": "275d8494f9a408ddee515b63402bdac27bba041730726231d35f428ac04c0f98"},
+        {"path": "DeepQN/configs/dqn_config.yaml", "sha256": "eb60241f8433c2f72667c3f15c2f7df4c91d78b2ce6d1a64a989ca46efd3a8f4"},
+        {"path": "research/2026-10-26-phase2c3-external-review-dossier.md", "sha256": "0398a6fe59f723fa0c163cddfa35b11ba50aba15a45fa042dd13fa86ecbf9fc4"}
+      ]
+    },
+    {
+      "id": "explicit-demand-registry",
+      "status": "unresolved",
+      "decision": null,
+      "reviewer": null,
+      "approval_evidence_sha256": null,
+      "question": "Are explicit-ID demand realizations and train/validation/test partitions independently frozen?",
+      "required_evidence": "Immutable demand artifacts, registry, split registry, seeds, generation code identity, and overlap audit.",
+      "source_artifacts": [
+        {"path": "research/2026-10-26-phase2c2b-demand-provenance.md", "sha256": "2ef71eedaf9800057f4716acf2d1c2011517724a842347310c5811fa579e61b9"},
+        {"path": "research/2026-10-26-phase2c3-experimental-protocol-candidate.md", "sha256": "cdaf159c6b8f4d7e6e03cf94bbbc5985bd4d8de8fef542a30c4390ec97a85413"}
+      ]
+    },
+    {
+      "id": "reward-calibration",
+      "status": "unresolved",
+      "decision": null,
+      "reviewer": null,
+      "approval_evidence_sha256": null,
+      "question": "Are interval-reward reference values derived only from approved training/calibration demand?",
+      "required_evidence": "Hash-verified source traces, frozen split membership, units, quantile rule, and approved calibration manifest.",
+      "source_artifacts": [
+        {"path": "DeepQN/evaluation/reward_calibration.py", "sha256": "81d94c777f154127f06f53b4d3e68ceb5be67511ad72d8f72fc20827bda78c07"},
+        {"path": "DeepQN/configs/dqn_config.yaml", "sha256": "eb60241f8433c2f72667c3f15c2f7df4c91d78b2ce6d1a64a989ca46efd3a8f4"},
+        {"path": "research/2026-10-26-phase2c2b-demand-provenance.md", "sha256": "2ef71eedaf9800057f4716acf2d1c2011517724a842347310c5811fa579e61b9"}
+      ]
+    },
+    {
+      "id": "publication-protocol",
+      "status": "unresolved",
+      "decision": null,
+      "reviewer": null,
+      "approval_evidence_sha256": null,
+      "question": "Is the five-training-seed, ten-paired-evaluation-seed protocol and hierarchical analysis approved?",
+      "required_evidence": "Signed or otherwise independently attributable protocol decision bound to an immutable protocol-manifest hash.",
+      "source_artifacts": [
+        {"path": "research/2026-10-26-phase2c3-experimental-protocol-candidate.md", "sha256": "cdaf159c6b8f4d7e6e03cf94bbbc5985bd4d8de8fef542a30c4390ec97a85413"},
+        {"path": "research/2026-10-26-phase2c2c-training-resume.md", "sha256": "f7eb3c0ba73b69bae1963aaf8bc3a25594a2c5a0bd5ff00b311094b1499c4d61"},
+        {"path": "DeepQN/configs/dqn_config.yaml", "sha256": "eb60241f8433c2f72667c3f15c2f7df4c91d78b2ce6d1a64a989ca46efd3a8f4"}
+      ]
+    },
+    {
+      "id": "real-world-claim-scope",
+      "status": "unresolved",
+      "decision": null,
+      "reviewer": null,
+      "approval_evidence_sha256": null,
+      "question": "Will claims remain simulation-only absent field calibration and independent validation?",
+      "required_evidence": "Explicit claim-scope decision; any broader claim additionally needs field measurements and calibration/validation evidence.",
+      "source_artifacts": [
+        {"path": "research/2026-10-26-phase2c3-external-review-dossier.md", "sha256": "0398a6fe59f723fa0c163cddfa35b11ba50aba15a45fa042dd13fa86ecbf9fc4"},
+        {"path": "research/2026-10-26-phase2c3-experimental-protocol-candidate.md", "sha256": "cdaf159c6b8f4d7e6e03cf94bbbc5985bd4d8de8fef542a30c4390ec97a85413"},
+        {"path": "simulation/maps/tahrirupdated.net.xml", "sha256": "a7f25235f208db932735983653e00b3af659d09d04169ef5807265433c2db708"}
+      ]
+    }
+  ]
+}

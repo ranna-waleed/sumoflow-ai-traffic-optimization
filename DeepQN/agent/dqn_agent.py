@@ -38,6 +38,7 @@ from DeepQN.agent.replay_buffer import (
 )
 
 logger = logging.getLogger(__name__)
+RESEARCH_OBSERVATION_CONTRACT = "sumoflow-dqn-observation-v3-lane-occupancy-fraction"
 
 
 class CheckpointValidationError(RuntimeError):
@@ -311,11 +312,12 @@ class MultiAgentDQN:
     Wraps act / push / update / save / load for convenience.
     """
 
-    def __init__(self, tls_ids: list, cfg: dict):
+    def __init__(self, tls_ids: list, cfg: dict, observation_contract: str | None = None):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.agents: Dict[str, DQNAgent] = {
             tid: DQNAgent(tid, cfg, device) for tid in tls_ids
         }
+        self.observation_contract = observation_contract
         logger.info(
             "MultiAgentDQN: %d agents on %s", len(self.agents), device
         )
@@ -371,6 +373,11 @@ class MultiAgentDQN:
         """
         if len(run_manifest_sha256) != 64:
             raise ValueError("run manifest SHA-256 is required")
+        if self.observation_contract != RESEARCH_OBSERVATION_CONTRACT:
+            raise ValueError(
+                "research checkpoints require observation contract "
+                f"{RESEARCH_OBSERVATION_CONTRACT}"
+            )
         root = Path(directory); root.mkdir(parents=True, exist_ok=True)
         targets = {tid: root / f"{tid}_ep{episode:04d}.pt" for tid in self.agents}
         ensemble_path = root / f"ensemble_ep{episode:04d}.json"
@@ -389,7 +396,8 @@ class MultiAgentDQN:
                     tmp = staging_root / targets[tid].name
                     numpy_state = np.random.get_state()
                     payload = {
-                        "checkpoint_schema": "sumoflow-dqn-checkpoint-v2",
+                        "checkpoint_schema": "sumoflow-dqn-checkpoint-v3",
+                        "observation_contract": self.observation_contract,
                         "online": agent.online_net.state_dict(), "target": agent.target_net.state_dict(),
                         "optimizer": agent.optimiser.state_dict(), "episode": episode,
                         "epsilon": agent.epsilon, "steps": agent.total_steps,
@@ -410,7 +418,8 @@ class MultiAgentDQN:
                     "architecture_config_sha256": cfg_hashes[tid]}
                     for tid in sorted(staged)]
                 ensemble_payload = {
-                    "schema_version": "sumoflow-dqn-ensemble-v2", "episode": episode,
+                    "schema_version": "sumoflow-dqn-ensemble-v3", "episode": episode,
+                    "observation_contract": self.observation_contract,
                     "run_manifest_sha256": run_manifest_sha256,
                     "tls_ids": sorted(self.agents), "checkpoints": checkpoint_rows,
                 }
@@ -427,7 +436,7 @@ class MultiAgentDQN:
         return CheckpointManifest(episode, tuple(
             CheckpointRecord(tid, episode, str(path.resolve()), _sha256(path))
             for tid, path in targets.items()
-        ), schema_version="sumoflow-dqn-ensemble-v2",
+        ), schema_version="sumoflow-dqn-ensemble-v3",
             ensemble_manifest_path=str(ensemble_path.resolve()),
             ensemble_manifest_sha256=_sha256(ensemble_path),
             run_manifest_sha256=run_manifest_sha256)
@@ -446,7 +455,12 @@ class MultiAgentDQN:
                 logger.info("No checkpoint for %s; starting fresh.", tid)
 
     def load_for_research_evaluation(self, directory: str, episode: int) -> CheckpointManifest:
-        """Require and atomically load a complete immutable v2 ensemble."""
+        """Require and atomically load a complete immutable v3 ensemble."""
+        if self.observation_contract != RESEARCH_OBSERVATION_CONTRACT:
+            raise CheckpointValidationError(
+                "research evaluation requires observation contract "
+                f"{RESEARCH_OBSERVATION_CONTRACT}"
+            )
         if not isinstance(episode, int) or isinstance(episode, bool) or episode < 0:
             raise CheckpointValidationError("checkpoint episode must be a non-negative integer")
         root = Path(directory)
@@ -458,9 +472,10 @@ class MultiAgentDQN:
         except (OSError, json.JSONDecodeError) as exc:
             raise CheckpointValidationError(f"cannot read ensemble manifest: {exc}") from exc
         expected_ids = sorted(self.agents)
-        if (manifest.get("schema_version") != "sumoflow-dqn-ensemble-v2"
+        if (manifest.get("schema_version") != "sumoflow-dqn-ensemble-v3"
                 or manifest.get("episode") != episode
-                or manifest.get("tls_ids") != expected_ids):
+                or manifest.get("tls_ids") != expected_ids
+                or manifest.get("observation_contract") != self.observation_contract):
             raise CheckpointValidationError("research ensemble manifest is incompatible")
         run_hash = manifest.get("run_manifest_sha256")
         if not isinstance(run_hash, str) or len(run_hash) != 64:
@@ -490,9 +505,10 @@ class MultiAgentDQN:
             required = {"online", "target", "optimizer", "episode", "tls_id",
                         "checkpoint_schema", "architecture_config_sha256",
                         "run_manifest_sha256", "python_rng_state", "numpy_rng_state",
-                        "torch_rng_state"}
+                        "torch_rng_state", "observation_contract"}
             if (required - set(checkpoint)
-                    or checkpoint.get("checkpoint_schema") != "sumoflow-dqn-checkpoint-v2"
+                    or checkpoint.get("checkpoint_schema") != "sumoflow-dqn-checkpoint-v3"
+                    or checkpoint.get("observation_contract") != self.observation_contract
                     or checkpoint.get("tls_id") != tls_id
                     or checkpoint.get("episode") != episode
                     or checkpoint.get("run_manifest_sha256") != run_hash
@@ -520,7 +536,7 @@ class MultiAgentDQN:
             agent.epsilon = checkpoint.get("epsilon", agent.epsilon_end)
             agent.total_steps = checkpoint.get("steps", 0)
         return CheckpointManifest(
-            episode, tuple(records), "sumoflow-dqn-ensemble-v2",
+            episode, tuple(records), "sumoflow-dqn-ensemble-v3",
             str(ensemble_path.resolve()), _sha256(ensemble_path), run_hash,
         )
 
