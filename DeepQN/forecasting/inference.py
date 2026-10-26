@@ -175,6 +175,13 @@ class StrictForecastAdapter:
         if self._collector is None:
             raise ForecastInferenceError("verified_model lacks a validated detector mapping")
         import traci
+        starting = tuple(map(str, traci.simulation.getStartingTeleportIDList()))
+        ending = tuple(map(str, traci.simulation.getEndingTeleportIDList()))
+        if starting or ending:
+            raise ForecastInferenceError(
+                "teleport intersects verified forecast collection; "
+                f"starting={starting}, ending={ending}"
+            )
         rows = {spec.detector_id: traci.inductionloop.getVehicleData(spec.detector_id)
                 for spec in self.detector_mapping.specs}
         events = self._collector.collect(rows)
