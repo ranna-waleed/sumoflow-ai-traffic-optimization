@@ -77,6 +77,13 @@ class RunManifest:
     output_paths: Dict[str, str] = field(default_factory=dict)
     output_hashes: Dict[str, str] = field(default_factory=dict)
     controller_diagnostics: Dict[str, Any] = field(default_factory=dict)
+    demand_realization_id: Optional[str] = None
+    demand_manifest_sha256: Optional[str] = None
+    demand_partition: Optional[str] = None
+    split_registry_sha256: Optional[str] = None
+    demand_usage: Optional[str] = None
+    effective_simulation_config_path: Optional[str] = None
+    effective_simulation_config_file_sha256: Optional[str] = None
     completion_status: str = "planned"
     errors: list[str] = field(default_factory=list)
 
@@ -248,5 +255,24 @@ def validate_comparability(left: RunManifest, right: RunManifest) -> None:
             "runs are not experimentally comparable; mismatched or unknown: "
             + ", ".join(mismatches)
         )
+    demand_fields = (
+        "demand_realization_id", "demand_manifest_sha256", "demand_partition",
+        "split_registry_sha256", "demand_usage",
+    )
+    if any(getattr(item, name) is not None for item in (left, right) for name in demand_fields):
+        for item in (left, right):
+            missing = [name for name in demand_fields if not getattr(item, name)]
+            if missing:
+                raise IncomparableRunsError(
+                    f"manifest {item.run_id} has incomplete demand provenance: "
+                    + ", ".join(missing)
+                )
+        mismatched = [name for name in demand_fields
+                      if getattr(left, name) != getattr(right, name)]
+        if mismatched:
+            raise IncomparableRunsError(
+                "runs are not experimentally comparable; mismatched demand provenance: "
+                + ", ".join(mismatched)
+            )
     if left.completion_status != "complete" or right.completion_status != "complete":
         raise IncomparableRunsError("both run manifests must have completion_status='complete'")

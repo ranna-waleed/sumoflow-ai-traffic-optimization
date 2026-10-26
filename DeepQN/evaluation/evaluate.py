@@ -41,11 +41,21 @@ def _set_or_create(parent: ET.Element, tag: str, value: str) -> None:
     child.set("value", value)
 
 
-def _patch_sumocfg(original_path: str | Path, outputs: Dict[str, Path], seed: int) -> Path:
+def _patch_sumocfg(original_path: str | Path, outputs: Dict[str, Path], seed: int,
+                   route_paths: Optional[Iterable[str | Path]] = None) -> Path:
     """Create a temporary config beside the original; never alter the source."""
     original = Path(original_path).resolve()
     tree = ET.parse(original)
     root = tree.getroot()
+    if route_paths is not None:
+        requested_routes = [Path(path).resolve() for path in route_paths]
+        if len(requested_routes) != 1:
+            raise ValueError("demand-contract evaluation requires exactly one route file")
+        input_section = root.find("input")
+        routes = None if input_section is None else input_section.find("route-files")
+        if routes is None:
+            raise ValueError(f"SUMO config has no route-files: {original}")
+        routes.set("value", str(requested_routes[0]))
     output = root.find("output")
     if output is None:
         output = root.find("o")
