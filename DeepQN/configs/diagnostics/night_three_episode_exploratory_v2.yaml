@@ -1,0 +1,40 @@
+schema: sumoflow-fullnight-exploratory-training-v1
+classification: nonpublication_uncalibrated_synthetic_exploratory_training
+base_config: ../dqn_config.yaml
+input_manifest: ../../diagnostics/inputs/night_synthetic_v5/input-manifest.json
+profile: night
+episodes: 3
+training_seed: 41001
+sumo_seed_start: 42001
+traci_port: 18813
+wall_clock_timeout_per_episode_s: 7200
+output_root: ../../diagnostics/phase3_fullnight_exploratory_v2
+overrides:
+  simulation:
+    net_file: DeepQN/diagnostics/inputs/night_synthetic_v5/tahrir_synthetic_signal_v1.net.xml
+    sumo_binary: sumo
+    step_length: 1
+    decision_interval: 10
+    terminate_on_empty: false
+    research_evaluation: true
+    comparative_research: false
+    require_matched_forecast_warmup: false
+    physical_trace_mode: research_fail_closed
+    lane_observation_mode: research_fail_closed
+    waiting_time_memory_s: 100
+  bilstm:
+    mode: no_forecast
+    history_warmup_seconds: 0
+    initial_control_protocol: null
+  training:
+    num_episodes: 3
+  state:
+    observation_contract: sumoflow-dqn-observation-v4-lane-occupancy-saturated
+    lane_occupancy_mode: bounded_saturation_v1
+  dqn:
+    min_replay_size: 1000
+  profiles:
+    night:
+      config: DeepQN/diagnostics/inputs/night_synthetic_v5/night-full.sumocfg
+      begin: 79200
+      end: 86400

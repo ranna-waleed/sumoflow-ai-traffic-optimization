@@ -1,0 +1,11 @@
+schema: sumoflow-heldout-dqn-evaluation-v1
+classification: nonpublication_synthetic_exploratory_evaluation
+publication_approved: false
+training_config: night_three_episode_exploratory_v3.yaml
+input_manifest: ../../diagnostics/inputs/night_synthetic_v6/input-manifest.json
+training_run_dir: ../../diagnostics/phase3_fullnight_exploratory_v3/night-v6-learning-r2-3ep-seed41001
+snapshot_manifest_sha256: d8c73fa5751e00c5924230ff7bff4f82bb17f68237b2618ed96b74d210056032
+heldout_seeds: [42004]
+traci_port_start: 18831
+wall_clock_timeout_per_run_s: 7200
+output_root: ../../diagnostics/phase3_heldout_evaluation_v1

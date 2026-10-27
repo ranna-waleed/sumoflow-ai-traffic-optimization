@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-10-27T02:54:47.877699+02:00 by Eclipse SUMO sumo 1.26.0
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="D:\Courses\University zewail\Year4\grad_project\sumoflow-ai-traffic-optimization\DeepQN\tests\fixtures\detector_sumo\../tiny_sumo/tiny.net.xml"/>
+        <route-files value="D:\Courses\University zewail\Year4\grad_project\sumoflow-ai-traffic-optimization\DeepQN\tests\fixtures\detector_sumo\detector.rou.xml"/>
+        <additional-files value="D:\Courses\University zewail\Year4\grad_project\sumoflow-ai-traffic-optimization\DeepQN\tests\fixtures\detector_sumo\detectors.add.xml"/>
+    </input>
+
+    <time>
+        <begin value="0"/>
+        <end value="8"/>
+        <step-length value="1"/>
+    </time>
+
+    <processing>
+        <waiting-time-memory value="100"/>
+    </processing>
+
+    <report>
+        <duration-log.disable value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+    <traci_server>
+        <remote-port value="60865"/>
+    </traci_server>
+
+    <random_number>
+        <random value="false"/>
+        <seed value="71"/>
+    </random_number>
+
+</sumoConfiguration>
+-->
+
+<detector xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/det_e1_file.xsd">
+    <interval begin="0.00" end="1.00" id="e1__center__north__s_in_0" nVehContrib="0" flow="0.00" occupancy="100.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="1"/>
+    <interval begin="0.00" end="1.00" id="e1__center__south__n_in_0" nVehContrib="0" flow="0.00" occupancy="100.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="1"/>
+    <interval begin="0.00" end="1.00" id="e1__center__east__w_in_0" nVehContrib="0" flow="0.00" occupancy="100.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="1"/>
+    <interval begin="0.00" end="1.00" id="e1__center__west__e_in_0" nVehContrib="0" flow="0.00" occupancy="100.00" speed="-1.00" harmonicMeanSpeed="-1.00" length="-1.00" nVehEntered="1"/>
+</detector>

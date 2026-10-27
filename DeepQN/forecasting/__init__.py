@@ -1,0 +1,2 @@
+"""Versioned forecasting research contracts."""
+

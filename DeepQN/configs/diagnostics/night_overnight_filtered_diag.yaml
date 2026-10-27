@@ -1,0 +1,92 @@
+schema: sumoflow-exploratory-training-diagnostic-v1
+classification: nonpublication_uncalibrated_synthetic_diagnostic
+base_config: ../dqn_config.yaml
+profile: night
+episodes: 1
+training_seed: 41001
+sumo_seed: 41002
+traci_port: 18813
+wall_clock_timeout_s: 25200
+output_root: ../../diagnostics/phase3_exploratory_night
+overrides:
+  simulation:
+    sumo_binary: sumo
+    step_length: 1
+    decision_interval: 10
+    terminate_on_empty: false
+    research_evaluation: true
+    comparative_research: false
+    require_matched_forecast_warmup: false
+    physical_trace_mode: research_fail_closed
+    lane_observation_mode: research_fail_closed
+    waiting_time_memory_s: 100
+  bilstm:
+    mode: no_forecast
+    history_warmup_seconds: 0
+    initial_control_protocol: null
+  training:
+    num_episodes: 1
+    checkpoint_freq: 1
+  state:
+    observation_contract: sumoflow-dqn-observation-v3-lane-occupancy-fraction
+  tls_junctions:
+    '315744796':
+      incoming_lanes:
+      - 28718647#3_0
+      - 28718647#3_1
+      - 28718647#3_2
+      - 28718647#3_3
+      - 28718647#3_4
+      - 690516091#0_0
+      - 690516091#0_1
+      - 690516091#0_2
+      - 690516091#0_3
+      - 690516091#0_4
+    '96621100':
+      incoming_lanes:
+      - 690516091#1_0
+      - 690516091#1_1
+      - 690516091#1_2
+      - 690516091#1_3
+      - 690516091#1_4
+    '2031414903':
+      incoming_lanes:
+      - 50211834#1_0
+      - 50211834#1_1
+      - 50211834#1_2
+      - 50211834#1_3
+      - 10873186#5_0
+      - 10873186#5_1
+      - 10873186#5_2
+      - 10873186#5_3
+      - 10873186#5_4
+    '2031414899':
+      incoming_lanes:
+      - 10873191#3_0
+      - 10873191#3_1
+      - 10873191#3_2
+      - 10873191#3_3
+    '6288771431':
+      incoming_lanes:
+      - 10873191#4_0
+      - 10873191#4_1
+      - 10873191#4_2
+      - 10873191#4_3
+    '271064234':
+      incoming_lanes:
+      - 10873193#1_0
+      - 10873193#1_1
+      - 10873193#1_2
+      - 10873193#1_3
+    '315743335':
+      incoming_lanes:
+      - 28718874#1_0
+      - 28718874#1_1
+      - 28718874#1_2
+      - 28718874#1_3
+      - 28718874#1_4
+  dqn:
+    min_replay_size: 64
+  profiles:
+    night:
+      end: 86400
