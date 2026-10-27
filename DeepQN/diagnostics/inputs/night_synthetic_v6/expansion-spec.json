@@ -1,0 +1,31 @@
+{
+  "additional_files": [
+    {
+      "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\DeepQN\\diagnostics\\inputs\\night_synthetic_v6\\tahrir.synthetic-stops.add.xml",
+      "sha256": "e6b3703b82d8c4b8ea797540029c945cd980fcd98f724268858abaaab5633c41"
+    },
+    {
+      "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\simulation\\maps\\vehtype.add.xml",
+      "sha256": "e97ddd34ad616596f80a536531cf35e4d82df162057e24a52c726432742bd835"
+    }
+  ],
+  "algorithm": "sumo-number-equal-spacing-begin-inclusive-end-exclusive-v1",
+  "begin_s": 79200,
+  "configuration": {
+    "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\DeepQN\\diagnostics\\inputs\\night_synthetic_v6\\expansion-source.sumocfg",
+    "sha256": "5c517a2e373ca0b9681810e668677fdc0df7dca3a4ca3f8a868d56fa5e3799f7"
+  },
+  "end_s": 86400,
+  "expansion_id": "night-explicit-sorted-diagnostic-v1",
+  "network": {
+    "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\DeepQN\\diagnostics\\inputs\\night_synthetic_v6\\tahrir_synthetic_signal_v1.net.xml",
+    "sha256": "4d65197847de59ee645047dd6ccc7fd2ea0d7c49818c9f00a6788ceb1e704e53"
+  },
+  "publication_approved": false,
+  "schema": "sumoflow-number-flow-expansion-spec-v1",
+  "source_routes": {
+    "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\simulation\\maps\\routes_night.rou.xml",
+    "sha256": "1e84789b2fac27aaff9d336a22cb0fc60b83ad08fc032046bf1671003223396a"
+  },
+  "sumo_version": "1.26.0"
+}

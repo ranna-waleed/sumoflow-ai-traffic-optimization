@@ -1,0 +1,2512 @@
+{
+  "expanded_routes_intermediate": {
+    "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\DeepQN\\diagnostics\\inputs\\night_synthetic_v6\\expanded\\routes.explicit.rou.xml",
+    "sha256": "b9404e453768e38eebd2762d843b199bc0aa233162711595f547282251a0d10b"
+  },
+  "expansion_manifest": {
+    "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\DeepQN\\diagnostics\\inputs\\night_synthetic_v6\\expanded\\expansion_manifest.json",
+    "sha256": "77b304157fe742ed5d2b1bf0c3d43a78f4b7ac7d3c738727bd22a102da2cd65f"
+  },
+  "expansion_spec": {
+    "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\DeepQN\\diagnostics\\inputs\\night_synthetic_v6\\expansion-spec.json",
+    "sha256": "00349b85552c2cb773bfd9fcbdb53bf4c6c784d96866de89940169f8c1487c1d"
+  },
+  "explicit_routes": {
+    "counts": {
+      "expanded_explicit_vehicles": 2106,
+      "flow_requested_vehicles": 1920,
+      "source_explicit_vehicles": 186,
+      "source_flows": 840
+    },
+    "invalid_stop_correction_count": 117,
+    "invalid_stop_corrections": [
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.0,
+        "requested_start_pos_m": 13.0,
+        "stop_index": 0,
+        "vehicle_id": "microbus_20"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.6,
+        "requested_start_pos_m": 11.6,
+        "stop_index": 0,
+        "vehicle_id": "microbus_21"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 19.2,
+        "requested_start_pos_m": 9.2,
+        "stop_index": 1,
+        "vehicle_id": "microbus_21"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.4,
+        "requested_start_pos_m": 12.4,
+        "stop_index": 0,
+        "vehicle_id": "microbus_27"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 15.5,
+        "requested_start_pos_m": 5.5,
+        "stop_index": 1,
+        "vehicle_id": "microbus_27"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.1,
+        "requested_start_pos_m": 13.1,
+        "stop_index": 0,
+        "vehicle_id": "microbus_28"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 19.5,
+        "requested_start_pos_m": 9.5,
+        "stop_index": 0,
+        "vehicle_id": "microbus_29"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.4,
+        "requested_start_pos_m": 8.4,
+        "stop_index": 1,
+        "vehicle_id": "microbus_29"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 16.3,
+        "requested_start_pos_m": 6.3,
+        "stop_index": 0,
+        "vehicle_id": "microbus_33"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.2,
+        "requested_start_pos_m": 8.2,
+        "stop_index": 1,
+        "vehicle_id": "microbus_33"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.1,
+        "requested_start_pos_m": 8.1,
+        "stop_index": 1,
+        "vehicle_id": "microbus_36"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 19.4,
+        "requested_start_pos_m": 9.4,
+        "stop_index": 1,
+        "vehicle_id": "microbus_122"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.7,
+        "requested_start_pos_m": 11.7,
+        "stop_index": 0,
+        "vehicle_id": "microbus_124"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.4,
+        "requested_start_pos_m": 12.4,
+        "stop_index": 1,
+        "vehicle_id": "microbus_124"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.9,
+        "requested_start_pos_m": 11.9,
+        "stop_index": 0,
+        "vehicle_id": "microbus_125"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 19.7,
+        "requested_start_pos_m": 9.7,
+        "stop_index": 1,
+        "vehicle_id": "microbus_125"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 17.3,
+        "requested_start_pos_m": 7.3,
+        "stop_index": 1,
+        "vehicle_id": "microbus_127"
+      },
+      {
+        "bus_stop_ids": [
+          "bs_7",
+          "bs_5",
+          "bs_3",
+          "bs_9"
+        ],
+        "candidate_stop_order": [
+          2,
+          1,
+          0,
+          3
+        ],
+        "lane_ids": [
+          "28718647#1_0",
+          "28718647#3_0",
+          "28718647#3_0",
+          "28718874#1_0"
+        ],
+        "policy": "reorder_stops_to_route_order_preserve_all_obligations",
+        "source_stop_order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "vehicle_id": "bus_160"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.3,
+        "requested_start_pos_m": 11.3,
+        "stop_index": 1,
+        "vehicle_id": "microbus_130"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.6,
+        "requested_start_pos_m": 12.6,
+        "stop_index": 0,
+        "vehicle_id": "microbus_133"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 17.6,
+        "requested_start_pos_m": 7.6,
+        "stop_index": 0,
+        "vehicle_id": "microbus_134"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.8,
+        "requested_start_pos_m": 8.8,
+        "stop_index": 1,
+        "vehicle_id": "microbus_134"
+      },
+      {
+        "bus_stop_ids": [
+          "bs_5",
+          "bs_3",
+          "bs_11"
+        ],
+        "candidate_stop_order": [
+          1,
+          0,
+          2
+        ],
+        "lane_ids": [
+          "28718647#3_0",
+          "28718647#3_0",
+          "10873193#1_0"
+        ],
+        "policy": "reorder_stops_to_route_order_preserve_all_obligations",
+        "source_stop_order": [
+          0,
+          1,
+          2
+        ],
+        "vehicle_id": "bus_161"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.2,
+        "requested_start_pos_m": 13.2,
+        "stop_index": 1,
+        "vehicle_id": "microbus_137"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.0,
+        "requested_start_pos_m": 13.0,
+        "stop_index": 1,
+        "vehicle_id": "microbus_138"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.7,
+        "requested_start_pos_m": 11.7,
+        "stop_index": 0,
+        "vehicle_id": "microbus_223"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.7,
+        "requested_start_pos_m": 12.7,
+        "stop_index": 1,
+        "vehicle_id": "microbus_225"
+      },
+      {
+        "bus_stop_ids": [
+          "bs_5",
+          "bs_3",
+          "bs_11"
+        ],
+        "candidate_stop_order": [
+          1,
+          0,
+          2
+        ],
+        "lane_ids": [
+          "28718647#3_0",
+          "28718647#3_0",
+          "10873193#1_0"
+        ],
+        "policy": "reorder_stops_to_route_order_preserve_all_obligations",
+        "source_stop_order": [
+          0,
+          1,
+          2
+        ],
+        "vehicle_id": "bus_260"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 20.8,
+        "requested_start_pos_m": 10.8,
+        "stop_index": 1,
+        "vehicle_id": "microbus_229"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 16.5,
+        "requested_start_pos_m": 6.5,
+        "stop_index": 0,
+        "vehicle_id": "microbus_232"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 19.1,
+        "requested_start_pos_m": 9.1,
+        "stop_index": 1,
+        "vehicle_id": "microbus_232"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 15.1,
+        "requested_start_pos_m": 5.1,
+        "stop_index": 1,
+        "vehicle_id": "microbus_233"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.9,
+        "requested_start_pos_m": 12.9,
+        "stop_index": 0,
+        "vehicle_id": "microbus_238"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 16.7,
+        "requested_start_pos_m": 6.7,
+        "stop_index": 1,
+        "vehicle_id": "microbus_238"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.0,
+        "requested_start_pos_m": 11.0,
+        "stop_index": 0,
+        "vehicle_id": "microbus_239"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.2,
+        "requested_start_pos_m": 13.2,
+        "stop_index": 1,
+        "vehicle_id": "microbus_239"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.1,
+        "requested_start_pos_m": 13.1,
+        "stop_index": 0,
+        "vehicle_id": "microbus_323"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 20.0,
+        "requested_start_pos_m": 10.0,
+        "stop_index": 1,
+        "vehicle_id": "microbus_323"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.5,
+        "requested_start_pos_m": 13.5,
+        "stop_index": 0,
+        "vehicle_id": "microbus_327"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 20.0,
+        "requested_start_pos_m": 10.0,
+        "stop_index": 1,
+        "vehicle_id": "microbus_327"
+      },
+      {
+        "bus_stop_ids": [
+          "bs_7",
+          "bs_5",
+          "bs_3"
+        ],
+        "candidate_stop_order": [
+          2,
+          1,
+          0
+        ],
+        "lane_ids": [
+          "28718647#1_0",
+          "28718647#3_0",
+          "28718647#3_0"
+        ],
+        "policy": "reorder_stops_to_route_order_preserve_all_obligations",
+        "source_stop_order": [
+          0,
+          1,
+          2
+        ],
+        "vehicle_id": "bus_361"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.8,
+        "requested_start_pos_m": 14.8,
+        "stop_index": 0,
+        "vehicle_id": "microbus_328"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.3,
+        "requested_start_pos_m": 8.3,
+        "stop_index": 1,
+        "vehicle_id": "microbus_328"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.4,
+        "requested_start_pos_m": 14.4,
+        "stop_index": 0,
+        "vehicle_id": "microbus_330"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 16.9,
+        "requested_start_pos_m": 6.9,
+        "stop_index": 1,
+        "vehicle_id": "microbus_330"
+      },
+      {
+        "bus_stop_ids": [
+          "bs_5",
+          "bs_3",
+          "bs_11"
+        ],
+        "candidate_stop_order": [
+          1,
+          0,
+          2
+        ],
+        "lane_ids": [
+          "28718647#3_0",
+          "28718647#3_0",
+          "10873193#1_0"
+        ],
+        "policy": "reorder_stops_to_route_order_preserve_all_obligations",
+        "source_stop_order": [
+          0,
+          1,
+          2
+        ],
+        "vehicle_id": "bus_362"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 20.5,
+        "requested_start_pos_m": 10.5,
+        "stop_index": 0,
+        "vehicle_id": "microbus_335"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.4,
+        "requested_start_pos_m": 12.4,
+        "stop_index": 1,
+        "vehicle_id": "microbus_335"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 20.9,
+        "requested_start_pos_m": 10.9,
+        "stop_index": 0,
+        "vehicle_id": "microbus_337"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.2,
+        "requested_start_pos_m": 11.2,
+        "stop_index": 1,
+        "vehicle_id": "microbus_337"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.7,
+        "requested_start_pos_m": 12.7,
+        "stop_index": 0,
+        "vehicle_id": "microbus_338"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 20.7,
+        "requested_start_pos_m": 10.7,
+        "stop_index": 1,
+        "vehicle_id": "microbus_339"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.3,
+        "requested_start_pos_m": 11.3,
+        "stop_index": 2,
+        "vehicle_id": "microbus_339"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 19.2,
+        "requested_start_pos_m": 9.2,
+        "stop_index": 0,
+        "vehicle_id": "microbus_425"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.8,
+        "requested_start_pos_m": 11.8,
+        "stop_index": 0,
+        "vehicle_id": "microbus_426"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.7,
+        "requested_start_pos_m": 8.7,
+        "stop_index": 1,
+        "vehicle_id": "microbus_426"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.7,
+        "requested_start_pos_m": 14.7,
+        "stop_index": 1,
+        "vehicle_id": "microbus_433"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 15.2,
+        "requested_start_pos_m": 5.2,
+        "stop_index": 0,
+        "vehicle_id": "microbus_435"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 16.2,
+        "requested_start_pos_m": 6.2,
+        "stop_index": 1,
+        "vehicle_id": "microbus_435"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.3,
+        "requested_start_pos_m": 12.3,
+        "stop_index": 0,
+        "vehicle_id": "microbus_436"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.6,
+        "requested_start_pos_m": 8.6,
+        "stop_index": 1,
+        "vehicle_id": "microbus_436"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.6,
+        "requested_start_pos_m": 13.6,
+        "stop_index": 1,
+        "vehicle_id": "microbus_437"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.3,
+        "requested_start_pos_m": 13.3,
+        "stop_index": 1,
+        "vehicle_id": "microbus_526"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.8,
+        "requested_start_pos_m": 8.8,
+        "stop_index": 0,
+        "vehicle_id": "microbus_527"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.9,
+        "requested_start_pos_m": 8.9,
+        "stop_index": 1,
+        "vehicle_id": "microbus_527"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 20.8,
+        "requested_start_pos_m": 10.8,
+        "stop_index": 0,
+        "vehicle_id": "microbus_528"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.3,
+        "requested_start_pos_m": 12.3,
+        "stop_index": 1,
+        "vehicle_id": "microbus_528"
+      },
+      {
+        "bus_stop_ids": [
+          "bs_5",
+          "bs_3",
+          "bs_11"
+        ],
+        "candidate_stop_order": [
+          1,
+          0,
+          2
+        ],
+        "lane_ids": [
+          "28718647#3_0",
+          "28718647#3_0",
+          "10873193#1_0"
+        ],
+        "policy": "reorder_stops_to_route_order_preserve_all_obligations",
+        "source_stop_order": [
+          0,
+          1,
+          2
+        ],
+        "vehicle_id": "bus_563"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 19.7,
+        "requested_start_pos_m": 9.7,
+        "stop_index": 0,
+        "vehicle_id": "microbus_530"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.6,
+        "requested_start_pos_m": 13.6,
+        "stop_index": 1,
+        "vehicle_id": "microbus_530"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.0,
+        "requested_start_pos_m": 14.0,
+        "stop_index": 1,
+        "vehicle_id": "microbus_531"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 20.8,
+        "requested_start_pos_m": 10.8,
+        "stop_index": 0,
+        "vehicle_id": "microbus_532"
+      },
+      {
+        "bus_stop_ids": [
+          "bs_7",
+          "bs_5",
+          "bs_3",
+          "bs_9"
+        ],
+        "candidate_stop_order": [
+          2,
+          1,
+          0,
+          3
+        ],
+        "lane_ids": [
+          "28718647#1_0",
+          "28718647#3_0",
+          "28718647#3_0",
+          "28718874#1_0"
+        ],
+        "policy": "reorder_stops_to_route_order_preserve_all_obligations",
+        "source_stop_order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "vehicle_id": "bus_564"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.4,
+        "requested_start_pos_m": 12.4,
+        "stop_index": 0,
+        "vehicle_id": "microbus_536"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.0,
+        "requested_start_pos_m": 11.0,
+        "stop_index": 1,
+        "vehicle_id": "microbus_536"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.2,
+        "requested_start_pos_m": 14.2,
+        "stop_index": 0,
+        "vehicle_id": "microbus_538"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.4,
+        "requested_start_pos_m": 14.4,
+        "stop_index": 1,
+        "vehicle_id": "microbus_539"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.4,
+        "requested_start_pos_m": 13.4,
+        "stop_index": 0,
+        "vehicle_id": "microbus_540"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.2,
+        "requested_start_pos_m": 14.2,
+        "stop_index": 0,
+        "vehicle_id": "microbus_541"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.3,
+        "requested_start_pos_m": 14.3,
+        "stop_index": 1,
+        "vehicle_id": "microbus_541"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 16.9,
+        "requested_start_pos_m": 6.9,
+        "stop_index": 1,
+        "vehicle_id": "microbus_542"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.6,
+        "requested_start_pos_m": 14.6,
+        "stop_index": 0,
+        "vehicle_id": "microbus_626"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 15.6,
+        "requested_start_pos_m": 5.6,
+        "stop_index": 1,
+        "vehicle_id": "microbus_626"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 16.0,
+        "requested_start_pos_m": 6.0,
+        "stop_index": 1,
+        "vehicle_id": "microbus_627"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.2,
+        "requested_start_pos_m": 8.2,
+        "stop_index": 1,
+        "vehicle_id": "microbus_628"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.0,
+        "requested_start_pos_m": 12.0,
+        "stop_index": 1,
+        "vehicle_id": "microbus_629"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 18.7,
+        "requested_start_pos_m": 8.7,
+        "stop_index": 0,
+        "vehicle_id": "microbus_631"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 17.4,
+        "requested_start_pos_m": 7.4,
+        "stop_index": 1,
+        "vehicle_id": "microbus_631"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.3,
+        "requested_start_pos_m": 13.3,
+        "stop_index": 1,
+        "vehicle_id": "microbus_634"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.0,
+        "requested_start_pos_m": 13.0,
+        "stop_index": 0,
+        "vehicle_id": "microbus_696"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.0,
+        "requested_start_pos_m": 13.0,
+        "stop_index": 1,
+        "vehicle_id": "microbus_696"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 15.5,
+        "requested_start_pos_m": 5.5,
+        "stop_index": 1,
+        "vehicle_id": "microbus_699"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 19.5,
+        "requested_start_pos_m": 9.5,
+        "stop_index": 0,
+        "vehicle_id": "microbus_701"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.0,
+        "requested_start_pos_m": 13.0,
+        "stop_index": 1,
+        "vehicle_id": "microbus_701"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.9,
+        "requested_start_pos_m": 12.9,
+        "stop_index": 0,
+        "vehicle_id": "microbus_766"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 17.4,
+        "requested_start_pos_m": 7.4,
+        "stop_index": 1,
+        "vehicle_id": "microbus_766"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 17.7,
+        "requested_start_pos_m": 7.7,
+        "stop_index": 0,
+        "vehicle_id": "microbus_774"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.2,
+        "requested_start_pos_m": 14.2,
+        "stop_index": 1,
+        "vehicle_id": "microbus_774"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.7,
+        "requested_start_pos_m": 13.7,
+        "stop_index": 2,
+        "vehicle_id": "microbus_837"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.7,
+        "requested_start_pos_m": 12.7,
+        "stop_index": 0,
+        "vehicle_id": "microbus_838"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 19.1,
+        "requested_start_pos_m": 9.1,
+        "stop_index": 1,
+        "vehicle_id": "microbus_839"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.9,
+        "requested_start_pos_m": 14.9,
+        "stop_index": 0,
+        "vehicle_id": "microbus_842"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 19.1,
+        "requested_start_pos_m": 9.1,
+        "stop_index": 1,
+        "vehicle_id": "microbus_842"
+      },
+      {
+        "bus_stop_ids": [
+          "bs_5",
+          "bs_3",
+          "bs_11"
+        ],
+        "candidate_stop_order": [
+          1,
+          0,
+          2
+        ],
+        "lane_ids": [
+          "28718647#3_0",
+          "28718647#3_0",
+          "10873193#1_0"
+        ],
+        "policy": "reorder_stops_to_route_order_preserve_all_obligations",
+        "source_stop_order": [
+          0,
+          1,
+          2
+        ],
+        "vehicle_id": "bus_865"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.5,
+        "requested_start_pos_m": 13.5,
+        "stop_index": 1,
+        "vehicle_id": "microbus_844"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.4,
+        "requested_start_pos_m": 12.4,
+        "stop_index": 0,
+        "vehicle_id": "microbus_909"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 22.0,
+        "requested_start_pos_m": 12.0,
+        "stop_index": 1,
+        "vehicle_id": "microbus_909"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.9,
+        "requested_start_pos_m": 11.9,
+        "stop_index": 0,
+        "vehicle_id": "microbus_910"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.7,
+        "requested_start_pos_m": 13.7,
+        "stop_index": 1,
+        "vehicle_id": "microbus_910"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.3,
+        "requested_start_pos_m": 11.3,
+        "stop_index": 0,
+        "vehicle_id": "microbus_911"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.7,
+        "requested_start_pos_m": 13.7,
+        "stop_index": 1,
+        "vehicle_id": "microbus_912"
+      },
+      {
+        "bus_stop_ids": [
+          "bs_5",
+          "bs_3"
+        ],
+        "candidate_stop_order": [
+          1,
+          0
+        ],
+        "lane_ids": [
+          "28718647#3_0",
+          "28718647#3_0"
+        ],
+        "policy": "reorder_stops_to_route_order_preserve_all_obligations",
+        "source_stop_order": [
+          0,
+          1
+        ],
+        "vehicle_id": "bus_935"
+      },
+      {
+        "lane_id": "10873193#0_0",
+        "lane_length_m": 0.2,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 20.9,
+        "requested_start_pos_m": 10.9,
+        "stop_index": 1,
+        "vehicle_id": "microbus_977"
+      },
+      {
+        "lane_id": "28718874#0_0",
+        "lane_length_m": 20.69,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 21.1,
+        "requested_start_pos_m": 11.1,
+        "stop_index": 0,
+        "vehicle_id": "microbus_979"
+      },
+      {
+        "lane_id": "192591565#0_0",
+        "lane_length_m": 3.46,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 23.7,
+        "requested_start_pos_m": 13.7,
+        "stop_index": 0,
+        "vehicle_id": "microbus_980"
+      },
+      {
+        "lane_id": "192591565#1_0",
+        "lane_length_m": 13.34,
+        "policy": "sumo_friendlyPos_true_preserve_stop_and_clamp_position",
+        "requested_end_pos_m": 24.2,
+        "requested_start_pos_m": 14.2,
+        "stop_index": 1,
+        "vehicle_id": "microbus_980"
+      },
+      {
+        "bus_stop_ids": [
+          "bs_7",
+          "bs_5",
+          "bs_3"
+        ],
+        "candidate_stop_order": [
+          2,
+          1,
+          0
+        ],
+        "lane_ids": [
+          "28718647#1_0",
+          "28718647#3_0",
+          "28718647#3_0"
+        ],
+        "policy": "reorder_stops_to_route_order_preserve_all_obligations",
+        "source_stop_order": [
+          0,
+          1,
+          2
+        ],
+        "vehicle_id": "bus_1005"
+      }
+    ],
+    "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\DeepQN\\diagnostics\\inputs\\night_synthetic_v6\\routes.explicit.corrected.rou.xml",
+    "physical_fingerprint_sha256": "1109c838553c6e2b64e8212952f90b6da195d512c98e32a4676747f73cff3ff7",
+    "route_integrity": {
+      "checks": [
+        "known_edges",
+        "ordered_edge_connectivity",
+        "vehicle_class_lane_permissions",
+        "ordered_required_stops",
+        "stop_lane_vehicle_class_permissions",
+        "end_of_edge_stop_outgoing_lane_reachability",
+        "continuous_lane_chain_with_25m_lane_change_contract"
+      ],
+      "required_stop_count": 242,
+      "runtime_limitation": "connectivity and permissions do not prove lane reachability under congestion; full-horizon SUMO execution is required",
+      "schema": "sumoflow-explicit-route-integrity-v1",
+      "vehicle_count": 2106
+    },
+    "sha256": "8ac9a27f77e1c45b8ff03115071975c14ae92d6b05b215e37cd69e0460bbb5ed",
+    "stop_lane_correction_count": 49,
+    "stop_lane_corrections": [
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "12",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "12",
+          "endPos": "21.6",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "11.6"
+        },
+        "vehicle_id": "microbus_21"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "27",
+          "endPos": "15.6",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "5.6"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "27",
+          "endPos": "15.6",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "5.6"
+        },
+        "vehicle_id": "microbus_22"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "60",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "60",
+          "endPos": "22.4",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "12.4"
+        },
+        "vehicle_id": "microbus_27"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "42",
+          "endPos": "20.69",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "28718874#1",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "42",
+          "endPos": "23.1",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "13.1"
+        },
+        "vehicle_id": "microbus_28"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "39",
+          "endPos": "17.0",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "7.0"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "39",
+          "endPos": "17.0",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "7.0"
+        },
+        "vehicle_id": "microbus_36"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "30",
+          "endPos": "16.8",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "6.8"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "30",
+          "endPos": "16.8",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "6.8"
+        },
+        "vehicle_id": "microbus_122"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "47",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "47",
+          "endPos": "21.9",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "11.9"
+        },
+        "vehicle_id": "microbus_125"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "17",
+          "endPos": "19.6",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "9.6"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "17",
+          "endPos": "19.6",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "9.6"
+        },
+        "vehicle_id": "microbus_127"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "41",
+          "endPos": "19.1",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "9.1"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "41",
+          "endPos": "19.1",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "9.1"
+        },
+        "vehicle_id": "microbus_130"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "40",
+          "endPos": "20.69",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "28718874#1",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "40",
+          "endPos": "22.6",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "12.6"
+        },
+        "vehicle_id": "microbus_133"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "31",
+          "endPos": "18.0",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "8.0"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "31",
+          "endPos": "18.0",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "8.0"
+        },
+        "vehicle_id": "microbus_137"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "39",
+          "endPos": "17.3",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "7.3"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "39",
+          "endPos": "17.3",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "7.3"
+        },
+        "vehicle_id": "microbus_138"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "26",
+          "endPos": "20.69",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "28718874#1",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "26",
+          "endPos": "21.7",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "11.7"
+        },
+        "vehicle_id": "microbus_223"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "11",
+          "endPos": "19.5",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "9.5"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "11",
+          "endPos": "19.5",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "9.5"
+        },
+        "vehicle_id": "microbus_225"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "41",
+          "endPos": "17.4",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "7.4"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "41",
+          "endPos": "17.4",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "7.4"
+        },
+        "vehicle_id": "microbus_229"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "19",
+          "endPos": "18.4",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "8.4"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "19",
+          "endPos": "18.4",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "8.4"
+        },
+        "vehicle_id": "microbus_233"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "58",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "58",
+          "endPos": "22.9",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "12.9"
+        },
+        "vehicle_id": "microbus_238"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "29",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "29",
+          "endPos": "23.1",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "13.1"
+        },
+        "vehicle_id": "microbus_323"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "52",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "52",
+          "endPos": "23.5",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "13.5"
+        },
+        "vehicle_id": "microbus_327"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "10",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "10",
+          "endPos": "24.8",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "14.8"
+        },
+        "vehicle_id": "microbus_328"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "51",
+          "endPos": "20.1",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.1"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "51",
+          "endPos": "20.1",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.1"
+        },
+        "vehicle_id": "microbus_329"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "56",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "56",
+          "endPos": "24.4",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "14.4"
+        },
+        "vehicle_id": "microbus_330"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "38",
+          "endPos": "20.69",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "28718874#1",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "38",
+          "endPos": "22.7",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "12.7"
+        },
+        "vehicle_id": "microbus_338"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "37",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "37",
+          "endPos": "20.7",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.7"
+        },
+        "vehicle_id": "microbus_339"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "58",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "58",
+          "endPos": "21.8",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "11.8"
+        },
+        "vehicle_id": "microbus_426"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "24",
+          "endPos": "17.9",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "7.9"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "24",
+          "endPos": "17.9",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "7.9"
+        },
+        "vehicle_id": "microbus_433"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "23",
+          "endPos": "20.0",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.0"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "23",
+          "endPos": "20.0",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.0"
+        },
+        "vehicle_id": "microbus_437"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "15",
+          "endPos": "16.7",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "6.7"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "15",
+          "endPos": "16.7",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "6.7"
+        },
+        "vehicle_id": "microbus_526"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "22",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "22",
+          "endPos": "20.8",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.8"
+        },
+        "vehicle_id": "microbus_528"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "18",
+          "endPos": "16.1",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "6.1"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "18",
+          "endPos": "16.1",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "6.1"
+        },
+        "vehicle_id": "microbus_531"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "46",
+          "endPos": "20.69",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "28718874#1",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "46",
+          "endPos": "20.8",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.8"
+        },
+        "vehicle_id": "microbus_532"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "27",
+          "endPos": "18.3",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "8.3"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "27",
+          "endPos": "18.3",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "8.3"
+        },
+        "vehicle_id": "microbus_539"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "58",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "58",
+          "endPos": "23.4",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "13.4"
+        },
+        "vehicle_id": "microbus_540"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "21",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "21",
+          "endPos": "24.2",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "14.2"
+        },
+        "vehicle_id": "microbus_541"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "54",
+          "endPos": "16.4",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "6.4"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "54",
+          "endPos": "16.4",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "6.4"
+        },
+        "vehicle_id": "microbus_542"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "57",
+          "endPos": "15.8",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "5.8"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "57",
+          "endPos": "15.8",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "5.8"
+        },
+        "vehicle_id": "microbus_627"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "58",
+          "endPos": "17.5",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "7.5"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "58",
+          "endPos": "17.5",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "7.5"
+        },
+        "vehicle_id": "microbus_628"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "51",
+          "endPos": "15.7",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "5.7"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "51",
+          "endPos": "15.7",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "5.7"
+        },
+        "vehicle_id": "microbus_629"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "52",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "52",
+          "endPos": "23.3",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "13.3"
+        },
+        "vehicle_id": "microbus_634"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "60",
+          "endPos": "16.6",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "6.6"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "60",
+          "endPos": "16.6",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "6.6"
+        },
+        "vehicle_id": "microbus_699"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "18",
+          "endPos": "19.7",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "9.7"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "18",
+          "endPos": "19.7",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "9.7"
+        },
+        "vehicle_id": "microbus_837"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "47",
+          "endPos": "20.69",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "28718874#1",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "47",
+          "endPos": "22.7",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "12.7"
+        },
+        "vehicle_id": "microbus_838"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "49",
+          "endPos": "17.8",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "7.8"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "49",
+          "endPos": "17.8",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "7.8"
+        },
+        "vehicle_id": "microbus_839"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "43",
+          "endPos": "20.69",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "43",
+          "endPos": "24.9",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "14.9"
+        },
+        "vehicle_id": "microbus_842"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "27",
+          "endPos": "16.4",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "6.4"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "27",
+          "endPos": "16.4",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "6.4"
+        },
+        "vehicle_id": "microbus_844"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "12",
+          "endPos": "20.69",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "28718874#1",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "12",
+          "endPos": "21.3",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "11.3"
+        },
+        "vehicle_id": "microbus_911"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "17",
+          "endPos": "17.7",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "7.7"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "17",
+          "endPos": "17.7",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "7.7"
+        },
+        "vehicle_id": "microbus_912"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "60",
+          "endPos": "15.5",
+          "lane": "28718874#0_2",
+          "parking": "false",
+          "startPos": "5.5"
+        },
+        "following_edge": "10873193#0",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "60",
+          "endPos": "15.5",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "5.5"
+        },
+        "vehicle_id": "microbus_977"
+      },
+      {
+        "assumption": "left-turn services use synthetic in-lane lane 2; the original stop extent is retained and only shifted when it exceeded the unchanged v5 edge boundary",
+        "candidate": {
+          "duration": "50",
+          "endPos": "20.69",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "10.69"
+        },
+        "following_edge": "28718874#1",
+        "policy": "route_aware_same_edge_stop_lane_and_extent_correction",
+        "source": {
+          "duration": "50",
+          "endPos": "21.1",
+          "friendlyPos": "true",
+          "lane": "28718874#0_0",
+          "parking": "false",
+          "startPos": "11.1"
+        },
+        "vehicle_id": "microbus_979"
+      }
+    ],
+    "vehicle_class_correction_count": 1,
+    "vehicle_class_corrections": [
+      {
+        "candidate_type": "type_microbus",
+        "candidate_vclass": "bus",
+        "depart_s": 86261.0,
+        "incompatible_pair": [
+          "28718647#3",
+          "690516091#1"
+        ],
+        "policy": "explicit_reviewed_vehicle_class_correction_preserve_id_depart_route_and_stops",
+        "route_edges": [
+          "28718647#2",
+          "28718647#3",
+          "690516091#1",
+          "10873186#9",
+          "10873186#0",
+          "10873186#1",
+          "10873191#0"
+        ],
+        "source_type": "type_bicycle",
+        "source_vclass": "bicycle",
+        "stop_count": 0,
+        "vehicle_id": "microbus_982"
+      }
+    ]
+  },
+  "limitations": [
+    "synthetic signal priority assumptions require bounded verification",
+    "not field calibrated or traffic-engineering approved",
+    "no model checkpoint is authorized by this manifest"
+  ],
+  "network_variant": {
+    "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\DeepQN\\diagnostics\\inputs\\night_synthetic_v6\\tahrir_synthetic_signal_v1.net.xml",
+    "sha256": "4d65197847de59ee645047dd6ccc7fd2ea0d7c49818c9f00a6788ceb1e704e53",
+    "signal_changes": {
+      "96621068": {
+        "candidate": "gggg",
+        "rationale": "all four same-direction merge links are permissive; no protected-conflict claim",
+        "source": "GGGG"
+      },
+      "96621100": {
+        "candidate_phases": [
+          "GGGGGrrrrr",
+          "yyyyyrrrrr",
+          "rrrrrGGGGG",
+          "rrrrryyyyy"
+        ],
+        "controlled_link_indices": {
+          "approach_A": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "approach_B": [
+            5,
+            6,
+            7,
+            8,
+            9
+          ]
+        },
+        "native_cycle": "0(approach-A-green)->1(A-yellow)->2(approach-B-green)->3(B-yellow)->0",
+        "rationale": "synthetic protected alternation prevents simultaneous merge and gives the secondary approach direct access to downstream lane 0",
+        "secondary_approach_lane_remapping": [
+          {
+            "candidate_to_lane": 0,
+            "from_lane": 0,
+            "link_index": 5,
+            "source_to_lane": 1
+          },
+          {
+            "candidate_to_lane": 1,
+            "from_lane": 1,
+            "link_index": 6,
+            "source_to_lane": 2
+          },
+          {
+            "candidate_to_lane": 2,
+            "from_lane": 2,
+            "link_index": 7,
+            "source_to_lane": 3
+          },
+          {
+            "candidate_to_lane": 3,
+            "from_lane": 3,
+            "link_index": 8,
+            "source_to_lane": 4
+          },
+          {
+            "candidate_to_lane": 5,
+            "from_lane": 4,
+            "link_index": 9,
+            "source_to_lane": 5
+          }
+        ]
+      },
+      "96621145_turn_access": {
+        "added_plain_connections": [
+          {
+            "from_lane": 1,
+            "to_lane": 0
+          },
+          {
+            "from_lane": 2,
+            "to_lane": 1
+          },
+          {
+            "from_lane": 3,
+            "to_lane": 1
+          },
+          {
+            "from_lane": 4,
+            "to_lane": 2
+          },
+          {
+            "from_lane": 5,
+            "to_lane": 2
+          }
+        ],
+        "rationale": "six fixed-time wrong-lane teleports occurred on lanes 2/3 for routes requiring 28718874#0; netconvert rebuilds junction internals and right-of-way",
+        "source_only_from_lane": 0
+      },
+      "supported_rebuild": {
+        "export_warnings": [
+          "Warning: Ambiguity in turnarounds computation at junction '11434948372'.",
+          "Warning: Ambiguity in turnarounds computation at junction '11434948383'.",
+          "Warning: Speed of straight connection '305873957#1_0->10873191#2_0' reduced by 8.02 due to turning radius of 52.40 (length=7.24, angle=23.04).",
+          "Warning: Speed of straight connection '305873957#1_0->10873191#2_1' reduced by 9.29 due to turning radius of 44.86 (length=6.18, angle=23.04).",
+          "Warning: Speed of straight connection '10873191#1_0->10873191#2_2' reduced by 11.25 due to turning radius of 49.66 (length=9.40, angle=26.02).",
+          "Warning: Speed of straight connection '10873191#1_1->10873191#2_3' reduced by 12.57 due to turning radius of 42.07 (length=7.94, angle=26.02).",
+          "Warning: Speed of straight connection '961982432#1_0->10873191#3_2' reduced by 8.68 due to turning radius of 48.44 (length=18.37, angle=37.10).",
+          "Warning: 9 total messages of type: Speed of % connection '%' reduced by % due to turning radius of % (length=%, angle=%)."
+        ],
+        "internal_geometry_recomputed": true,
+        "rebuild_warnings": [
+          "Warning: Ambiguity in turnarounds computation at junction '11434948372'.",
+          "Warning: Ambiguity in turnarounds computation at junction '11434948383'.",
+          "Warning: Speed of straight connection '305873957#1_0->10873191#2_0' reduced by 8.02 due to turning radius of 52.40 (length=7.24, angle=23.04).",
+          "Warning: Speed of straight connection '305873957#1_0->10873191#2_1' reduced by 9.29 due to turning radius of 44.86 (length=6.18, angle=23.04).",
+          "Warning: Speed of straight connection '10873191#1_0->10873191#2_2' reduced by 11.25 due to turning radius of 49.66 (length=9.40, angle=26.02).",
+          "Warning: Speed of straight connection '10873191#1_1->10873191#2_3' reduced by 12.57 due to turning radius of 42.07 (length=7.94, angle=26.02).",
+          "Warning: Speed of straight connection '961982432#1_0->10873191#3_2' reduced by 8.68 due to turning radius of 48.44 (length=18.37, angle=37.10).",
+          "Warning: 9 total messages of type: Speed of % connection '%' reduced by % due to turning radius of % (length=%, angle=%)."
+        ],
+        "source_representation": "plain XML",
+        "tool": "netconvert"
+      },
+      "synthetic_effective_edge_lengths": {
+        "assumption": "v5 lane geometry and lengths are preserved; direct lane-chain topology removes the prior need for compiled length edits",
+        "changes": []
+      }
+    }
+  },
+  "publication_approved": false,
+  "schema": "sumoflow-night-synthetic-input-candidate-v6",
+  "source_additional_files": [
+    {
+      "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\simulation\\maps\\tahrir.add.xml",
+      "sha256": "87125278f5f806a769e3223d70278adbc02c88010c4e80fc32813a6ae885eac5"
+    },
+    {
+      "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\simulation\\maps\\vehtype.add.xml",
+      "sha256": "e97ddd34ad616596f80a536531cf35e4d82df162057e24a52c726432742bd835"
+    }
+  ],
+  "source_network": {
+    "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\simulation\\maps\\tahrirupdated.net.xml",
+    "sha256": "a7f25235f208db932735983653e00b3af659d09d04169ef5807265433c2db708"
+  },
+  "source_routes": {
+    "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\simulation\\maps\\routes_night.rou.xml",
+    "sha256": "1e84789b2fac27aaff9d336a22cb0fc60b83ad08fc032046bf1671003223396a"
+  },
+  "status": "engineering_candidate_not_publication_approved",
+  "stopping_place_corrections": [
+    {
+      "candidate": {
+        "endPos": "12.1",
+        "id": "bs_5",
+        "lane": "28718647#3_0",
+        "startPos": "0.1"
+      },
+      "rationale": "relocated to the next common route edge before bs_3",
+      "required_vehicle_length_m": 12.0,
+      "source": {
+        "endPos": "2.5",
+        "id": "bs_5",
+        "lane": "28718647#2_0",
+        "startPos": "0.2"
+      },
+      "stop_id": "bs_5"
+    },
+    {
+      "candidate": {
+        "endPos": "13",
+        "id": "bs_2",
+        "lane": "192591565#1_0",
+        "startPos": "1"
+      },
+      "rationale": "extended within the existing 13.34 m lane",
+      "required_vehicle_length_m": 12.0,
+      "source": {
+        "endPos": "10",
+        "id": "bs_2",
+        "lane": "192591565#1_0",
+        "startPos": "1"
+      },
+      "stop_id": "bs_2"
+    },
+    {
+      "candidate": {
+        "endPos": "25.1",
+        "id": "bs_3",
+        "lane": "28718647#3_0",
+        "startPos": "13.1"
+      },
+      "rationale": "extended and placed after relocated bs_5 within the existing 25.10 m lane",
+      "required_vehicle_length_m": 12.0,
+      "source": {
+        "endPos": "10",
+        "id": "bs_3",
+        "lane": "28718647#3_0",
+        "startPos": "1"
+      },
+      "stop_id": "bs_3"
+    },
+    {
+      "candidate": {
+        "endPos": "13",
+        "id": "bs_9",
+        "lane": "28718874#1_0",
+        "startPos": "1"
+      },
+      "rationale": "extended within the existing 96.17 m lane",
+      "required_vehicle_length_m": 12.0,
+      "source": {
+        "endPos": "8",
+        "id": "bs_9",
+        "lane": "28718874#1_0",
+        "startPos": "1"
+      },
+      "stop_id": "bs_9"
+    }
+  ],
+  "sumo_configs": {
+    "full": {
+      "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\DeepQN\\diagnostics\\inputs\\night_synthetic_v6\\night-full.sumocfg",
+      "sha256": "d52401d3263b37ddaa18ccfef655e23c67f2d2a451fc0232d68a3ae6d37e1ec9"
+    },
+    "smoke": {
+      "path": "D:\\Courses\\University zewail\\Year4\\grad_project\\sumoflow-ai-traffic-optimization\\DeepQN\\diagnostics\\inputs\\night_synthetic_v6\\night-900s.sumocfg",
+      "sha256": "57128ca44065d27c6ca8b210fef5eb8edb05933c87a0fd950d8423cc9ca5f6fa"
+    }
+  }
+}
