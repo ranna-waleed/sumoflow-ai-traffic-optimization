@@ -52,6 +52,13 @@ from DeepQN.integration.bilstm_adapter import BiLSTMAdapter
 
 logger = logging.getLogger(__name__)
 DQN_OBSERVATION_CONTRACT_VERSION = "sumoflow-dqn-observation-v3-lane-occupancy-fraction"
+BOUNDED_OCCUPANCY_OBSERVATION_CONTRACT_VERSION = (
+    "sumoflow-dqn-observation-v4-lane-occupancy-saturated"
+)
+# SUMO may return sub-ulp negative lane occupancy residue near exact zero.
+# This tolerance is numerical hygiene within the existing fraction contract;
+# it does not admit physically meaningful negative occupancy.
+LANE_OCCUPANCY_ZERO_TOLERANCE = 1e-12
 
 
 #  Phase controller per junction 
@@ -375,16 +382,32 @@ class SumoEnv:
         self.state_dim:  int   = st_cfg.get("state_dim", 37)
         self.observation_contract = st_cfg.get("observation_contract")
         if (self.research_evaluation
-                and self.observation_contract != DQN_OBSERVATION_CONTRACT_VERSION):
+                and self.observation_contract not in {
+                    DQN_OBSERVATION_CONTRACT_VERSION,
+                    BOUNDED_OCCUPANCY_OBSERVATION_CONTRACT_VERSION,
+                }):
             raise ValueError(
-                "research evaluation requires observation_contract="
-                f"{DQN_OBSERVATION_CONTRACT_VERSION}"
+                "research evaluation requires a supported versioned observation_contract"
             )
         self.max_lanes:  int   = st_cfg.get("max_lanes", 10)
         self.fperlane:   int   = st_cfg.get("features_per_lane", 3)
         self.max_queue: float  = st_cfg.get("max_queue",   50.0)
         self.max_wait:  float  = st_cfg.get("max_wait",    300.0)
         self.max_elapsed: float = st_cfg.get("max_phase_elapsed", 120.0)
+        self.lane_occupancy_mode = st_cfg.get(
+            "lane_occupancy_mode", "strict_fraction_v1"
+        )
+        if self.lane_occupancy_mode not in {
+                "strict_fraction_v1", "bounded_saturation_v1"}:
+            raise ValueError("unknown state.lane_occupancy_mode")
+        if (self.observation_contract
+                == BOUNDED_OCCUPANCY_OBSERVATION_CONTRACT_VERSION):
+            if self.lane_occupancy_mode != "bounded_saturation_v1":
+                raise ValueError("v4 observation requires bounded_saturation_v1")
+        elif self.lane_occupancy_mode != "strict_fraction_v1":
+            raise ValueError(
+                "bounded occupancy requires the explicitly versioned v4 observation contract"
+            )
 
         # Per-junction incoming lanes (from config)
         self._lanes: Dict[str, List[str]] = {
@@ -454,6 +477,10 @@ class SumoEnv:
         self._connected:  bool  = False
         self._step_count: int   = 0
         self._episode_done: bool = False
+        self._occupancy_saturation_count: int = 0
+        self._occupancy_saturation_events: list[dict] = []
+        self._occupancy_zero_correction_count: int = 0
+        self._occupancy_zero_correction_events: list[dict] = []
 
     #  Gym-like API 
 
@@ -465,6 +492,10 @@ class SumoEnv:
         self._connected = True
         self._step_count = 0
         self._episode_done = False
+        self._occupancy_saturation_count = 0
+        self._occupancy_saturation_events = []
+        self._occupancy_zero_correction_count = 0
+        self._occupancy_zero_correction_events = []
 
         try:
             # Reset every controller field, command the initial phase, and
@@ -715,6 +746,14 @@ class SumoEnv:
             "action_trace_sha256": hashlib.sha256(json.dumps(
                 action_trace, sort_keys=True, separators=(",", ":")
             ).encode()).hexdigest(),
+            "occupancy_saturation_count": getattr(
+                self, "_occupancy_saturation_count", 0),
+            "occupancy_saturation_events": list(getattr(
+                self, "_occupancy_saturation_events", [])),
+            "occupancy_zero_correction_count": getattr(
+                self, "_occupancy_zero_correction_count", 0),
+            "occupancy_zero_correction_events": list(getattr(
+                self, "_occupancy_zero_correction_events", [])),
             **self._reward_fn.get_metrics(),
         }
 
@@ -807,14 +846,48 @@ class SumoEnv:
             raw_occupancy_fraction = self._lane_measurement(
                 tid, lane, "occupancy", traci.lane.getLastStepOccupancy
             )
-            if raw_occupancy_fraction < 0 or raw_occupancy_fraction > 1:
-                if self.lane_observation_mode == "research_fail_closed":
+            if raw_occupancy_fraction < 0:
+                if raw_occupancy_fraction >= -LANE_OCCUPANCY_ZERO_TOLERANCE:
+                    self._occupancy_zero_correction_count = getattr(
+                        self, "_occupancy_zero_correction_count", 0) + 1
+                    if not hasattr(self, "_occupancy_zero_correction_events"):
+                        self._occupancy_zero_correction_events = []
+                    if len(self._occupancy_zero_correction_events) < 100:
+                        self._occupancy_zero_correction_events.append({
+                            "tls_id": tid, "lane_id": lane,
+                            "raw_occupancy": raw_occupancy_fraction,
+                            "normalized_occupancy": 0.0,
+                            "tolerance": LANE_OCCUPANCY_ZERO_TOLERANCE,
+                            "sim_time_s": float(traci.simulation.getTime()),
+                        })
+                    raw_occupancy_fraction = 0.0
+                elif self.lane_observation_mode == "research_fail_closed":
                     raise RuntimeError(
                         f"lane observation failed: TLS={tid}, lane={lane}, "
-                        f"measurement=occupancy: fraction outside [0, 1]: "
+                        f"measurement=occupancy: negative value: "
                         f"{raw_occupancy_fraction}"
                     )
-            occ = raw_occupancy_fraction
+            if raw_occupancy_fraction > 1:
+                if getattr(self, "lane_occupancy_mode", "strict_fraction_v1") \
+                        == "strict_fraction_v1":
+                    if self.lane_observation_mode == "research_fail_closed":
+                        raise RuntimeError(
+                            f"lane observation failed: TLS={tid}, lane={lane}, "
+                            f"measurement=occupancy: fraction outside [0, 1]: "
+                            f"{raw_occupancy_fraction}"
+                        )
+                else:
+                    self._occupancy_saturation_count = getattr(
+                        self, "_occupancy_saturation_count", 0) + 1
+                    if not hasattr(self, "_occupancy_saturation_events"):
+                        self._occupancy_saturation_events = []
+                    if len(self._occupancy_saturation_events) < 100:
+                        self._occupancy_saturation_events.append({
+                            "tls_id": tid, "lane_id": lane,
+                            "raw_occupancy": raw_occupancy_fraction,
+                            "sim_time_s": float(traci.simulation.getTime()),
+                        })
+            occ = min(raw_occupancy_fraction, 1.0)
             base = i * self.fperlane
             lane_feats[base]     = float(np.clip(halt, 0.0, 1.0))
             lane_feats[base + 1] = float(np.clip(wait, 0.0, 1.0))
@@ -866,6 +939,12 @@ class SumoEnv:
             if not isinstance(seed, int) or isinstance(seed, bool) or seed < 0:
                 raise ValueError("simulation.seed must be a nonnegative integer")
             cmd += ["--seed", str(seed)]
+        message_log = self.config["simulation"].get("message_log_path")
+        if message_log:
+            cmd += ["--message-log", str(Path(message_log).resolve())]
+        error_log = self.config["simulation"].get("error_log_path")
+        if error_log:
+            cmd += ["--error-log", str(Path(error_log).resolve())]
         # Fail before spawning when the explicitly assigned port is occupied.
         probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:

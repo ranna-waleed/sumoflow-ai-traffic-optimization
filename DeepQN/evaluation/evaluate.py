@@ -7,7 +7,11 @@ import copy
 import hashlib
 import json
 import logging
+import math
+import os
+import re
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from statistics import mean, stdev
@@ -65,13 +69,15 @@ def _patch_sumocfg(original_path: str | Path, outputs: Dict[str, Path], seed: in
         "tripinfo": "tripinfo-output",
         "emission": "emission-output",
         "summary": "summary-output",
+        "statistic": "statistic-output",
     }
-    retained_tags = set(tags.values())
+    retained_tags = {tag for key, tag in tags.items() if key in outputs}
     for child in list(output):
         if child.tag.endswith("-output") and child.tag not in retained_tags:
             output.remove(child)
     for key, tag in tags.items():
-        _set_or_create(output, tag, str(outputs[key].resolve()))
+        if key in outputs:
+            _set_or_create(output, tag, str(outputs[key].resolve()))
     _set_or_create(output, "tripinfo-output.write-unfinished", "true")
     _set_or_create(output, "tripinfo-output.write-undeparted", "true")
     _set_or_create(output, "emission-output.step-scaled", "false")
@@ -114,6 +120,148 @@ def _ensure_outputs_available(paths: Iterable[Path]) -> None:
         raise FileExistsError("refusing to overwrite existing evaluation artifacts: " + ", ".join(collisions))
 
 
+def _collect_evaluation_telemetry(*, error_log: Path, message_log: Path,
+                                  diagnostic_log: Path,
+                                  statistic_path: Path) -> dict:
+    """Combine detailed SUMO logs with mandatory structured safety counters."""
+    contents = {}
+    for name, path in (("error_log", error_log), ("message_log", message_log),
+                       ("diagnostic_log", diagnostic_log)):
+        if not path.is_file():
+            raise RuntimeError(f"required SUMO telemetry is missing: {name}={path}")
+        try:
+            contents[name] = path.read_text(encoding="utf-8", errors="strict")
+        except (OSError, UnicodeError) as exc:
+            raise RuntimeError(f"required SUMO telemetry is unreadable: {name}: {exc}") from exc
+    if not statistic_path.is_file():
+        raise RuntimeError(f"required SUMO statistic output is missing: {statistic_path}")
+    try:
+        root = ET.parse(statistic_path).getroot()
+        safety = root.find("safety"); teleports = root.find("teleports")
+        if safety is None or teleports is None:
+            raise ValueError("safety or teleports counters are absent")
+        counters = {
+            "collisions": int(safety.get("collisions")),
+            "emergency_stops": int(safety.get("emergencyStops")),
+            "emergency_braking": int(safety.get("emergencyBraking")),
+            "teleports": int(teleports.get("total")),
+        }
+        if any(value < 0 for value in counters.values()):
+            raise ValueError("negative safety counter")
+    except (ET.ParseError, OSError, TypeError, ValueError) as exc:
+        raise RuntimeError(f"required SUMO statistic output is invalid: {exc}") from exc
+    events = {}
+    source_evidence = {}
+    emergency_counter_pattern = re.compile(
+        r"^\s*Emergency Braking:\s*(\d+)\s*$", re.IGNORECASE)
+    teleport_counter_pattern = re.compile(
+        r"^\s*Teleports:\s*(\d+)\s*\(Collisions:\s*(\d+)", re.IGNORECASE)
+    for source, content in contents.items():
+        evidence = {"raw_relevant_lines": [], "emergency_braking_detail_count": 0,
+                    "emergency_braking_summary_counters": [],
+                    "collision_detail_count": 0,
+                    "teleport_summary_counters": [],
+                    "collision_summary_counters": []}
+        for raw in content.splitlines():
+            line = " ".join(raw.strip().split()); lowered = line.lower()
+            summary_match = emergency_counter_pattern.match(line)
+            if summary_match:
+                evidence["raw_relevant_lines"].append(line)
+                evidence["emergency_braking_summary_counters"].append(
+                    int(summary_match.group(1)))
+                continue
+            teleport_match = teleport_counter_pattern.match(line)
+            if teleport_match:
+                evidence["raw_relevant_lines"].append(line)
+                evidence["teleport_summary_counters"].append(
+                    int(teleport_match.group(1)))
+                evidence["collision_summary_counters"].append(
+                    int(teleport_match.group(2)))
+                continue
+            if not line or not any(token in lowered for token in
+                    ("warning", "error", "teleport", "emergency braking")):
+                continue
+            evidence["raw_relevant_lines"].append(line)
+            evidence["emergency_braking_detail_count"] += int(
+                "performs emergency braking" in lowered)
+            evidence["collision_detail_count"] += int(
+                "collision with vehicle" in lowered)
+            event = events.setdefault(lowered, {"message": line, "sources": []})
+            if source not in event["sources"]:
+                event["sources"].append(source)
+        source_evidence[source] = evidence
+    detailed = list(events.values())
+    detail_braking = sum("performs emergency braking" in row["message"].lower()
+                         for row in detailed)
+    summary_counters = [value for evidence in source_evidence.values()
+                        for value in evidence["emergency_braking_summary_counters"]]
+    if any(value != counters["emergency_braking"] for value in summary_counters):
+        raise RuntimeError("SUMO emergency-braking summary contradicts statistic output")
+    teleport_summaries = [value for evidence in source_evidence.values()
+                          for value in evidence["teleport_summary_counters"]]
+    collision_summaries = [value for evidence in source_evidence.values()
+                           for value in evidence["collision_summary_counters"]]
+    if any(value != counters["teleports"] for value in teleport_summaries):
+        raise RuntimeError("SUMO teleport summary contradicts statistic output")
+    if any(value != counters["collisions"] for value in collision_summaries):
+        raise RuntimeError("SUMO collision summary contradicts statistic output")
+    if detail_braking > counters["emergency_braking"]:
+        raise RuntimeError("SUMO emergency-braking details exceed statistic output")
+    detail_collisions = sum("collision with vehicle" in row["message"].lower()
+                            for row in detailed)
+    if detail_collisions > counters["collisions"]:
+        raise RuntimeError(
+            "SUMO collision details exceed statistic output: "
+            f"details={detail_collisions}, counter={counters['collisions']}")
+    reconciliation = {
+        "emergency_braking": {
+            "structured_count": counters["emergency_braking"],
+            "deduplicated_detail_count": detail_braking,
+            "summary_counter_values": summary_counters,
+            "status": ("matched" if detail_braking == counters["emergency_braking"]
+                       else "structured_count_exceeds_detailed_warnings"),
+        },
+        "collisions": {
+            "structured_count": counters["collisions"],
+            "deduplicated_detail_count": detail_collisions,
+            "summary_counter_values": collision_summaries,
+            "status": ("matched" if detail_collisions == counters["collisions"]
+                       else "structured_count_exceeds_detailed_warnings"),
+        },
+        "teleports": {"structured_count": counters["teleports"],
+                       "summary_counter_values": teleport_summaries,
+                       "status": "matched"},
+    }
+    return {"valid": True, "adverse_events": detailed, "categories": counters,
+            "source_evidence": source_evidence, "reconciliation": reconciliation,
+            "required_sources": {"error_log": str(error_log),
+                "message_log": str(message_log), "diagnostic_log": str(diagnostic_log),
+                "statistic": str(statistic_path)}}
+
+
+def _is_traffic_behavior_event(message: str) -> bool:
+    """Classify adverse traffic outcomes without excusing integrity defects."""
+    lowered = message.lower()
+    return any(token in lowered for token in (
+        "emergency braking", "performs emergency stop", "teleport",
+        "collision with vehicle",
+    ))
+
+
+def _persist_action_trace(path: Path, payload: dict) -> tuple[str, bytes]:
+    """Atomically preserve completed controller evidence before postprocessing."""
+    if path.exists():
+        raise FileExistsError(f"refusing to overwrite action trace: {path}")
+    raw = (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    temporary = path.with_name(path.name + ".tmp")
+    try:
+        temporary.write_bytes(raw)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return hashlib.sha256(raw).hexdigest(), raw
+
+
 def _paired_baseline_manifest_path(directory, profile, seed, run_index):
     """Return the exact non-overwriting filename emitted by baseline.py."""
     return Path(directory) / f"manifest_fixed_time_{profile}_seed{seed}_run{run_index}.json"
@@ -131,6 +279,13 @@ def _fixed_horizon_config(cfg: dict, profile: str, patched_path: Path,
     return run_cfg
 
 
+def _set_controlled_evaluation_seed(run_cfg: dict, seed: int) -> None:
+    """Make the TraCI-launched SUMO seed equal the paired manifest seed."""
+    if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
+        raise ValueError("evaluation seed must be a nonnegative integer")
+    run_cfg.setdefault("simulation", {})["seed"] = seed
+
+
 def run_controlled_episode(
     *,
     cfg: dict,
@@ -146,21 +301,30 @@ def run_controlled_episode(
     port: int,
     environment_mutator=None,
     action_provider=None,
+    require_forecast_protocol: Optional[bool] = None,
+    wall_clock_timeout_s: Optional[float] = None,
 ) -> tuple[EpisodeMetrics, RunManifest]:
     """Run one explicit learned, random, or validated rule-based controller."""
-    if controller not in {"dqn", "random", "max_pressure"}:
-        raise ValueError("controller must be 'dqn', 'random', or 'max_pressure'")
+    dqn_controllers = {"dqn", "trained_dqn", "untrained_dqn"}
+    if controller not in dqn_controllers | {"random", "max_pressure"}:
+        raise ValueError("unsupported controlled-evaluation controller")
     if controller == "max_pressure" and action_provider is None:
         raise ValueError("max_pressure requires an explicit validated action provider")
     if controller == "max_pressure" and (checkpoint_manifest is not None or model_mode != "not_applicable"):
         raise ValueError("max_pressure must not use a DQN checkpoint or forecast model")
-    if controller in {"dqn", "random"} and agents is None:
+    if controller in dqn_controllers | {"random"} and agents is None:
         raise ValueError(f"{controller} requires an explicit agent ensemble")
+    if (wall_clock_timeout_s is not None
+            and (isinstance(wall_clock_timeout_s, bool)
+                 or not isinstance(wall_clock_timeout_s, (int, float))
+                 or not math.isfinite(wall_clock_timeout_s)
+                 or wall_clock_timeout_s <= 0)):
+        raise ValueError("wall_clock_timeout_s must be finite and positive")
     output_dir.mkdir(parents=True, exist_ok=True)
     run_id = f"{controller}_{profile}_seed{seed}_run{run_index}"
     outputs = {
         kind: (output_dir / f"{kind}_{run_id}.xml").resolve()
-        for kind in ("tripinfo", "emission", "summary")
+        for kind in ("tripinfo", "emission", "summary", "statistic")
     }
     original_sumocfg = Path(cfg["profiles"][profile]["config"])
     network_path, route_paths, additional_paths = _sumocfg_inputs(original_sumocfg)
@@ -180,7 +344,8 @@ def run_controlled_episode(
         network_path=network_path,
         route_paths=route_paths,
         additional_paths=additional_paths,
-        output_paths={key: str(value) for key, value in outputs.items()},
+        output_paths={key: str(value) for key, value in outputs.items()
+                      if key in {"tripinfo", "emission", "summary"}},
         model_mode=model_mode,
         checkpoint_manifest=(checkpoint_manifest.to_dict() if checkpoint_manifest else None),
         emission_step_scaled=False,
@@ -195,8 +360,18 @@ def run_controlled_episode(
         manifest.effective_simulation_config_sha256 = hash_effective_sumocfg(patched_path)
         run_cfg = _fixed_horizon_config(
             cfg, profile, patched_path,
-            require_forecast_protocol=(controller in {"dqn", "max_pressure"})
+            require_forecast_protocol=(
+                controller in {"dqn", "max_pressure"}
+                if require_forecast_protocol is None
+                else require_forecast_protocol
+            )
         )
+        _set_controlled_evaluation_seed(run_cfg, seed)
+        message_log = output_dir / f"sumo_messages_{run_id}.log"
+        error_log = output_dir / f"sumo_errors_{run_id}.log"
+        _ensure_outputs_available([message_log, error_log])
+        run_cfg["simulation"]["message_log_path"] = str(message_log.resolve())
+        run_cfg["simulation"]["error_log_path"] = str(error_log.resolve())
         env = SumoEnv(run_cfg, profile=profile, port=port)
         if environment_mutator is not None:
             environment_mutator(env)
@@ -213,7 +388,13 @@ def run_controlled_episode(
         requested_switches = 0
         requested_action_trace = []
         physical_action_trace = []
+        wall_started = time.monotonic()
         while not done:
+            if (wall_clock_timeout_s is not None
+                    and time.monotonic() - wall_started > wall_clock_timeout_s):
+                raise TimeoutError(
+                    f"controlled evaluation exceeded wall-clock limit "
+                    f"{wall_clock_timeout_s:g}s")
             if controller == "random":
                 actions = {tls_id: int(rng.integers(0, 2)) for tls_id in agents.agents}
             elif controller == "max_pressure":
@@ -229,8 +410,44 @@ def run_controlled_episode(
                 "physical_steps": step_info.get("action_trace", {}),
                 "interval_duration_s": step_info.get("interval_duration_s"),
             })
+        diagnostic_log = env._sumo_diagnostic_path
         env.close()
         env = None
+        trace_path = Path(output_dir) / f"action_trace_{run_id}.json"
+        trace_sha256, trace_raw = _persist_action_trace(trace_path, {
+            "initial_control_warmup": warmup_trace,
+            "requested": requested_action_trace,
+            "physical": physical_action_trace,
+        })
+        manifest.controller_diagnostics = {
+            "decision_count": decision_count,
+            "requested_switches": requested_switches,
+            "controlled_tls_ids": (list(action_provider.tls_ids)
+                if action_provider is not None else sorted(agents.agents)),
+            "requested_action_trace_sha256": hashlib.sha256(json.dumps(
+                requested_action_trace, sort_keys=True, separators=(",", ":")
+            ).encode("utf-8")).hexdigest(),
+            "physical_action_trace_path": str(trace_path.resolve()),
+            "physical_action_trace_sha256": trace_sha256,
+            "initial_control_warmup": warmup_diagnostics,
+            "detector_runtime_preflight": detector_preflight,
+            "waiting_time_memory_s": waiting_time_memory_s,
+            "observation_contract": observation_contract,
+            "comparative_research": comparative_research,
+            "effective_sumo_seed": seed,
+            "postprocessing_status": "pending",
+        }
+        manifest.write(manifest_path)
+        telemetry = _collect_evaluation_telemetry(
+            error_log=error_log, message_log=message_log,
+            diagnostic_log=diagnostic_log, statistic_path=outputs["statistic"])
+        integrity_events = [
+            event["message"] for event in telemetry["adverse_events"]
+            if not _is_traffic_behavior_event(event["message"])
+        ]
+        if integrity_events:
+            raise RuntimeError("non-traffic SUMO warnings/errors: "
+                               + json.dumps(integrity_events))
         metrics = load_metrics_from_outputs(
             output_dir,
             profile,
@@ -243,35 +460,22 @@ def run_controlled_episode(
             route_paths=route_paths,
             require_demand_contract=True,
         )
-        trace_path = Path(output_dir) / f"action_trace_{run_id}.json"
-        if trace_path.exists():
-            raise FileExistsError(f"refusing to overwrite action trace: {trace_path}")
-        trace_payload = {
-            "initial_control_warmup": warmup_trace,
-            "requested": requested_action_trace,
-            "physical": physical_action_trace,
-        }
-        trace_raw = (json.dumps(trace_payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
-        trace_path.write_bytes(trace_raw)
-        manifest.controller_diagnostics = {
-            "decision_count": decision_count,
-            "requested_switches": requested_switches,
-            "controlled_tls_ids": (list(action_provider.tls_ids) if action_provider is not None
-                                   else sorted(agents.agents)),
-            "requested_action_trace_sha256": hashlib.sha256(json.dumps(
-                requested_action_trace, sort_keys=True, separators=(",", ":")
-            ).encode("utf-8")).hexdigest(),
-            "physical_action_trace_path": str(trace_path.resolve()),
-            "physical_action_trace_sha256": hashlib.sha256(trace_raw).hexdigest(),
-            "initial_control_warmup": warmup_diagnostics,
-            "detector_runtime_preflight": detector_preflight,
-            "waiting_time_memory_s": waiting_time_memory_s,
-            "observation_contract": observation_contract,
-            "comparative_research": comparative_research,
-        }
+        manifest.controller_diagnostics.update({
+            "sumo_telemetry": telemetry,
+            "traffic_behavior_valid": (
+                not telemetry["adverse_events"]
+                and not any(telemetry["categories"].values())
+                and not metrics.teleports and not metrics.collisions
+            ),
+            "postprocessing_status": "complete",
+        })
         if action_provider is not None:
             manifest.controller_diagnostics["rule_based_controller"] = action_provider.diagnostics()
         capture_output_hashes(manifest)
+        manifest.controller_diagnostics["statistic_output"] = {
+            "path": str(outputs["statistic"]),
+            "sha256": hashlib.sha256(outputs["statistic"].read_bytes()).hexdigest(),
+        }
         manifest.completion_status = "complete" if metrics.valid and metrics.reached_horizon else "incomplete"
         if not metrics.valid:
             manifest.errors.extend(metrics.errors)
